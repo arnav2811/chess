@@ -1,0 +1,100 @@
+{
+  "title": "Paired head-to-head: frozen v6.9 vs v7.1 with PUCT disabled",
+  "games_completed": 100,
+  "v71": {
+    "wins": 56,
+    "draws": 0,
+    "losses": 44,
+    "errors": 0,
+    "score_pct": 56.0
+  },
+  "by_v71_colour": {
+    "white": {
+      "games": 50,
+      "W": 29,
+      "D": 0,
+      "L": 21,
+      "errors": 0
+    },
+    "black": {
+      "games": 50,
+      "W": 27,
+      "D": 0,
+      "L": 23,
+      "errors": 0
+    }
+  },
+  "by_board": {
+    "sample0": {
+      "games": 20,
+      "W": 10,
+      "D": 0,
+      "L": 10,
+      "errors": 0
+    },
+    "sample1": {
+      "games": 20,
+      "W": 8,
+      "D": 0,
+      "L": 12,
+      "errors": 0
+    },
+    "sample2": {
+      "games": 20,
+      "W": 10,
+      "D": 0,
+      "L": 10,
+      "errors": 0
+    },
+    "sample3": {
+      "games": 20,
+      "W": 9,
+      "D": 0,
+      "L": 11,
+      "errors": 0
+    },
+    "sample4": {
+      "games": 20,
+      "W": 19,
+      "D": 0,
+      "L": 1,
+      "errors": 0
+    }
+  },
+  "paired_colour_reversal": {
+    "v71_wins_both": 9,
+    "v69_wins_both": 3,
+    "split": 38,
+    "draw_or_error": 0
+  },
+  "engine_search_metrics": {
+    "v69": {
+      "moves": 1564,
+      "weighted_average_depth": 3.247,
+      "max_depth": 9,
+      "total_nodes": 2275542,
+      "average_move_time_s": 9.0937,
+      "aggregate_nps": 160.0,
+      "puct_calls": 0,
+      "puct_overrides": 0
+    },
+    "v71": {
+      "moves": 1570,
+      "weighted_average_depth": 2.999,
+      "max_depth": 8,
+      "total_nodes": 2031851,
+      "average_move_time_s": 8.4378,
+      "aggregate_nps": 153.4,
+      "puct_calls": 0,
+      "puct_overrides": 0
+    }
+  },
+  "average_plies": 31.34,
+  "average_game_wall_s": 274.84,
+  "puct_disabled_validation": {
+    "v71_puct_calls": 0,
+    "v71_puct_overrides": 0
+  },
+  "elapsed_wall_s": 3606.08,
+  "games_per_hour": 99.83
+}
