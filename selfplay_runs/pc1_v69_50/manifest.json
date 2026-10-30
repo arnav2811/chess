@@ -1,0 +1,33 @@
+{
+  "title": "Same-engine two-sided self-play control",
+  "engine": "v69",
+  "engine_file": "agent_v69_frozen_overnight.py",
+  "games_requested": 50,
+  "workers_at_start": 8,
+  "thinking_time_s_per_move": 14.0,
+  "game_clock_s_per_player": 300.0,
+  "seed_base": 730069,
+  "boards": [
+    "sample0",
+    "sample1",
+    "sample2",
+    "sample3",
+    "sample4"
+  ],
+  "schedule": "equal board coverage; paired games swap independent White/Black RNG streams",
+  "puct_enabled": null,
+  "engine_files": {
+    "agent_v69_frozen_overnight.py": {
+      "path": "C:\\Users\\am31g25\\Downloads\\chess\\agent_v69_frozen_overnight.py",
+      "sha256": "df5cfb7305e8374ed45b6a862e6934cf0f3168e7c7eca9b1c18e9cfd517e08bd"
+    },
+    "agent_v71_adaptive_tactical_hybrid.py": {
+      "path": "C:\\Users\\am31g25\\Downloads\\chess\\agent_v71_adaptive_tactical_hybrid.py",
+      "sha256": "488b051b3dce2e49f3b883a16dc12eddaba31510a0596bde7b83247c933865de"
+    }
+  },
+  "python": "3.13.5 (tags/v3.13.5:6cb20a2, Jun 11 2025, 16:15:46) [MSC v.1943 64 bit (AMD64)]",
+  "created_local": "2026-10-30T14:21:19",
+  "output_directory": "C:\\Users\\am31g25\\Downloads\\chess\\selfplay_runs\\pc1_v69_50",
+  "notes": "Each side is a separate module import; v7.1 PUCT is forced off."
+}

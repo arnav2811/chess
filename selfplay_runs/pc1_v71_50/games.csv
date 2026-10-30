@@ -1,0 +1,51 @@
+game_id,pair_id,pair_variant,engine,board,seed,white_rng_seed,black_rng_seed,winner_color,outcome,termination,plies,wall_time_s,process_cpu_s,white_clock_remaining_s,black_clock_remaining_s,move_count
+1,1,A,v71,sample0,730069,730069,730070,white,WHITE_WIN,Stalemate (no more possible moves) - black loses,39,361.626,360.125,106.853,131.749,39
+2,1,B,v71,sample0,730069,730070,730069,white,WHITE_WIN,Stalemate (no more possible moves) - black loses,39,361.576,359.641,107.09,131.557,39
+3,2,A,v71,sample1,730070,730071,730072,black,BLACK_WIN,Checkmate - white loses,28,227.686,226.484,181.522,190.929,28
+4,2,B,v71,sample1,730070,730072,730071,black,BLACK_WIN,Checkmate - white loses,28,227.751,226.453,181.471,190.916,28
+5,3,A,v71,sample2,730071,730073,730074,white,WHITE_WIN,Checkmate - black loses,17,102.165,101.641,232.784,265.137,17
+6,3,B,v71,sample2,730071,730074,730073,white,WHITE_WIN,Checkmate - black loses,17,102.08,101.594,232.805,265.191,17
+7,4,A,v71,sample3,730072,730075,730076,black,BLACK_WIN,Stalemate (no more possible moves) - white loses,34,289.313,288.125,163.793,147.079,34
+8,4,B,v71,sample3,730072,730076,730075,black,BLACK_WIN,Stalemate (no more possible moves) - white loses,34,290.285,289.0,163.533,146.366,34
+9,5,A,v71,sample4,730073,730077,730078,black,BLACK_WIN,Stalemate (no more possible moves) - white loses,34,290.453,288.797,158.397,151.299,34
+10,5,B,v71,sample4,730073,730078,730077,black,BLACK_WIN,Stalemate (no more possible moves) - white loses,66,536.455,534.219,18.714,45.117,66
+11,6,A,v71,sample0,730074,730079,730080,white,WHITE_WIN,Stalemate (no more possible moves) - black loses,39,361.735,360.094,106.85,131.636,39
+12,6,B,v71,sample0,730074,730080,730079,white,WHITE_WIN,Stalemate (no more possible moves) - black loses,41,368.192,365.969,100.63,131.423,41
+13,7,A,v71,sample1,730075,730081,730082,black,BLACK_WIN,Checkmate - white loses,28,227.804,226.375,181.378,190.95,28
+14,7,B,v71,sample1,730075,730082,730081,white,WHITE_WIN,Stalemate (no more possible moves) - black loses,27,246.431,244.844,183.475,170.198,27
+15,8,A,v71,sample2,730076,730083,730084,white,WHITE_WIN,Checkmate - black loses,17,102.317,101.766,232.895,264.865,17
+16,8,B,v71,sample2,730076,730084,730083,white,WHITE_WIN,Checkmate - black loses,17,102.251,101.719,232.926,264.899,17
+17,9,A,v71,sample3,730077,730085,730086,black,BLACK_WIN,Stalemate (no more possible moves) - white loses,34,290.24,289.031,163.417,146.526,34
+18,9,B,v71,sample3,730077,730086,730085,black,BLACK_WIN,Stalemate (no more possible moves) - white loses,34,289.341,287.828,163.446,147.388,34
+19,10,A,v71,sample4,730078,730087,730088,black,BLACK_WIN,Stalemate (no more possible moves) - white loses,66,536.309,533.812,18.873,45.114,66
+20,10,B,v71,sample4,730078,730088,730087,black,BLACK_WIN,Stalemate (no more possible moves) - white loses,34,290.789,288.969,158.051,151.31,34
+21,11,A,v71,sample0,730079,730089,730090,white,WHITE_WIN,Stalemate (no more possible moves) - black loses,39,361.991,360.578,106.644,131.593,39
+22,11,B,v71,sample0,730079,730090,730089,white,WHITE_WIN,Stalemate (no more possible moves) - black loses,39,361.835,360.234,106.699,131.695,39
+23,12,A,v71,sample1,730080,730091,730092,black,BLACK_WIN,Stalemate (no more possible moves) - white loses,82,582.103,579.578,7.75,10.493,82
+24,12,B,v71,sample1,730080,730092,730091,white,WHITE_WIN,Checkmate - black loses,27,261.865,261.078,178.765,159.484,27
+25,13,A,v71,sample2,730081,730093,730094,white,WHITE_WIN,Checkmate - black loses,17,102.157,101.531,232.998,264.921,17
+26,13,B,v71,sample2,730081,730094,730093,white,WHITE_WIN,Checkmate - black loses,17,102.04,101.438,233.088,264.95,17
+27,14,A,v71,sample3,730082,730095,730096,black,BLACK_WIN,Stalemate (no more possible moves) - white loses,34,289.629,288.203,163.402,147.15,34
+28,14,B,v71,sample3,730082,730096,730095,black,BLACK_WIN,Checkmate - white loses,30,256.221,255.125,184.917,158.983,30
+29,15,A,v71,sample4,730083,730097,730098,black,BLACK_WIN,Stalemate (no more possible moves) - white loses,34,290.012,288.625,158.398,151.746,34
+30,15,B,v71,sample4,730083,730098,730097,,DRAW,Draw - only 2 kings left,60,540.308,538.016,24.135,35.833,60
+31,16,A,v71,sample0,730084,730099,730100,white,WHITE_WIN,Stalemate (no more possible moves) - black loses,39,361.915,360.484,106.595,131.717,39
+32,16,B,v71,sample0,730084,730100,730099,white,WHITE_WIN,Stalemate (no more possible moves) - black loses,39,361.831,360.641,106.562,131.836,39
+33,17,A,v71,sample1,730085,730101,730102,black,BLACK_WIN,Checkmate - white loses,28,227.409,226.25,181.48,191.245,28
+34,17,B,v71,sample1,730085,730102,730101,black,BLACK_WIN,Checkmate - white loses,28,227.541,226.109,181.305,191.287,28
+35,18,A,v71,sample2,730086,730103,730104,white,WHITE_WIN,Checkmate - black loses,17,102.23,101.953,232.835,265.013,17
+36,18,B,v71,sample2,730086,730104,730103,white,WHITE_WIN,Checkmate - black loses,17,102.073,101.656,233.002,265.0,17
+37,19,A,v71,sample3,730087,730105,730106,black,BLACK_WIN,Stalemate (no more possible moves) - white loses,34,289.877,288.031,163.926,146.389,34
+38,19,B,v71,sample3,730087,730106,730105,black,BLACK_WIN,Stalemate (no more possible moves) - white loses,34,289.293,287.859,163.65,147.244,34
+39,20,A,v71,sample4,730088,730107,730108,white,WHITE_WIN,Checkmate - black loses,63,534.275,530.484,30.059,35.966,63
+40,20,B,v71,sample4,730088,730108,730107,black,BLACK_WIN,Stalemate (no more possible moves) - white loses,66,536.41,533.953,18.671,45.217,66
+41,21,A,v71,sample0,730089,730109,730110,white,WHITE_WIN,Stalemate (no more possible moves) - black loses,37,353.698,352.125,114.585,131.925,37
+42,21,B,v71,sample0,730089,730110,730109,white,WHITE_WIN,Stalemate (no more possible moves) - black loses,39,361.538,359.797,106.818,131.876,39
+43,22,A,v71,sample1,730090,730111,730112,white,WHITE_WIN,Checkmate - black loses,27,262.017,260.938,178.577,159.523,27
+44,22,B,v71,sample1,730090,730112,730111,white,WHITE_WIN,Checkmate - black loses,27,261.813,260.781,178.795,159.503,27
+45,23,A,v71,sample2,730091,730113,730114,white,WHITE_WIN,Checkmate - black loses,17,102.15,101.766,232.998,264.938,17
+46,23,B,v71,sample2,730091,730114,730113,white,WHITE_WIN,Checkmate - black loses,17,102.083,101.953,233.152,264.845,17
+47,24,A,v71,sample3,730092,730115,730116,black,BLACK_WIN,Stalemate (no more possible moves) - white loses,34,289.958,287.641,163.498,146.731,34
+48,24,B,v71,sample3,730092,730116,730115,black,BLACK_WIN,Stalemate (no more possible moves) - white loses,34,290.049,288.688,163.254,146.895,34
+49,25,A,v71,sample4,730093,730117,730118,black,BLACK_WIN,Stalemate (no more possible moves) - white loses,66,536.477,533.703,18.759,45.055,66
+50,25,B,v71,sample4,730093,730118,730117,black,BLACK_WIN,Stalemate (no more possible moves) - white loses,66,536.405,533.5,18.771,45.113,66
