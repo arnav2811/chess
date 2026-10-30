@@ -3,9 +3,9 @@ $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
 
 Write-Host "=== PC1: validate both engines and project environment ===" -ForegroundColor Cyan
-python .\selfplay_control_runner.py --engine v69 --validate-only
+python .\selfplay_control_runner.py --engine v69 --validate-only --out selfplay_runs\validation_v69
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-python .\selfplay_control_runner.py --engine v71 --validate-only
+python .\selfplay_control_runner.py --engine v71 --validate-only --out selfplay_runs\validation_v71
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 Write-Host "=== PC1: v6.9 self-play, 50 games ===" -ForegroundColor Cyan
