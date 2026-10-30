@@ -1,0 +1,51 @@
+game_id,pair_id,pair_variant,engine,board,seed,white_rng_seed,black_rng_seed,winner_color,outcome,termination,plies,wall_time_s,process_cpu_s,white_clock_remaining_s,black_clock_remaining_s,move_count
+1,1,A,v69,sample0,730169,730169,730170,white,WHITE_WIN,Checkmate - black loses,17,101.272,101.141,234.13,264.699,17
+2,1,B,v69,sample0,730169,730170,730169,white,WHITE_WIN,Checkmate - black loses,17,100.896,100.5,234.288,264.915,17
+3,2,A,v69,sample1,730170,730171,730172,white,WHITE_WIN,Checkmate - black loses,19,140.998,140.672,223.444,235.612,19
+4,2,B,v69,sample1,730170,730172,730171,white,WHITE_WIN,Checkmate - black loses,19,172.405,171.906,213.889,213.765,19
+5,3,A,v69,sample2,730171,730173,730174,white,WHITE_WIN,Checkmate - black loses,23,124.949,124.578,222.473,252.654,23
+6,3,B,v69,sample2,730171,730174,730173,white,WHITE_WIN,Checkmate - black loses,23,125.045,124.484,222.339,252.693,23
+7,4,A,v69,sample3,730172,730175,730176,black,BLACK_WIN,Stalemate (no more possible moves) - white loses,126,599.329,597.25,0.92,0.196,126
+8,4,B,v69,sample3,730172,730176,730175,white,WHITE_WIN,Checkmate - black loses,29,274.064,273.109,177.207,148.833,29
+9,5,A,v69,sample4,730173,730177,730178,,DRAW,Draw - only 2 kings left,34,360.091,358.953,115.672,124.353,34
+10,5,B,v69,sample4,730173,730178,730177,black,BLACK_WIN,Checkmate - white loses,38,356.879,356.078,104.777,138.443,38
+11,6,A,v69,sample0,730174,730179,730180,white,WHITE_WIN,Checkmate - black loses,17,101.244,100.953,234.038,264.814,17
+12,6,B,v69,sample0,730174,730180,730179,white,WHITE_WIN,Checkmate - black loses,17,100.796,100.516,234.319,264.986,17
+13,7,A,v69,sample1,730175,730181,730182,white,WHITE_WIN,Checkmate - black loses,19,172.145,171.641,214.013,213.914,19
+14,7,B,v69,sample1,730175,730182,730181,white,WHITE_WIN,Checkmate - black loses,19,172.395,172.031,213.765,213.898,19
+15,8,A,v69,sample2,730176,730183,730184,white,WHITE_WIN,Checkmate - black loses,17,100.474,100.281,234.421,265.179,17
+16,8,B,v69,sample2,730176,730184,730183,white,WHITE_WIN,Checkmate - black loses,23,125.205,124.812,222.366,252.506,23
+17,9,A,v69,sample3,730177,730185,730186,white,WHITE_WIN,Checkmate - black loses,29,263.536,262.812,176.896,159.664,29
+18,9,B,v69,sample3,730177,730186,730185,white,WHITE_WIN,Checkmate - black loses,29,273.805,272.828,177.228,149.067,29
+19,10,A,v69,sample4,730178,730187,730188,black,BLACK_WIN,Checkmate - white loses,38,364.916,363.719,104.666,130.52,38
+20,10,B,v69,sample4,730178,730188,730187,black,BLACK_WIN,Checkmate - white loses,36,346.052,345.031,115.898,138.14,36
+21,11,A,v69,sample0,730179,730189,730190,white,WHITE_WIN,Checkmate - black loses,17,100.796,100.469,234.434,264.868,17
+22,11,B,v69,sample0,730179,730190,730189,black,BLACK_WIN,Checkmate - white loses,26,244.528,243.797,159.452,196.126,26
+23,12,A,v69,sample1,730180,730191,730192,white,WHITE_WIN,Checkmate - black loses,19,172.7,172.156,213.385,213.973,19
+24,12,B,v69,sample1,730180,730192,730191,white,WHITE_WIN,Stalemate (no more possible moves) - black loses,27,228.7,228.219,189.89,181.493,27
+25,13,A,v69,sample2,730181,730193,730194,white,WHITE_WIN,Checkmate - black loses,23,124.783,124.406,222.374,252.919,23
+26,13,B,v69,sample2,730181,730194,730193,white,WHITE_WIN,Checkmate - black loses,23,125.118,124.656,222.272,252.692,23
+27,14,A,v69,sample3,730182,730195,730196,white,WHITE_WIN,Checkmate - black loses,29,273.85,273.141,177.348,148.905,29
+28,14,B,v69,sample3,730182,730196,730195,white,WHITE_WIN,Checkmate - black loses,29,273.736,272.844,177.426,148.942,29
+29,15,A,v69,sample4,730183,730197,730198,black,BLACK_WIN,Checkmate - white loses,38,364.657,363.422,104.905,130.54,38
+30,15,B,v69,sample4,730183,730198,730197,black,BLACK_WIN,Checkmate - white loses,38,364.544,363.328,104.861,130.696,38
+31,16,A,v69,sample0,730184,730199,730200,white,WHITE_WIN,Checkmate - black loses,17,101.162,100.891,234.152,264.781,17
+32,16,B,v69,sample0,730184,730200,730199,white,WHITE_WIN,Checkmate - black loses,17,100.713,100.578,234.512,264.874,17
+33,17,A,v69,sample1,730185,730201,730202,white,WHITE_WIN,Checkmate - black loses,19,172.867,172.406,213.475,213.716,19
+34,17,B,v69,sample1,730185,730202,730201,white,WHITE_WIN,Checkmate - black loses,19,172.234,171.781,214.018,213.806,19
+35,18,A,v69,sample2,730186,730203,730204,white,WHITE_WIN,Checkmate - black loses,23,124.855,124.594,222.462,252.762,23
+36,18,B,v69,sample2,730186,730204,730203,white,WHITE_WIN,Checkmate - black loses,23,124.66,124.219,222.591,252.826,23
+37,19,A,v69,sample3,730187,730205,730206,white,WHITE_WIN,Checkmate - black loses,29,274.26,273.406,176.997,148.846,29
+38,19,B,v69,sample3,730187,730206,730205,white,WHITE_WIN,Stalemate (no more possible moves) - black loses,67,565.328,563.984,18.138,16.736,67
+39,20,A,v69,sample4,730188,730207,730208,black,BLACK_WIN,Checkmate - white loses,38,364.707,363.75,104.687,130.715,38
+40,20,B,v69,sample4,730188,730208,730207,black,BLACK_WIN,Checkmate - white loses,38,364.969,363.922,104.586,130.556,38
+41,21,A,v69,sample0,730189,730209,730210,black,BLACK_WIN,Checkmate - white loses,34,326.907,325.844,115.748,157.519,34
+42,21,B,v69,sample0,730189,730210,730209,white,WHITE_WIN,Checkmate - black loses,17,101.007,100.719,234.194,264.893,17
+43,22,A,v69,sample1,730190,730211,730212,black,BLACK_WIN,Stalemate (no more possible moves) - white loses,40,368.727,367.656,104.686,126.786,40
+44,22,B,v69,sample1,730190,730212,730211,white,WHITE_WIN,Checkmate - black loses,19,172.459,172.0,213.818,213.788,19
+45,23,A,v69,sample2,730191,730213,730214,white,WHITE_WIN,Checkmate - black loses,23,124.976,124.531,222.33,252.777,23
+46,23,B,v69,sample2,730191,730214,730213,white,WHITE_WIN,Checkmate - black loses,23,125.343,124.969,222.258,252.476,23
+47,24,A,v69,sample3,730192,730215,730216,white,WHITE_WIN,Checkmate - black loses,29,273.933,273.062,177.389,148.778,29
+48,24,B,v69,sample3,730192,730216,730215,white,WHITE_WIN,Checkmate - black loses,29,274.378,273.656,177.004,148.727,29
+49,25,A,v69,sample4,730193,730217,730218,black,BLACK_WIN,Checkmate - white loses,38,365.086,364.125,104.608,130.418,38
+50,25,B,v69,sample4,730193,730218,730217,,DRAW,Draw - only 2 kings left,34,359.885,358.656,115.897,124.343,34

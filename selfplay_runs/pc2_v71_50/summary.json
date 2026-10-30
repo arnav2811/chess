@@ -1,0 +1,73 @@
+{
+  "engine": "v71",
+  "games_completed": 50,
+  "outcomes": {
+    "DRAW": 0,
+    "WHITE_WIN": 35,
+    "BLACK_WIN": 15,
+    "WHITE_WIN_BY_CLOCK": 0,
+    "BLACK_WIN_BY_CLOCK": 0,
+    "WHITE_WIN_BY_TIMEOUT": 0,
+    "BLACK_WIN_BY_TIMEOUT": 0,
+    "WHITE_WIN_BY_NO_MOVE": 0,
+    "BLACK_WIN_BY_NO_MOVE": 0,
+    "WHITE_WIN_BY_ILLEGAL_MOVE": 0,
+    "BLACK_WIN_BY_ILLEGAL_MOVE": 0,
+    "WHITE_WIN_BY_ENGINE_ERROR": 0,
+    "BLACK_WIN_BY_ENGINE_ERROR": 0,
+    "UNKNOWN_RESULT": 0,
+    "WORKER_ERROR": 0
+  },
+  "winner_color": {
+    "white_wins": 35,
+    "black_wins": 15,
+    "draws": 0,
+    "white_win_pct_of_decisive": 70.0
+  },
+  "by_board": {
+    "sample0": {
+      "games": 10,
+      "white_wins": 10,
+      "black_wins": 0,
+      "draws": 0
+    },
+    "sample1": {
+      "games": 10,
+      "white_wins": 8,
+      "black_wins": 2,
+      "draws": 0
+    },
+    "sample2": {
+      "games": 10,
+      "white_wins": 10,
+      "black_wins": 0,
+      "draws": 0
+    },
+    "sample3": {
+      "games": 10,
+      "white_wins": 0,
+      "black_wins": 10,
+      "draws": 0
+    },
+    "sample4": {
+      "games": 10,
+      "white_wins": 7,
+      "black_wins": 3,
+      "draws": 0
+    }
+  },
+  "paired_rng_stream_results": {
+    "white_wins_both": 16,
+    "black_wins_both": 6,
+    "split": 3,
+    "draw_or_mixed": 0
+  },
+  "average_plies": 35.14,
+  "average_game_wall_s": 305.1,
+  "total_engine_nodes": 2531799,
+  "max_completed_depth": 9,
+  "puct_calls": 0,
+  "puct_overrides": 0,
+  "elapsed_wall_s": 2054.66,
+  "games_per_hour": 87.61
+}
