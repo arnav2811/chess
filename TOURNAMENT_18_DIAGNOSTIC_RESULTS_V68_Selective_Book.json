@@ -1,0 +1,5604 @@
+[
+  {
+    "match_id": 1,
+    "tier": 1,
+    "opp_name": "Baseline",
+    "board": "sample0",
+    "agent_color": "white",
+    "outcome": "WIN",
+    "termination": "Checkmate - black loses",
+    "plies": 12,
+    "duration_s": 87.8,
+    "pieces_left": 12,
+    "moves": [
+      {
+        "ply": 1,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          2,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 2,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          1,
+          1
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 3,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          3,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 4,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          3,
+          1
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 5,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          1,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 6,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Queen",
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          1,
+          4
+        ],
+        "captures": [
+          [
+            1,
+            4
+          ]
+        ]
+      },
+      {
+        "ply": 7,
+        "side": "white",
+        "is_agent": true,
+        "piece": "King",
+        "from": [
+          2,
+          4
+        ],
+        "to": [
+          1,
+          4
+        ],
+        "captures": [
+          [
+            1,
+            4
+          ]
+        ]
+      },
+      {
+        "ply": 8,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Knight",
+        "from": [
+          0,
+          0
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 9,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          0,
+          3
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 10,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          0,
+          1
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 11,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Right",
+        "from": [
+          0,
+          4
+        ],
+        "to": [
+          0,
+          0
+        ],
+        "captures": []
+      }
+    ]
+  },
+  {
+    "match_id": 2,
+    "tier": 1,
+    "opp_name": "Baseline",
+    "board": "sample0",
+    "agent_color": "black",
+    "outcome": "WIN",
+    "termination": "Checkmate - white loses",
+    "plies": 15,
+    "duration_s": 93.1,
+    "pieces_left": 10,
+    "moves": [
+      {
+        "ply": 1,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Right",
+        "from": [
+          0,
+          4
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 2,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          2,
+          1
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 3,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          0,
+          3
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 4,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Bishop",
+        "from": [
+          3,
+          0
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 5,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          2,
+          3
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 6,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Knight",
+        "from": [
+          0,
+          0
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 7,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Queen",
+        "from": [
+          3,
+          4
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 8,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          0,
+          1
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 9,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Bishop",
+        "from": [
+          1,
+          4
+        ],
+        "to": [
+          4,
+          1
+        ],
+        "captures": [
+          [
+            4,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 10,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          2,
+          1
+        ],
+        "captures": []
+      },
+      {
+        "ply": 11,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Knight",
+        "from": [
+          4,
+          4
+        ],
+        "to": [
+          2,
+          3
+        ],
+        "captures": []
+      },
+      {
+        "ply": 12,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Right",
+        "from": [
+          4,
+          0
+        ],
+        "to": [
+          4,
+          1
+        ],
+        "captures": [
+          [
+            4,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 13,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          3,
+          3
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 14,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          2,
+          1
+        ],
+        "to": [
+          2,
+          3
+        ],
+        "captures": [
+          [
+            2,
+            3
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "match_id": 3,
+    "tier": 1,
+    "opp_name": "Baseline",
+    "board": "sample1",
+    "agent_color": "white",
+    "outcome": "WIN",
+    "termination": "Stalemate (no more possible moves) - black loses",
+    "plies": 26,
+    "duration_s": 202.0,
+    "pieces_left": 6,
+    "moves": [
+      {
+        "ply": 1,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          2,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 2,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          3,
+          1
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 3,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          3,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 4,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          1,
+          1
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 5,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Right",
+        "from": [
+          4,
+          4
+        ],
+        "to": [
+          2,
+          3
+        ],
+        "captures": []
+      },
+      {
+        "ply": 6,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Queen",
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 7,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          3,
+          4
+        ],
+        "to": [
+          3,
+          0
+        ],
+        "captures": [
+          [
+            3,
+            0
+          ]
+        ]
+      },
+      {
+        "ply": 8,
+        "side": "black",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          2,
+          0
+        ],
+        "to": [
+          3,
+          0
+        ],
+        "captures": [
+          [
+            3,
+            0
+          ]
+        ]
+      },
+      {
+        "ply": 9,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Knight",
+        "from": [
+          1,
+          4
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 10,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Bishop",
+        "from": [
+          4,
+          0
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 11,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          0,
+          3
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 12,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Right",
+        "from": [
+          0,
+          0
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 13,
+        "side": "white",
+        "is_agent": true,
+        "piece": "King",
+        "from": [
+          2,
+          4
+        ],
+        "to": [
+          1,
+          4
+        ],
+        "captures": []
+      },
+      {
+        "ply": 14,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Right",
+        "from": [
+          1,
+          2
+        ],
+        "to": [
+          0,
+          4
+        ],
+        "captures": [
+          [
+            0,
+            4
+          ]
+        ]
+      },
+      {
+        "ply": 15,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Right",
+        "from": [
+          2,
+          3
+        ],
+        "to": [
+          0,
+          4
+        ],
+        "captures": [
+          [
+            0,
+            4
+          ]
+        ]
+      },
+      {
+        "ply": 16,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Bishop",
+        "from": [
+          2,
+          2
+        ],
+        "to": [
+          1,
+          3
+        ],
+        "captures": [
+          [
+            1,
+            3
+          ]
+        ]
+      },
+      {
+        "ply": 17,
+        "side": "white",
+        "is_agent": true,
+        "piece": "King",
+        "from": [
+          1,
+          4
+        ],
+        "to": [
+          1,
+          3
+        ],
+        "captures": [
+          [
+            1,
+            3
+          ]
+        ]
+      },
+      {
+        "ply": 18,
+        "side": "black",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          3,
+          0
+        ],
+        "to": [
+          2,
+          0
+        ],
+        "captures": []
+      },
+      {
+        "ply": 19,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Right",
+        "from": [
+          0,
+          4
+        ],
+        "to": [
+          0,
+          1
+        ],
+        "captures": [
+          [
+            0,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 20,
+        "side": "black",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          2,
+          0
+        ],
+        "to": [
+          3,
+          1
+        ],
+        "captures": []
+      },
+      {
+        "ply": 21,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Right",
+        "from": [
+          0,
+          1
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 22,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          4,
+          1
+        ],
+        "to": [
+          4,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 23,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Right",
+        "from": [
+          2,
+          2
+        ],
+        "to": [
+          1,
+          0
+        ],
+        "captures": []
+      },
+      {
+        "ply": 24,
+        "side": "black",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          3,
+          1
+        ],
+        "to": [
+          4,
+          1
+        ],
+        "captures": []
+      },
+      {
+        "ply": 25,
+        "side": "white",
+        "is_agent": true,
+        "piece": "King",
+        "from": [
+          1,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": []
+      }
+    ]
+  },
+  {
+    "match_id": 4,
+    "tier": 1,
+    "opp_name": "Baseline",
+    "board": "sample1",
+    "agent_color": "black",
+    "outcome": "WIN",
+    "termination": "Checkmate - white loses",
+    "plies": 19,
+    "duration_s": 103.2,
+    "pieces_left": 10,
+    "moves": [
+      {
+        "ply": 1,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Knight",
+        "from": [
+          1,
+          4
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 2,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          1,
+          1
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 3,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          3,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 4,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          3,
+          1
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 5,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Queen",
+        "from": [
+          3,
+          4
+        ],
+        "to": [
+          3,
+          0
+        ],
+        "captures": [
+          [
+            3,
+            0
+          ]
+        ]
+      },
+      {
+        "ply": 6,
+        "side": "black",
+        "is_agent": true,
+        "piece": "King",
+        "from": [
+          2,
+          0
+        ],
+        "to": [
+          3,
+          0
+        ],
+        "captures": [
+          [
+            3,
+            0
+          ]
+        ]
+      },
+      {
+        "ply": 7,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          1,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 8,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          4,
+          1
+        ],
+        "to": [
+          4,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 9,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Right",
+        "from": [
+          4,
+          4
+        ],
+        "to": [
+          3,
+          4
+        ],
+        "captures": []
+      },
+      {
+        "ply": 10,
+        "side": "black",
+        "is_agent": true,
+        "piece": "King",
+        "from": [
+          3,
+          0
+        ],
+        "to": [
+          4,
+          1
+        ],
+        "captures": []
+      },
+      {
+        "ply": 11,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Bishop",
+        "from": [
+          0,
+          4
+        ],
+        "to": [
+          1,
+          3
+        ],
+        "captures": []
+      },
+      {
+        "ply": 12,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          0,
+          1
+        ],
+        "to": [
+          0,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 13,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Right",
+        "from": [
+          3,
+          4
+        ],
+        "to": [
+          4,
+          2
+        ],
+        "captures": [
+          [
+            4,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 14,
+        "side": "black",
+        "is_agent": true,
+        "piece": "King",
+        "from": [
+          4,
+          1
+        ],
+        "to": [
+          4,
+          2
+        ],
+        "captures": [
+          [
+            4,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 15,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Bishop",
+        "from": [
+          1,
+          3
+        ],
+        "to": [
+          0,
+          2
+        ],
+        "captures": [
+          [
+            0,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 16,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Right",
+        "from": [
+          0,
+          0
+        ],
+        "to": [
+          0,
+          2
+        ],
+        "captures": [
+          [
+            0,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 17,
+        "side": "white",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          2,
+          4
+        ],
+        "to": [
+          3,
+          4
+        ],
+        "captures": []
+      },
+      {
+        "ply": 18,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          1,
+          4
+        ],
+        "captures": []
+      }
+    ]
+  },
+  {
+    "match_id": 5,
+    "tier": 1,
+    "opp_name": "Baseline",
+    "board": "sample2",
+    "agent_color": "white",
+    "outcome": "WIN",
+    "termination": "Checkmate - black loses",
+    "plies": 14,
+    "duration_s": 88.0,
+    "pieces_left": 11,
+    "moves": [
+      {
+        "ply": 1,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          2,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 2,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          1,
+          1
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 3,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          1,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 4,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          3,
+          1
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 5,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          3,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 6,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Queen",
+        "from": [
+          3,
+          0
+        ],
+        "to": [
+          3,
+          4
+        ],
+        "captures": [
+          [
+            3,
+            4
+          ]
+        ]
+      },
+      {
+        "ply": 7,
+        "side": "white",
+        "is_agent": true,
+        "piece": "King",
+        "from": [
+          2,
+          4
+        ],
+        "to": [
+          3,
+          4
+        ],
+        "captures": [
+          [
+            3,
+            4
+          ]
+        ]
+      },
+      {
+        "ply": 8,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Right",
+        "from": [
+          0,
+          0
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 9,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          0,
+          3
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 10,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          0,
+          1
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 11,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          1,
+          4
+        ],
+        "to": [
+          4,
+          1
+        ],
+        "captures": [
+          [
+            4,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 12,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Knight",
+        "from": [
+          4,
+          0
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 13,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          4,
+          1
+        ],
+        "to": [
+          3,
+          1
+        ],
+        "captures": []
+      }
+    ]
+  },
+  {
+    "match_id": 6,
+    "tier": 1,
+    "opp_name": "Baseline",
+    "board": "sample2",
+    "agent_color": "black",
+    "outcome": "WIN",
+    "termination": "Checkmate - white loses",
+    "plies": 17,
+    "duration_s": 114.4,
+    "pieces_left": 10,
+    "moves": [
+      {
+        "ply": 1,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Knight",
+        "from": [
+          0,
+          4
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 2,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          0,
+          1
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 3,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          0,
+          3
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 4,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          4,
+          1
+        ],
+        "to": [
+          4,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 5,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          1,
+          2
+        ],
+        "to": [
+          2,
+          1
+        ],
+        "captures": [
+          [
+            2,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 6,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Bishop",
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          2,
+          1
+        ],
+        "captures": [
+          [
+            2,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 7,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          3,
+          3
+        ],
+        "to": [
+          4,
+          2
+        ],
+        "captures": [
+          [
+            4,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 8,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          3,
+          1
+        ],
+        "to": [
+          4,
+          2
+        ],
+        "captures": [
+          [
+            4,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 9,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Right",
+        "from": [
+          4,
+          4
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 10,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Bishop",
+        "from": [
+          2,
+          1
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": [
+          [
+            3,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 11,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          4,
+          3
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": [
+          [
+            3,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 12,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Right",
+        "from": [
+          0,
+          0
+        ],
+        "to": [
+          0,
+          3
+        ],
+        "captures": []
+      },
+      {
+        "ply": 13,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Queen",
+        "from": [
+          1,
+          4
+        ],
+        "to": [
+          0,
+          3
+        ],
+        "captures": [
+          [
+            0,
+            3
+          ]
+        ]
+      },
+      {
+        "ply": 14,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          3,
+          0
+        ],
+        "to": [
+          0,
+          3
+        ],
+        "captures": [
+          [
+            0,
+            3
+          ]
+        ]
+      },
+      {
+        "ply": 15,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          1,
+          3
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 16,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          0,
+          3
+        ],
+        "to": [
+          0,
+          4
+        ],
+        "captures": []
+      }
+    ]
+  },
+  {
+    "match_id": 7,
+    "tier": 2,
+    "opp_name": "Strong",
+    "board": "sample0",
+    "agent_color": "white",
+    "outcome": "WIN",
+    "termination": "Checkmate - black loses",
+    "plies": 18,
+    "duration_s": 112.5,
+    "pieces_left": 12,
+    "moves": [
+      {
+        "ply": 1,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          2,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 2,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          0,
+          1
+        ],
+        "to": [
+          0,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 3,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          2,
+          2
+        ],
+        "to": [
+          3,
+          1
+        ],
+        "captures": [
+          [
+            3,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 4,
+        "side": "black",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          2,
+          0
+        ],
+        "to": [
+          3,
+          1
+        ],
+        "captures": [
+          [
+            3,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 5,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Right",
+        "from": [
+          0,
+          4
+        ],
+        "to": [
+          2,
+          3
+        ],
+        "captures": []
+      },
+      {
+        "ply": 6,
+        "side": "black",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          3,
+          1
+        ],
+        "to": [
+          2,
+          0
+        ],
+        "captures": []
+      },
+      {
+        "ply": 7,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          3,
+          3
+        ],
+        "to": [
+          3,
+          1
+        ],
+        "captures": []
+      },
+      {
+        "ply": 8,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          4,
+          1
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": [
+          [
+            3,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 9,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Knight",
+        "from": [
+          4,
+          4
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": [
+          [
+            3,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 10,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Right",
+        "from": [
+          4,
+          0
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": [
+          [
+            3,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 11,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          3,
+          4
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": [
+          [
+            3,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 12,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          0,
+          2
+        ],
+        "to": [
+          1,
+          3
+        ],
+        "captures": [
+          [
+            1,
+            3
+          ]
+        ]
+      },
+      {
+        "ply": 13,
+        "side": "white",
+        "is_agent": true,
+        "piece": "King",
+        "from": [
+          2,
+          4
+        ],
+        "to": [
+          3,
+          4
+        ],
+        "captures": []
+      },
+      {
+        "ply": 14,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Queen",
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          0,
+          1
+        ],
+        "captures": []
+      },
+      {
+        "ply": 15,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          3,
+          2
+        ],
+        "to": [
+          3,
+          1
+        ],
+        "captures": []
+      },
+      {
+        "ply": 16,
+        "side": "black",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          2,
+          0
+        ],
+        "to": [
+          1,
+          0
+        ],
+        "captures": []
+      },
+      {
+        "ply": 17,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          3,
+          1
+        ],
+        "to": [
+          3,
+          0
+        ],
+        "captures": [
+          [
+            3,
+            0
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "match_id": 8,
+    "tier": 2,
+    "opp_name": "Strong",
+    "board": "sample0",
+    "agent_color": "black",
+    "outcome": "WIN",
+    "termination": "Checkmate - white loses",
+    "plies": 23,
+    "duration_s": 200.9,
+    "pieces_left": 8,
+    "moves": [
+      {
+        "ply": 1,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          4,
+          3
+        ],
+        "to": [
+          4,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 2,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          3,
+          1
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 3,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          2,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 4,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          0,
+          1
+        ],
+        "to": [
+          0,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 5,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          1,
+          3
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 6,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          2,
+          1
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 7,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          2,
+          2
+        ],
+        "to": [
+          1,
+          1
+        ],
+        "captures": [
+          [
+            1,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 8,
+        "side": "black",
+        "is_agent": true,
+        "piece": "King",
+        "from": [
+          2,
+          0
+        ],
+        "to": [
+          1,
+          1
+        ],
+        "captures": [
+          [
+            1,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 9,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          0,
+          3
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 10,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Knight",
+        "from": [
+          0,
+          0
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 11,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Right",
+        "from": [
+          0,
+          4
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 12,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Bishop",
+        "from": [
+          3,
+          0
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 13,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Bishop",
+        "from": [
+          1,
+          4
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": [
+          [
+            3,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 14,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          4,
+          1
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": [
+          [
+            3,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 15,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Queen",
+        "from": [
+          3,
+          4
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 16,
+        "side": "black",
+        "is_agent": true,
+        "piece": "King",
+        "from": [
+          1,
+          1
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 17,
+        "side": "white",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          2,
+          4
+        ],
+        "to": [
+          1,
+          4
+        ],
+        "captures": []
+      },
+      {
+        "ply": 18,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Right",
+        "from": [
+          4,
+          0
+        ],
+        "to": [
+          2,
+          1
+        ],
+        "captures": []
+      },
+      {
+        "ply": 19,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Knight",
+        "from": [
+          4,
+          4
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": [
+          [
+            3,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 20,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          0,
+          2
+        ],
+        "to": [
+          0,
+          3
+        ],
+        "captures": []
+      },
+      {
+        "ply": 21,
+        "side": "white",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          1,
+          4
+        ],
+        "to": [
+          0,
+          4
+        ],
+        "captures": []
+      },
+      {
+        "ply": 22,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Right",
+        "from": [
+          2,
+          1
+        ],
+        "to": [
+          2,
+          3
+        ],
+        "captures": []
+      }
+    ]
+  },
+  {
+    "match_id": 9,
+    "tier": 2,
+    "opp_name": "Strong",
+    "board": "sample1",
+    "agent_color": "white",
+    "outcome": "WIN",
+    "termination": "Checkmate - black loses",
+    "plies": 18,
+    "duration_s": 136.7,
+    "pieces_left": 12,
+    "moves": [
+      {
+        "ply": 1,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          3,
+          3
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 2,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          4,
+          1
+        ],
+        "to": [
+          4,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 3,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          0,
+          3
+        ],
+        "to": [
+          0,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 4,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          1,
+          1
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 5,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          3,
+          2
+        ],
+        "to": [
+          2,
+          1
+        ],
+        "captures": [
+          [
+            2,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 6,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Queen",
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          2,
+          1
+        ],
+        "captures": [
+          [
+            2,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 7,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Right",
+        "from": [
+          4,
+          4
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 8,
+        "side": "black",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          2,
+          0
+        ],
+        "to": [
+          1,
+          0
+        ],
+        "captures": []
+      },
+      {
+        "ply": 9,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Right",
+        "from": [
+          3,
+          2
+        ],
+        "to": [
+          4,
+          0
+        ],
+        "captures": [
+          [
+            4,
+            0
+          ]
+        ]
+      },
+      {
+        "ply": 10,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Queen",
+        "from": [
+          2,
+          1
+        ],
+        "to": [
+          2,
+          3
+        ],
+        "captures": [
+          [
+            2,
+            3
+          ]
+        ]
+      },
+      {
+        "ply": 11,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          3,
+          4
+        ],
+        "to": [
+          2,
+          3
+        ],
+        "captures": [
+          [
+            2,
+            3
+          ]
+        ]
+      },
+      {
+        "ply": 12,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          3,
+          1
+        ],
+        "to": [
+          3,
+          3
+        ],
+        "captures": []
+      },
+      {
+        "ply": 13,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          4,
+          3
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": [
+          [
+            3,
+            3
+          ]
+        ]
+      },
+      {
+        "ply": 14,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Right",
+        "from": [
+          0,
+          0
+        ],
+        "to": [
+          2,
+          1
+        ],
+        "captures": []
+      },
+      {
+        "ply": 15,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          3,
+          2
+        ],
+        "to": [
+          2,
+          1
+        ],
+        "captures": [
+          [
+            2,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 16,
+        "side": "black",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          2,
+          0
+        ],
+        "captures": []
+      },
+      {
+        "ply": 17,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          2,
+          1
+        ],
+        "to": [
+          3,
+          0
+        ],
+        "captures": [
+          [
+            3,
+            0
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "match_id": 10,
+    "tier": 2,
+    "opp_name": "Strong",
+    "board": "sample1",
+    "agent_color": "black",
+    "outcome": "WIN",
+    "termination": "Stalemate (no more possible moves) - white loses",
+    "plies": 37,
+    "duration_s": 313.7,
+    "pieces_left": 4,
+    "moves": [
+      {
+        "ply": 1,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          0,
+          3
+        ],
+        "to": [
+          0,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 2,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          1,
+          1
+        ],
+        "to": [
+          0,
+          2
+        ],
+        "captures": [
+          [
+            0,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 3,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Knight",
+        "from": [
+          1,
+          4
+        ],
+        "to": [
+          0,
+          2
+        ],
+        "captures": [
+          [
+            0,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 4,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          1,
+          1
+        ],
+        "captures": []
+      },
+      {
+        "ply": 5,
+        "side": "white",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          2,
+          4
+        ],
+        "to": [
+          1,
+          4
+        ],
+        "captures": []
+      },
+      {
+        "ply": 6,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          2,
+          1
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 7,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          4,
+          3
+        ],
+        "to": [
+          4,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 8,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          2,
+          2
+        ],
+        "to": [
+          3,
+          3
+        ],
+        "captures": [
+          [
+            3,
+            3
+          ]
+        ]
+      },
+      {
+        "ply": 9,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          4,
+          2
+        ],
+        "to": [
+          3,
+          1
+        ],
+        "captures": [
+          [
+            3,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 10,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          1,
+          1
+        ],
+        "to": [
+          3,
+          1
+        ],
+        "captures": [
+          [
+            3,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 11,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Right",
+        "from": [
+          4,
+          4
+        ],
+        "to": [
+          4,
+          3
+        ],
+        "captures": []
+      },
+      {
+        "ply": 12,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          4,
+          1
+        ],
+        "to": [
+          4,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 13,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Right",
+        "from": [
+          4,
+          3
+        ],
+        "to": [
+          3,
+          1
+        ],
+        "captures": [
+          [
+            3,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 14,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Bishop",
+        "from": [
+          4,
+          0
+        ],
+        "to": [
+          3,
+          1
+        ],
+        "captures": [
+          [
+            3,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 15,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          2,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 16,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Knight",
+        "from": [
+          3,
+          0
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 17,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          1,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 18,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Right",
+        "from": [
+          0,
+          0
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 19,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Queen",
+        "from": [
+          3,
+          4
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 20,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          0,
+          1
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 21,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          2,
+          2
+        ],
+        "to": [
+          3,
+          1
+        ],
+        "captures": [
+          [
+            3,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 22,
+        "side": "black",
+        "is_agent": true,
+        "piece": "King",
+        "from": [
+          2,
+          0
+        ],
+        "to": [
+          3,
+          0
+        ],
+        "captures": []
+      },
+      {
+        "ply": 23,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Bishop",
+        "from": [
+          0,
+          4
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 24,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          3,
+          3
+        ],
+        "to": [
+          3,
+          4
+        ],
+        "captures": []
+      },
+      {
+        "ply": 25,
+        "side": "white",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          1,
+          4
+        ],
+        "to": [
+          1,
+          3
+        ],
+        "captures": []
+      },
+      {
+        "ply": 26,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          4,
+          2
+        ],
+        "to": [
+          4,
+          3
+        ],
+        "captures": []
+      },
+      {
+        "ply": 27,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Bishop",
+        "from": [
+          2,
+          2
+        ],
+        "to": [
+          4,
+          4
+        ],
+        "captures": []
+      },
+      {
+        "ply": 28,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          3,
+          4
+        ],
+        "to": [
+          4,
+          4
+        ],
+        "captures": [
+          [
+            4,
+            4
+          ]
+        ]
+      },
+      {
+        "ply": 29,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Knight",
+        "from": [
+          0,
+          2
+        ],
+        "to": [
+          1,
+          4
+        ],
+        "captures": []
+      },
+      {
+        "ply": 30,
+        "side": "black",
+        "is_agent": true,
+        "piece": "King",
+        "from": [
+          3,
+          0
+        ],
+        "to": [
+          3,
+          1
+        ],
+        "captures": [
+          [
+            3,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 31,
+        "side": "white",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          1,
+          3
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 32,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          4,
+          4
+        ],
+        "to": [
+          1,
+          4
+        ],
+        "captures": [
+          [
+            1,
+            4
+          ]
+        ]
+      },
+      {
+        "ply": 33,
+        "side": "white",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          1,
+          2
+        ],
+        "to": [
+          0,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 34,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          4,
+          3
+        ],
+        "to": [
+          4,
+          4
+        ],
+        "captures": []
+      },
+      {
+        "ply": 35,
+        "side": "white",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          0,
+          2
+        ],
+        "to": [
+          0,
+          1
+        ],
+        "captures": []
+      },
+      {
+        "ply": 36,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          4,
+          4
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": []
+      }
+    ]
+  },
+  {
+    "match_id": 11,
+    "tier": 2,
+    "opp_name": "Strong",
+    "board": "sample2",
+    "agent_color": "white",
+    "outcome": "WIN",
+    "termination": "Checkmate - black loses",
+    "plies": 12,
+    "duration_s": 82.5,
+    "pieces_left": 15,
+    "moves": [
+      {
+        "ply": 1,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          2,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 2,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          0,
+          1
+        ],
+        "to": [
+          0,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 3,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          2,
+          2
+        ],
+        "to": [
+          1,
+          1
+        ],
+        "captures": [
+          [
+            1,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 4,
+        "side": "black",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          2,
+          0
+        ],
+        "to": [
+          1,
+          1
+        ],
+        "captures": [
+          [
+            1,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 5,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Knight",
+        "from": [
+          0,
+          4
+        ],
+        "to": [
+          2,
+          3
+        ],
+        "captures": []
+      },
+      {
+        "ply": 6,
+        "side": "black",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          1,
+          1
+        ],
+        "to": [
+          2,
+          0
+        ],
+        "captures": []
+      },
+      {
+        "ply": 7,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          1,
+          3
+        ],
+        "to": [
+          0,
+          2
+        ],
+        "captures": [
+          [
+            0,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 8,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Right",
+        "from": [
+          0,
+          0
+        ],
+        "to": [
+          0,
+          1
+        ],
+        "captures": []
+      },
+      {
+        "ply": 9,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          1,
+          4
+        ],
+        "to": [
+          1,
+          1
+        ],
+        "captures": []
+      },
+      {
+        "ply": 10,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Right",
+        "from": [
+          0,
+          1
+        ],
+        "to": [
+          1,
+          1
+        ],
+        "captures": [
+          [
+            1,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 11,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          0,
+          2
+        ],
+        "to": [
+          1,
+          1
+        ],
+        "captures": [
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "match_id": 12,
+    "tier": 2,
+    "opp_name": "Strong",
+    "board": "sample2",
+    "agent_color": "black",
+    "outcome": "LOSS",
+    "termination": "Stalemate (no more possible moves) - black loses",
+    "plies": 16,
+    "duration_s": 136.5,
+    "pieces_left": 15,
+    "moves": [
+      {
+        "ply": 1,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          0,
+          3
+        ],
+        "to": [
+          0,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 2,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          1,
+          1
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 3,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          2,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 4,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          3,
+          1
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 5,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          1,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 6,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Knight",
+        "from": [
+          4,
+          0
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 7,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          4,
+          3
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": [
+          [
+            3,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 8,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          4,
+          1
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": [
+          [
+            3,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 9,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Queen",
+        "from": [
+          1,
+          4
+        ],
+        "to": [
+          1,
+          3
+        ],
+        "captures": []
+      },
+      {
+        "ply": 10,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          3,
+          0
+        ],
+        "to": [
+          4,
+          1
+        ],
+        "captures": []
+      },
+      {
+        "ply": 11,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Right",
+        "from": [
+          4,
+          4
+        ],
+        "to": [
+          4,
+          1
+        ],
+        "captures": [
+          [
+            4,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 12,
+        "side": "black",
+        "is_agent": true,
+        "piece": "King",
+        "from": [
+          2,
+          0
+        ],
+        "to": [
+          3,
+          0
+        ],
+        "captures": []
+      },
+      {
+        "ply": 13,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Right",
+        "from": [
+          4,
+          1
+        ],
+        "to": [
+          3,
+          1
+        ],
+        "captures": []
+      },
+      {
+        "ply": 14,
+        "side": "black",
+        "is_agent": true,
+        "piece": "King",
+        "from": [
+          3,
+          0
+        ],
+        "to": [
+          2,
+          0
+        ],
+        "captures": []
+      },
+      {
+        "ply": 15,
+        "side": "white",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          2,
+          4
+        ],
+        "to": [
+          1,
+          4
+        ],
+        "captures": []
+      }
+    ]
+  },
+  {
+    "match_id": 13,
+    "tier": 3,
+    "opp_name": "Master",
+    "board": "sample0",
+    "agent_color": "white",
+    "outcome": "WIN",
+    "termination": "Checkmate - black loses",
+    "plies": 10,
+    "duration_s": 87.2,
+    "pieces_left": 14,
+    "moves": [
+      {
+        "ply": 1,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          2,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 2,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          1,
+          1
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 3,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          3,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 4,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          3,
+          1
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 5,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          1,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 6,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Knight",
+        "from": [
+          0,
+          0
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 7,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          0,
+          3
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 8,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          0,
+          1
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 9,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          3,
+          4
+        ],
+        "to": [
+          3,
+          1
+        ],
+        "captures": []
+      }
+    ]
+  },
+  {
+    "match_id": 14,
+    "tier": 3,
+    "opp_name": "Master",
+    "board": "sample0",
+    "agent_color": "black",
+    "outcome": "WIN",
+    "termination": "Checkmate - white loses",
+    "plies": 25,
+    "duration_s": 263.4,
+    "pieces_left": 9,
+    "moves": [
+      {
+        "ply": 1,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          0,
+          3
+        ],
+        "to": [
+          0,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 2,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          1,
+          1
+        ],
+        "to": [
+          0,
+          2
+        ],
+        "captures": [
+          [
+            0,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 3,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Right",
+        "from": [
+          0,
+          4
+        ],
+        "to": [
+          0,
+          2
+        ],
+        "captures": [
+          [
+            0,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 4,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          1,
+          1
+        ],
+        "captures": []
+      },
+      {
+        "ply": 5,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Right",
+        "from": [
+          0,
+          2
+        ],
+        "to": [
+          0,
+          3
+        ],
+        "captures": []
+      },
+      {
+        "ply": 6,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Knight",
+        "from": [
+          0,
+          0
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 7,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          2,
+          3
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 8,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          1,
+          1
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 9,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Right",
+        "from": [
+          0,
+          3
+        ],
+        "to": [
+          0,
+          1
+        ],
+        "captures": [
+          [
+            0,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 10,
+        "side": "black",
+        "is_agent": true,
+        "piece": "King",
+        "from": [
+          2,
+          0
+        ],
+        "to": [
+          1,
+          0
+        ],
+        "captures": []
+      },
+      {
+        "ply": 11,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Bishop",
+        "from": [
+          1,
+          4
+        ],
+        "to": [
+          2,
+          3
+        ],
+        "captures": []
+      },
+      {
+        "ply": 12,
+        "side": "black",
+        "is_agent": true,
+        "piece": "King",
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          0,
+          1
+        ],
+        "captures": [
+          [
+            0,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 13,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Bishop",
+        "from": [
+          2,
+          3
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 14,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          2,
+          1
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": [
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 15,
+        "side": "white",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          2,
+          4
+        ],
+        "to": [
+          1,
+          4
+        ],
+        "captures": []
+      },
+      {
+        "ply": 16,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Right",
+        "from": [
+          4,
+          0
+        ],
+        "to": [
+          2,
+          1
+        ],
+        "captures": []
+      },
+      {
+        "ply": 17,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          3,
+          3
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 18,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Right",
+        "from": [
+          2,
+          1
+        ],
+        "to": [
+          2,
+          0
+        ],
+        "captures": []
+      },
+      {
+        "ply": 19,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          3,
+          2
+        ],
+        "to": [
+          4,
+          1
+        ],
+        "captures": [
+          [
+            4,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 20,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Bishop",
+        "from": [
+          3,
+          0
+        ],
+        "to": [
+          4,
+          1
+        ],
+        "captures": [
+          [
+            4,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 21,
+        "side": "white",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          1,
+          4
+        ],
+        "to": [
+          0,
+          4
+        ],
+        "captures": []
+      },
+      {
+        "ply": 22,
+        "side": "black",
+        "is_agent": true,
+        "piece": "King",
+        "from": [
+          0,
+          1
+        ],
+        "to": [
+          1,
+          0
+        ],
+        "captures": []
+      },
+      {
+        "ply": 23,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Queen",
+        "from": [
+          3,
+          4
+        ],
+        "to": [
+          3,
+          1
+        ],
+        "captures": [
+          [
+            3,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 24,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Right",
+        "from": [
+          2,
+          0
+        ],
+        "to": [
+          2,
+          4
+        ],
+        "captures": []
+      }
+    ]
+  },
+  {
+    "match_id": 15,
+    "tier": 3,
+    "opp_name": "Master",
+    "board": "sample1",
+    "agent_color": "white",
+    "outcome": "WIN",
+    "termination": "Checkmate - black loses",
+    "plies": 8,
+    "duration_s": 71.5,
+    "pieces_left": 18,
+    "moves": [
+      {
+        "ply": 1,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          3,
+          3
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 2,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          4,
+          1
+        ],
+        "to": [
+          4,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 3,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          0,
+          3
+        ],
+        "to": [
+          0,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 4,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          1,
+          1
+        ],
+        "to": [
+          1,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 5,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          3,
+          2
+        ],
+        "to": [
+          2,
+          1
+        ],
+        "captures": [
+          [
+            2,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 6,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Right",
+        "from": [
+          0,
+          0
+        ],
+        "to": [
+          2,
+          1
+        ],
+        "captures": [
+          [
+            2,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 7,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Right",
+        "from": [
+          4,
+          4
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": []
+      }
+    ]
+  },
+  {
+    "match_id": 16,
+    "tier": 3,
+    "opp_name": "Master",
+    "board": "sample1",
+    "agent_color": "black",
+    "outcome": "WIN",
+    "termination": "Checkmate - white loses",
+    "plies": 23,
+    "duration_s": 214.2,
+    "pieces_left": 10,
+    "moves": [
+      {
+        "ply": 1,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          0,
+          3
+        ],
+        "to": [
+          0,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 2,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          1,
+          1
+        ],
+        "to": [
+          0,
+          2
+        ],
+        "captures": [
+          [
+            0,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 3,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Knight",
+        "from": [
+          1,
+          4
+        ],
+        "to": [
+          0,
+          2
+        ],
+        "captures": [
+          [
+            0,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 4,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          1,
+          1
+        ],
+        "captures": []
+      },
+      {
+        "ply": 5,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          3,
+          3
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 6,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Knight",
+        "from": [
+          3,
+          0
+        ],
+        "to": [
+          4,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 7,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Queen",
+        "from": [
+          3,
+          4
+        ],
+        "to": [
+          3,
+          3
+        ],
+        "captures": []
+      },
+      {
+        "ply": 8,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          2,
+          1
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 9,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          1,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 10,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          1,
+          1
+        ],
+        "to": [
+          0,
+          2
+        ],
+        "captures": [
+          [
+            0,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 11,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Bishop",
+        "from": [
+          0,
+          4
+        ],
+        "to": [
+          1,
+          3
+        ],
+        "captures": []
+      },
+      {
+        "ply": 12,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          0,
+          2
+        ],
+        "to": [
+          1,
+          3
+        ],
+        "captures": [
+          [
+            1,
+            3
+          ]
+        ]
+      },
+      {
+        "ply": 13,
+        "side": "white",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          2,
+          4
+        ],
+        "to": [
+          1,
+          3
+        ],
+        "captures": [
+          [
+            1,
+            3
+          ]
+        ]
+      },
+      {
+        "ply": 14,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          3,
+          1
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 15,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Queen",
+        "from": [
+          3,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 16,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Knight",
+        "from": [
+          4,
+          2
+        ],
+        "to": [
+          2,
+          1
+        ],
+        "captures": []
+      },
+      {
+        "ply": 17,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          3,
+          2
+        ],
+        "to": [
+          2,
+          1
+        ],
+        "captures": [
+          [
+            2,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 18,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Bishop",
+        "from": [
+          4,
+          0
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 19,
+        "side": "white",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          1,
+          3
+        ],
+        "to": [
+          1,
+          4
+        ],
+        "captures": []
+      },
+      {
+        "ply": 20,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          0,
+          1
+        ],
+        "to": [
+          0,
+          3
+        ],
+        "captures": []
+      },
+      {
+        "ply": 21,
+        "side": "white",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          1,
+          4
+        ],
+        "to": [
+          2,
+          4
+        ],
+        "captures": []
+      },
+      {
+        "ply": 22,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          0,
+          3
+        ],
+        "to": [
+          0,
+          4
+        ],
+        "captures": []
+      }
+    ]
+  },
+  {
+    "match_id": 17,
+    "tier": 3,
+    "opp_name": "Master",
+    "board": "sample2",
+    "agent_color": "white",
+    "outcome": "WIN",
+    "termination": "Checkmate - black loses",
+    "plies": 10,
+    "duration_s": 95.5,
+    "pieces_left": 14,
+    "moves": [
+      {
+        "ply": 1,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          2,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 2,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          1,
+          1
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 3,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          1,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 4,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          3,
+          1
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 5,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          3,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 6,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Knight",
+        "from": [
+          4,
+          0
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 7,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          4,
+          3
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": [
+          [
+            3,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 8,
+        "side": "black",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          4,
+          1
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": [
+          [
+            3,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 9,
+        "side": "white",
+        "is_agent": true,
+        "piece": "Queen",
+        "from": [
+          1,
+          4
+        ],
+        "to": [
+          1,
+          1
+        ],
+        "captures": []
+      }
+    ]
+  },
+  {
+    "match_id": 18,
+    "tier": 3,
+    "opp_name": "Master",
+    "board": "sample2",
+    "agent_color": "black",
+    "outcome": "WIN",
+    "termination": "Checkmate - white loses",
+    "plies": 19,
+    "duration_s": 144.9,
+    "pieces_left": 12,
+    "moves": [
+      {
+        "ply": 1,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          2,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 2,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          4,
+          1
+        ],
+        "to": [
+          4,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 3,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          2,
+          2
+        ],
+        "to": [
+          1,
+          1
+        ],
+        "captures": [
+          [
+            1,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 4,
+        "side": "black",
+        "is_agent": true,
+        "piece": "King",
+        "from": [
+          2,
+          0
+        ],
+        "to": [
+          1,
+          1
+        ],
+        "captures": [
+          [
+            1,
+            1
+          ]
+        ]
+      },
+      {
+        "ply": 5,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Knight",
+        "from": [
+          0,
+          4
+        ],
+        "to": [
+          2,
+          3
+        ],
+        "captures": []
+      },
+      {
+        "ply": 6,
+        "side": "black",
+        "is_agent": true,
+        "piece": "King",
+        "from": [
+          1,
+          1
+        ],
+        "to": [
+          2,
+          0
+        ],
+        "captures": []
+      },
+      {
+        "ply": 7,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          3,
+          3
+        ],
+        "to": [
+          4,
+          2
+        ],
+        "captures": [
+          [
+            4,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 8,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          3,
+          1
+        ],
+        "to": [
+          3,
+          3
+        ],
+        "captures": []
+      },
+      {
+        "ply": 9,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          4,
+          3
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": [
+          [
+            3,
+            3
+          ]
+        ]
+      },
+      {
+        "ply": 10,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Knight",
+        "from": [
+          4,
+          0
+        ],
+        "to": [
+          3,
+          2
+        ],
+        "captures": [
+          [
+            3,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 11,
+        "side": "white",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          2,
+          4
+        ],
+        "to": [
+          3,
+          3
+        ],
+        "captures": []
+      },
+      {
+        "ply": 12,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Pawn",
+        "from": [
+          2,
+          1
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": []
+      },
+      {
+        "ply": 13,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Pawn",
+        "from": [
+          1,
+          3
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "ply": 14,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Right",
+        "from": [
+          0,
+          0
+        ],
+        "to": [
+          2,
+          1
+        ],
+        "captures": []
+      },
+      {
+        "ply": 15,
+        "side": "white",
+        "is_agent": false,
+        "piece": "King",
+        "from": [
+          3,
+          3
+        ],
+        "to": [
+          4,
+          3
+        ],
+        "captures": []
+      },
+      {
+        "ply": 16,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Knight",
+        "from": [
+          3,
+          2
+        ],
+        "to": [
+          2,
+          4
+        ],
+        "captures": []
+      },
+      {
+        "ply": 17,
+        "side": "white",
+        "is_agent": false,
+        "piece": "Queen",
+        "from": [
+          1,
+          4
+        ],
+        "to": [
+          2,
+          4
+        ],
+        "captures": [
+          [
+            2,
+            4
+          ]
+        ]
+      },
+      {
+        "ply": 18,
+        "side": "black",
+        "is_agent": true,
+        "piece": "Right",
+        "from": [
+          2,
+          1
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "captures": [
+          [
+            2,
+            2
+          ]
+        ]
+      }
+    ]
+  }
+]

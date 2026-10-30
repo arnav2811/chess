@@ -1,0 +1,14 @@
+{
+  "mode": "benchmark_only",
+  "games": 10,
+  "elapsed_s": 0.19,
+  "games_per_hour": 192587.52,
+  "average_game_s": 0.0,
+  "outcomes": {
+    "WIN": 0,
+    "DRAW": 0,
+    "LOSS": 0,
+    "ERROR": 10
+  },
+  "champion_sha256": "df5cfb7305e8374ed45b6a862e6934cf0f3168e7c7eca9b1c18e9cfd517e08bd"
+}

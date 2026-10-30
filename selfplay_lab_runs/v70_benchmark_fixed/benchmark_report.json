@@ -1,0 +1,16 @@
+{
+  "mode": "benchmark_only",
+  "games_attempted": 10,
+  "valid_games": 10,
+  "elapsed_s": 149.25,
+  "valid_games_per_hour": 241.21,
+  "average_game_s": 26.44,
+  "outcomes": {
+    "WIN": 2,
+    "DRAW": 2,
+    "LOSS": 6,
+    "ERROR": 0
+  },
+  "champion_sha256": "df5cfb7305e8374ed45b6a862e6934cf0f3168e7c7eca9b1c18e9cfd517e08bd",
+  "status": "PASS"
+}

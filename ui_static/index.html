@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chess Fragments — AI Arena</title>
+  <meta name="description" content="5×5 Chess Fragments AI Arena — play against or watch your AI agents battle in real time." />
+  <script src="socket.io.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Ambient background lighting with classy subtle blue-green hues -->
+  <div class="bg-grid"></div>
+  <div class="bg-glow left-glow"></div>
+  <div class="bg-glow center-glow"></div>
+  <div class="bg-glow right-glow"></div>
+
+  <!-- ── Top Header ────────────────────────────────────────── -->
+  <header class="top-bar">
+    <div class="logo">
+      <div class="logo-badge">
+        <span class="logo-icon">♟</span>
+      </div>
+      <div class="logo-text-group">
+        <span class="logo-text">Chess Fragments</span>
+        <span class="logo-sub">AI Arena &bull; 5&times;5 Grandmaster Engine</span>
+      </div>
+    </div>
+
+    <div class="header-center-info">
+      <div class="active-agent-pill" id="header-agent-pill" title="Currently active AI agent file">
+        <span class="pill-dot"></span>
+        <span class="pill-label">Engine:</span>
+        <span class="pill-name" id="header-agent-name">agent.py</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="icon-btn" id="btn-sound-toggle" title="Toggle Move Sounds">
+        <span id="sound-icon">🔊</span>
+      </button>
+      <button class="btn btn-sm btn-outline" id="btn-open-guide" title="How to run tournaments and host">
+        📖 Runner & Hosting Guide
+      </button>
+      <button class="btn btn-sm btn-stop-server" id="btn-stop-hosting" title="Stop UI server process">
+        🛑 Stop Hosting
+      </button>
+      <div class="conn-status" id="conn-status">
+        <span class="dot disconnected" id="conn-dot"></span>
+        <span id="conn-label">Connecting…</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Main 3-Column Arena Layout ────────────────────────── -->
+  <main class="layout">
+
+    <!-- LEFT PANEL: Match Setup & Agent Hub -->
+    <aside class="panel panel-left glass">
+      <div class="panel-header">
+        <h2 class="panel-title"><span class="icon">⚙</span>Match Setup</h2>
+      </div>
+
+      <!-- Agent Selection -->
+      <div class="form-group">
+        <label for="agent-select">AI Agent File</label>
+        <div class="agent-select-row">
+          <select id="agent-select" class="select-input"></select>
+          <button class="btn btn-sm btn-accent" id="btn-load-agent" title="Load selected agent into memory">Load</button>
+        </div>
+
+        <!-- Quick Agent Chips -->
+        <div class="quick-chips" id="quick-chips">
+          <span class="chip-label">Quick:</span>
+          <button class="chip-btn" data-file="agent_v69_stalemate_guard.py" title="Load v69 Stalemate Guard">v69</button>
+          <button class="chip-btn" data-file="agent_peak.py" title="Load Peak Agent">Peak</button>
+          <button class="chip-btn" data-file="agent_6.3.py" title="Load Agent 6.3">v6.3</button>
+          <button class="chip-btn" data-file="agent_v68_selective_book.py" title="Load v68 Selective Book">v68</button>
+          <button class="chip-btn" data-file="agent.py" title="Load current agent.py">agent.py</button>
+        </div>
+
+        <!-- Promote to main agent.py button -->
+        <button class="btn btn-sm btn-promote full-width" id="btn-promote-agent" title="Copy selected file to agent.py (official grader file) with automatic backup">
+          👑 Set as Main Tournament agent.py
+        </button>
+      </div>
+
+      <!-- Board Variant Selection (Samples 0 through 4) -->
+      <div class="form-group">
+        <label for="board-select">Board Variant</label>
+        <select id="board-select" class="select-input">
+          <option value="sample0">Sample 0 — Standard (R N K B Q)</option>
+          <option value="sample1">Sample 1 — Mirrored Setup</option>
+          <option value="sample2">Sample 2 — Asymmetric Challenge</option>
+          <option value="sample3">Sample 3 — Double Right Setup (2 Rights)</option>
+          <option value="sample4">Sample 4 — Queenless Endgame (Right & Minors)</option>
+        </select>
+      </div>
+
+      <!-- Right Piece Emblem Selector -->
+      <div class="form-group">
+        <label for="right-style-select">Right Piece Style (Rook + Knight)</label>
+        <select id="right-style-select" class="select-input">
+          <option value="fairy" selected>Stylized ℝ (Double-Struck Fairy Right)</option>
+          <option value="hybrid">Hybrid ♜ᴷ (Castle + Knight Crest)</option>
+          <option value="standard">Standard ♜ (Castle Wall)</option>
+        </select>
+      </div>
+
+      <!-- Time Control Selection -->
+      <div class="form-group">
+        <label for="tc-select">Chess Clock Time Control</label>
+        <select id="tc-select" class="select-input">
+          <option value="300" selected>5 min (Tournament Budget — 300s)</option>
+          <option value="180">3 min (Blitz — 180s)</option>
+          <option value="60">1 min (Bullet — 60s)</option>
+          <option value="600">10 min (Rapid — 600s)</option>
+          <option value="0">Unlimited (No Time Limit)</option>
+        </select>
+      </div>
+
+      <!-- Play Mode (Play As) with Auto-Flip -->
+      <div class="form-group">
+        <label>Game Mode (Auto-Flips Board)</label>
+        <div class="side-picker" id="side-picker">
+          <button class="side-btn active" data-side="white" title="Play as White (Auto-flips White to bottom)">
+            <span class="side-symbol">♙</span> White
+          </button>
+          <button class="side-btn" data-side="black" title="Play as Black (Auto-flips Black to bottom)">
+            <span class="side-symbol">♟</span> Black
+          </button>
+          <button class="side-btn" data-side="watch" title="Watch AI vs AI in real time">
+            <span class="side-symbol">👁</span> Watch
+          </button>
+        </div>
+      </div>
+
+      <!-- Opponent Selection -->
+      <div class="form-group" id="opp-group">
+        <label for="opp-select">Opponent</label>
+        <select id="opp-select" class="select-input">
+          <option value="baseline">Baseline Opponent (opponent.py)</option>
+          <option value="strong">Strong Opponent (strong_opponent.py)</option>
+          <option value="master">Master Opponent (master_opponent.py)</option>
+        </select>
+      </div>
+
+      <!-- Watch Pacing Speed -->
+      <div class="form-group" id="speed-group">
+        <div class="label-with-val">
+          <label for="speed-range">Watch AI Delay</label>
+          <span class="speed-val" id="speed-val">0.5s</span>
+        </div>
+        <input type="range" id="speed-range" min="0.0" max="1.5" step="0.1" value="0.5" class="range-input" />
+      </div>
+
+      <!-- Primary Action Buttons -->
+      <div class="action-btn-stack">
+        <button class="btn btn-primary full-width" id="btn-new-game">
+          <span class="btn-icon">▶</span> Start Match
+        </button>
+        <div class="action-btn-row">
+          <button class="btn btn-warning flex-1" id="btn-undo-action" title="Undo last move (Key: U or Ctrl+Z)">
+            <span class="btn-icon">↶</span> Undo
+          </button>
+          <button class="btn btn-danger flex-1" id="btn-resign" style="display:none">
+            <span class="btn-icon">⚑</span> Resign
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Engine Telemetry Card -->
+      <div class="stats-box" id="stats-box">
+        <div class="stats-header">
+          <span class="stats-title">Engine Telemetry</span>
+          <span class="stats-live-tag">LIVE</span>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">Last Move Time</span>
+            <span class="stat-val highlight-teal" id="stat-time">—</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Search Depth</span>
+            <span class="stat-val" id="stat-depth">—</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Nodes Searched</span>
+            <span class="stat-val" id="stat-nodes">—</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Current Ply</span>
+            <span class="stat-val" id="stat-ply">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Piece Guide -->
+      <div class="legend-card">
+        <div class="legend-title">Special Piece Guide</div>
+        <div class="legend-content">
+          <div class="legend-item"><span class="piece-tag right-tag">R</span><strong>Right:</strong> Rook + Knight hybrid (Chancellor)</div>
+          <div class="legend-item"><span class="piece-tag">P</span><strong>Pawn_Q:</strong> Promotes to Queen upon reaching rank 4</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER PANEL: The Arena & 5x5 Board -->
+    <section class="centre">
+
+      <!-- Top Player Bar (Black by default, or White if flipped) -->
+      <div class="player-bar" id="player-black-bar">
+        <div class="player-left">
+          <div class="player-avatar black-avatar" id="top-avatar">♚</div>
+          <div class="player-meta">
+            <div class="player-name-row">
+              <span class="player-name" id="black-name">Black</span>
+              <span class="player-badge" id="black-role">Opponent</span>
+            </div>
+            <div class="captured-and-advantage-row">
+              <div class="captured-tray" id="black-captured" title="Pieces captured by Black"></div>
+              <span class="material-lead-badge" id="black-lead-badge" style="display:none">+0</span>
+            </div>
+          </div>
+        </div>
+        <div class="player-right">
+          <div class="think-wave" id="black-spinner" style="display:none">
+            <span></span><span></span><span></span>
+          </div>
+          <!-- Chess.com Digital Clock -->
+          <div class="chess-clock" id="black-clock" title="Black Clock">
+            <span class="clock-digits" id="black-timer">05:00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Board Arena Wrapper -->
+      <div class="board-arena">
+        <!-- Chess.com-style Evaluation Bar with +/- score -->
+        <div class="eval-bar-wrapper" title="Material & Engine Evaluation (+ White / - Black)">
+          <div class="eval-bar-fill" id="eval-bar-fill" style="height: 50%;"></div>
+          <div class="eval-score-badge" id="eval-score-badge">0.0</div>
+        </div>
+
+        <div class="board-frame">
+          <!-- Coordinates & 5x5 Grid -->
+          <div class="coord-col col-left" id="coords-y-left">
+            <span>4</span><span>3</span><span>2</span><span>1</span><span>0</span>
+          </div>
+
+          <div class="board-container" id="board-container">
+            <div id="board" class="board"></div>
+
+            <!-- Review Mode Floating Notification Banner -->
+            <div class="review-banner" id="review-banner" style="display:none">
+              <div class="review-banner-text">
+                <span class="icon">🔍</span>
+                <span>Reviewing Ply <strong id="review-ply-num">0</strong></span>
+              </div>
+              <button class="btn btn-xs btn-primary" id="btn-jump-live">⚡ Return to Live</button>
+            </div>
+
+            <!-- Game Over Overlay Modal -->
+            <div id="result-overlay" class="result-overlay" style="display:none">
+              <div class="result-card">
+                <div class="result-trophy" id="result-icon">🏆</div>
+                <h3 class="result-title" id="result-title">Victory!</h3>
+                <p class="result-sub" id="result-sub">White won by checkmate</p>
+                <div class="result-actions">
+                  <button class="btn btn-primary" id="btn-play-again">Play Again</button>
+                  <button class="btn btn-outline" id="btn-close-result">Review Board</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="coord-col col-right" id="coords-y-right">
+            <span>4</span><span>3</span><span>2</span><span>1</span><span>0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="coord-row" id="coords-x">
+        <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+      </div>
+
+      <!-- Bottom Player Bar (White by default, or Black if flipped) -->
+      <div class="player-bar" id="player-white-bar">
+        <div class="player-left">
+          <div class="player-avatar white-avatar" id="bottom-avatar">♔</div>
+          <div class="player-meta">
+            <div class="player-name-row">
+              <span class="player-name" id="white-name">White</span>
+              <span class="player-badge" id="white-role">You</span>
+            </div>
+            <div class="captured-and-advantage-row">
+              <div class="captured-tray" id="white-captured" title="Pieces captured by White"></div>
+              <span class="material-lead-badge" id="white-lead-badge" style="display:none">+0</span>
+            </div>
+          </div>
+        </div>
+        <div class="player-right">
+          <div class="think-wave" id="white-spinner" style="display:none">
+            <span></span><span></span><span></span>
+          </div>
+          <!-- Chess.com Digital Clock -->
+          <div class="chess-clock" id="white-clock" title="White Clock">
+            <span class="clock-digits" id="white-timer">05:00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chess.com Move Scrubbing Navigation Bar -->
+      <div class="move-nav-bar" id="move-nav-bar">
+        <button class="nav-btn" id="btn-nav-first" title="First Position (Home)">⏮</button>
+        <button class="nav-btn" id="btn-nav-prev" title="Previous Move (←)">◀</button>
+        <div class="nav-info" id="nav-info">
+          <span class="nav-status-dot live-dot" id="nav-status-dot"></span>
+          <span class="nav-ply-text" id="nav-ply-text">Live Game</span>
+        </div>
+        <button class="nav-btn" id="btn-nav-next" title="Next Move (→)">▶</button>
+        <button class="nav-btn" id="btn-nav-last" title="Live Position (End)">⏭</button>
+      </div>
+
+      <!-- Quick Board Action Toolbar -->
+      <div class="board-toolbar">
+        <div class="board-toolbar-buttons">
+          <button class="btn btn-sm btn-tool" id="btn-flip-board" title="Flip Board Perspective (Key: F)">
+            🔁 Flip Board
+          </button>
+          <button class="btn btn-sm btn-tool btn-undo" id="btn-undo-move" title="Undo Last Move (Key: U or Ctrl+Z)">
+            ↶ Undo Move
+          </button>
+        </div>
+        <div class="status-indicator-pill">
+          <span class="status-bullet"></span>
+          <span id="status-text">Select game parameters and click Start Match</span>
+        </div>
+        <div class="hotkey-hint">Keys: [←/→] Review &bull; [U] Undo &bull; [F] Flip</div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: Move Ledger & Engine Console -->
+    <aside class="panel panel-right glass">
+      <!-- Move History with Clickable Rows -->
+      <div class="panel-section">
+        <div class="panel-header">
+          <h2 class="panel-title"><span class="icon">📋</span>Move Ledger</h2>
+          <span class="move-count-badge" id="move-count-badge">0 moves</span>
+        </div>
+        <div class="move-history-container" id="move-history">
+          <div class="history-empty">No moves recorded yet</div>
+        </div>
+      </div>
+
+      <!-- Live Engine Log -->
+      <div class="panel-section flex-grow">
+        <div class="panel-header">
+          <h2 class="panel-title"><span class="icon">📡</span>Engine Telemetry Log</h2>
+          <button class="btn btn-xs btn-outline" id="btn-clear-log" title="Clear console messages">Clear</button>
+        </div>
+        <div class="log-panel" id="log-panel">
+          <div class="log-entry info">
+            <span class="log-ts">[Ready]</span>
+            <span class="log-msg">Chess Fragments Arena online. Select an agent to begin.</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- ── Modal: Runner Guide & Instructions ────────────────── -->
+  <div class="modal-overlay" id="guide-modal" style="display:none">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">📖 Runner & Hosting Operations Guide</h3>
+        <button class="modal-close" id="btn-close-guide">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Section: Starting & Stopping Hosting -->
+        <div class="guide-box highlight-box">
+          <div class="guide-item-title">🚀 How to Start & Stop Hosting</div>
+          <div class="host-instructions">
+            <div class="host-method">
+              <strong>Method 1: One-Click Windows Launchers (Easiest)</strong>
+              <ul>
+                <li><strong>Start Hosting:</strong> Double-click <code class="file-chip">start_ui.bat</code> in the project folder. It frees port 5000, starts the server, and automatically opens your browser!</li>
+                <li><strong>Stop Hosting:</strong> Double-click <code class="file-chip">stop_ui.bat</code> in the project folder, or click the red <strong>🛑 Stop Hosting</strong> button on the top right bar.</li>
+              </ul>
+            </div>
+            <div class="host-method">
+              <strong>Method 2: Command Line (PowerShell / Terminal)</strong>
+              <div class="code-block">
+                <code>python ui_server.py</code>
+                <button class="btn-copy" onclick="navigator.clipboard.writeText('python ui_server.py'); alert('Copied to clipboard!')">Copy</button>
+              </div>
+              <p style="margin-top:0.3rem">To stop: Press <kbd>Ctrl + C</kbd> in that terminal window.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-item">
+          <div class="guide-item-title">1. Set Active Agent</div>
+          <p>Click <strong>👑 Set as Main Tournament agent.py</strong> on the left panel. This automatically backs up your previous <code>agent.py</code> and copies the chosen file as the official root agent.</p>
+        </div>
+
+        <div class="guide-item">
+          <div class="guide-item-title">2. Run the 18-Game Diagnostic Tournament</div>
+          <p>To verify performance against baseline, strong, and master opponents across all samples:</p>
+          <div class="code-block">
+            <code>python run_fresh_18_tournament_diagnostic.py</code>
+            <button class="btn-copy" onclick="navigator.clipboard.writeText('python run_fresh_18_tournament_diagnostic.py'); alert('Copied to clipboard!')">Copy</button>
+          </div>
+        </div>
+
+        <div class="guide-item">
+          <div class="guide-item-title">3. Run the Clean 18-Game Benchmark</div>
+          <div class="code-block">
+            <code>python run_fresh_18_tournament.py</code>
+            <button class="btn-copy" onclick="navigator.clipboard.writeText('python run_fresh_18_tournament.py'); alert('Copied to clipboard!')">Copy</button>
+          </div>
+        </div>
+
+        <div class="guide-item">
+          <div class="guide-item-title">4. Run the Full Game Engine Test</div>
+          <div class="code-block">
+            <code>python test_fullgame.py</code>
+            <button class="btn-copy" onclick="navigator.clipboard.writeText('python test_fullgame.py'); alert('Copied to clipboard!')">Copy</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="btn-guide-got-it">Got it!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification banner -->
+  <div id="toast" class="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

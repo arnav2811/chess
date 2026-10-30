@@ -1,0 +1,15 @@
+{
+  "lab_version": "1.1",
+  "started_local": "2026-10-29 23:43:15",
+  "base_agent_path": "C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\agent_v70_depth10_overnight.py",
+  "base_agent_sha256": "d51b6e92413d936fd895fb16860618132d71b70a13f4045df73247f640283c4a",
+  "champion_path": "C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\agent_v69_frozen_overnight.py",
+  "champion_sha256": "df5cfb7305e8374ed45b6a862e6934cf0f3168e7c7eca9b1c18e9cfd517e08bd",
+  "runner_path": "C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\run_fresh_18_tournament_diagnostic_v70_overnight.py",
+  "target_games": 1000,
+  "workers": 2,
+  "think_time_s": 2.0,
+  "population": 10,
+  "seed": 690070,
+  "note": "Champion source is read-only. Fast-screen results are provisional, not a promotion-grade strength claim."
+}

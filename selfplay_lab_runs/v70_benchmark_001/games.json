@@ -1,0 +1,262 @@
+[
+  {
+    "match_id": 1,
+    "candidate_id": "baseline-benchmark",
+    "seed": 900000,
+    "agent_color": "white",
+    "outcome": "ERROR",
+    "termination": "Lab exception: TypeError: Pawn.__init__() missing 1 required positional argument: 'direction'",
+    "duration_s": 0.0,
+    "plies": 0,
+    "moves": [],
+    "candidate_config": {
+      "piece_values": {
+        "pawn": 100,
+        "knight": 320,
+        "bishop": 330,
+        "right": 700,
+        "queen": 900,
+        "king": 20000
+      },
+      "pawn_scale": 1.0,
+      "aspiration_delta": 250,
+      "tt_max_size": 200000
+    },
+    "think_time_s": 2.0,
+    "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 157, in _play_task\n    result = _RUNNER.play_one_game(\n        game_id, 2, \"Strong\", f\"variant_{seed}\", colour\n    )\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\run_fresh_18_tournament_diagnostic_v70_overnight.py\", line 97, in play_one_game\n    board, players = make_fresh_board(board_sample_name)\n                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 137, in <lambda>\n    _RUNNER.make_fresh_board = lambda name: _variant_factory(_RUNNER, name)\n                                            ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 95, in _variant_factory\n    squares[y][x] = Square(type(piece)(player_by_name[piece.player.name]))\n                           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python313\\site-packages\\chessmaker\\events\\event_publisher.py\", line 79, in __init__\n    original_init(self, *args, **kwargs)\n    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: Pawn.__init__() missing 1 required positional argument: 'direction'\n"
+  },
+  {
+    "match_id": 2,
+    "candidate_id": "baseline-benchmark",
+    "seed": 900001,
+    "agent_color": "black",
+    "outcome": "ERROR",
+    "termination": "Lab exception: TypeError: Pawn.__init__() missing 1 required positional argument: 'direction'",
+    "duration_s": 0.0,
+    "plies": 0,
+    "moves": [],
+    "candidate_config": {
+      "piece_values": {
+        "pawn": 100,
+        "knight": 320,
+        "bishop": 330,
+        "right": 700,
+        "queen": 900,
+        "king": 20000
+      },
+      "pawn_scale": 1.0,
+      "aspiration_delta": 250,
+      "tt_max_size": 200000
+    },
+    "think_time_s": 2.0,
+    "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 157, in _play_task\n    result = _RUNNER.play_one_game(\n        game_id, 2, \"Strong\", f\"variant_{seed}\", colour\n    )\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\run_fresh_18_tournament_diagnostic_v70_overnight.py\", line 97, in play_one_game\n    board, players = make_fresh_board(board_sample_name)\n                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 137, in <lambda>\n    _RUNNER.make_fresh_board = lambda name: _variant_factory(_RUNNER, name)\n                                            ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 95, in _variant_factory\n    squares[y][x] = Square(type(piece)(player_by_name[piece.player.name]))\n                           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python313\\site-packages\\chessmaker\\events\\event_publisher.py\", line 79, in __init__\n    original_init(self, *args, **kwargs)\n    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: Pawn.__init__() missing 1 required positional argument: 'direction'\n"
+  },
+  {
+    "match_id": 3,
+    "candidate_id": "baseline-benchmark",
+    "seed": 900002,
+    "agent_color": "white",
+    "outcome": "ERROR",
+    "termination": "Lab exception: TypeError: Pawn.__init__() missing 1 required positional argument: 'direction'",
+    "duration_s": 0.0,
+    "plies": 0,
+    "moves": [],
+    "candidate_config": {
+      "piece_values": {
+        "pawn": 100,
+        "knight": 320,
+        "bishop": 330,
+        "right": 700,
+        "queen": 900,
+        "king": 20000
+      },
+      "pawn_scale": 1.0,
+      "aspiration_delta": 250,
+      "tt_max_size": 200000
+    },
+    "think_time_s": 2.0,
+    "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 157, in _play_task\n    result = _RUNNER.play_one_game(\n        game_id, 2, \"Strong\", f\"variant_{seed}\", colour\n    )\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\run_fresh_18_tournament_diagnostic_v70_overnight.py\", line 97, in play_one_game\n    board, players = make_fresh_board(board_sample_name)\n                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 137, in <lambda>\n    _RUNNER.make_fresh_board = lambda name: _variant_factory(_RUNNER, name)\n                                            ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 95, in _variant_factory\n    squares[y][x] = Square(type(piece)(player_by_name[piece.player.name]))\n                           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python313\\site-packages\\chessmaker\\events\\event_publisher.py\", line 79, in __init__\n    original_init(self, *args, **kwargs)\n    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: Pawn.__init__() missing 1 required positional argument: 'direction'\n"
+  },
+  {
+    "match_id": 4,
+    "candidate_id": "baseline-benchmark",
+    "seed": 900003,
+    "agent_color": "black",
+    "outcome": "ERROR",
+    "termination": "Lab exception: TypeError: Pawn.__init__() missing 1 required positional argument: 'direction'",
+    "duration_s": 0.0,
+    "plies": 0,
+    "moves": [],
+    "candidate_config": {
+      "piece_values": {
+        "pawn": 100,
+        "knight": 320,
+        "bishop": 330,
+        "right": 700,
+        "queen": 900,
+        "king": 20000
+      },
+      "pawn_scale": 1.0,
+      "aspiration_delta": 250,
+      "tt_max_size": 200000
+    },
+    "think_time_s": 2.0,
+    "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 157, in _play_task\n    result = _RUNNER.play_one_game(\n        game_id, 2, \"Strong\", f\"variant_{seed}\", colour\n    )\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\run_fresh_18_tournament_diagnostic_v70_overnight.py\", line 97, in play_one_game\n    board, players = make_fresh_board(board_sample_name)\n                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 137, in <lambda>\n    _RUNNER.make_fresh_board = lambda name: _variant_factory(_RUNNER, name)\n                                            ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 95, in _variant_factory\n    squares[y][x] = Square(type(piece)(player_by_name[piece.player.name]))\n                           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python313\\site-packages\\chessmaker\\events\\event_publisher.py\", line 79, in __init__\n    original_init(self, *args, **kwargs)\n    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: Pawn.__init__() missing 1 required positional argument: 'direction'\n"
+  },
+  {
+    "match_id": 5,
+    "candidate_id": "baseline-benchmark",
+    "seed": 900004,
+    "agent_color": "white",
+    "outcome": "ERROR",
+    "termination": "Lab exception: TypeError: Pawn.__init__() missing 1 required positional argument: 'direction'",
+    "duration_s": 0.0,
+    "plies": 0,
+    "moves": [],
+    "candidate_config": {
+      "piece_values": {
+        "pawn": 100,
+        "knight": 320,
+        "bishop": 330,
+        "right": 700,
+        "queen": 900,
+        "king": 20000
+      },
+      "pawn_scale": 1.0,
+      "aspiration_delta": 250,
+      "tt_max_size": 200000
+    },
+    "think_time_s": 2.0,
+    "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 157, in _play_task\n    result = _RUNNER.play_one_game(\n        game_id, 2, \"Strong\", f\"variant_{seed}\", colour\n    )\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\run_fresh_18_tournament_diagnostic_v70_overnight.py\", line 97, in play_one_game\n    board, players = make_fresh_board(board_sample_name)\n                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 137, in <lambda>\n    _RUNNER.make_fresh_board = lambda name: _variant_factory(_RUNNER, name)\n                                            ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 95, in _variant_factory\n    squares[y][x] = Square(type(piece)(player_by_name[piece.player.name]))\n                           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python313\\site-packages\\chessmaker\\events\\event_publisher.py\", line 79, in __init__\n    original_init(self, *args, **kwargs)\n    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: Pawn.__init__() missing 1 required positional argument: 'direction'\n"
+  },
+  {
+    "match_id": 6,
+    "candidate_id": "baseline-benchmark",
+    "seed": 900005,
+    "agent_color": "black",
+    "outcome": "ERROR",
+    "termination": "Lab exception: TypeError: Pawn.__init__() missing 1 required positional argument: 'direction'",
+    "duration_s": 0.0,
+    "plies": 0,
+    "moves": [],
+    "candidate_config": {
+      "piece_values": {
+        "pawn": 100,
+        "knight": 320,
+        "bishop": 330,
+        "right": 700,
+        "queen": 900,
+        "king": 20000
+      },
+      "pawn_scale": 1.0,
+      "aspiration_delta": 250,
+      "tt_max_size": 200000
+    },
+    "think_time_s": 2.0,
+    "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 157, in _play_task\n    result = _RUNNER.play_one_game(\n        game_id, 2, \"Strong\", f\"variant_{seed}\", colour\n    )\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\run_fresh_18_tournament_diagnostic_v70_overnight.py\", line 97, in play_one_game\n    board, players = make_fresh_board(board_sample_name)\n                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 137, in <lambda>\n    _RUNNER.make_fresh_board = lambda name: _variant_factory(_RUNNER, name)\n                                            ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 95, in _variant_factory\n    squares[y][x] = Square(type(piece)(player_by_name[piece.player.name]))\n                           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python313\\site-packages\\chessmaker\\events\\event_publisher.py\", line 79, in __init__\n    original_init(self, *args, **kwargs)\n    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: Pawn.__init__() missing 1 required positional argument: 'direction'\n"
+  },
+  {
+    "match_id": 7,
+    "candidate_id": "baseline-benchmark",
+    "seed": 900006,
+    "agent_color": "white",
+    "outcome": "ERROR",
+    "termination": "Lab exception: TypeError: Pawn.__init__() missing 1 required positional argument: 'direction'",
+    "duration_s": 0.0,
+    "plies": 0,
+    "moves": [],
+    "candidate_config": {
+      "piece_values": {
+        "pawn": 100,
+        "knight": 320,
+        "bishop": 330,
+        "right": 700,
+        "queen": 900,
+        "king": 20000
+      },
+      "pawn_scale": 1.0,
+      "aspiration_delta": 250,
+      "tt_max_size": 200000
+    },
+    "think_time_s": 2.0,
+    "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 157, in _play_task\n    result = _RUNNER.play_one_game(\n        game_id, 2, \"Strong\", f\"variant_{seed}\", colour\n    )\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\run_fresh_18_tournament_diagnostic_v70_overnight.py\", line 97, in play_one_game\n    board, players = make_fresh_board(board_sample_name)\n                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 137, in <lambda>\n    _RUNNER.make_fresh_board = lambda name: _variant_factory(_RUNNER, name)\n                                            ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 95, in _variant_factory\n    squares[y][x] = Square(type(piece)(player_by_name[piece.player.name]))\n                           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python313\\site-packages\\chessmaker\\events\\event_publisher.py\", line 79, in __init__\n    original_init(self, *args, **kwargs)\n    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: Pawn.__init__() missing 1 required positional argument: 'direction'\n"
+  },
+  {
+    "match_id": 8,
+    "candidate_id": "baseline-benchmark",
+    "seed": 900007,
+    "agent_color": "black",
+    "outcome": "ERROR",
+    "termination": "Lab exception: TypeError: Pawn.__init__() missing 1 required positional argument: 'direction'",
+    "duration_s": 0.0,
+    "plies": 0,
+    "moves": [],
+    "candidate_config": {
+      "piece_values": {
+        "pawn": 100,
+        "knight": 320,
+        "bishop": 330,
+        "right": 700,
+        "queen": 900,
+        "king": 20000
+      },
+      "pawn_scale": 1.0,
+      "aspiration_delta": 250,
+      "tt_max_size": 200000
+    },
+    "think_time_s": 2.0,
+    "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 157, in _play_task\n    result = _RUNNER.play_one_game(\n        game_id, 2, \"Strong\", f\"variant_{seed}\", colour\n    )\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\run_fresh_18_tournament_diagnostic_v70_overnight.py\", line 97, in play_one_game\n    board, players = make_fresh_board(board_sample_name)\n                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 137, in <lambda>\n    _RUNNER.make_fresh_board = lambda name: _variant_factory(_RUNNER, name)\n                                            ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 95, in _variant_factory\n    squares[y][x] = Square(type(piece)(player_by_name[piece.player.name]))\n                           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python313\\site-packages\\chessmaker\\events\\event_publisher.py\", line 79, in __init__\n    original_init(self, *args, **kwargs)\n    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: Pawn.__init__() missing 1 required positional argument: 'direction'\n"
+  },
+  {
+    "match_id": 9,
+    "candidate_id": "baseline-benchmark",
+    "seed": 900008,
+    "agent_color": "white",
+    "outcome": "ERROR",
+    "termination": "Lab exception: TypeError: Pawn.__init__() missing 1 required positional argument: 'direction'",
+    "duration_s": 0.0,
+    "plies": 0,
+    "moves": [],
+    "candidate_config": {
+      "piece_values": {
+        "pawn": 100,
+        "knight": 320,
+        "bishop": 330,
+        "right": 700,
+        "queen": 900,
+        "king": 20000
+      },
+      "pawn_scale": 1.0,
+      "aspiration_delta": 250,
+      "tt_max_size": 200000
+    },
+    "think_time_s": 2.0,
+    "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 157, in _play_task\n    result = _RUNNER.play_one_game(\n        game_id, 2, \"Strong\", f\"variant_{seed}\", colour\n    )\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\run_fresh_18_tournament_diagnostic_v70_overnight.py\", line 97, in play_one_game\n    board, players = make_fresh_board(board_sample_name)\n                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 137, in <lambda>\n    _RUNNER.make_fresh_board = lambda name: _variant_factory(_RUNNER, name)\n                                            ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 95, in _variant_factory\n    squares[y][x] = Square(type(piece)(player_by_name[piece.player.name]))\n                           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python313\\site-packages\\chessmaker\\events\\event_publisher.py\", line 79, in __init__\n    original_init(self, *args, **kwargs)\n    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: Pawn.__init__() missing 1 required positional argument: 'direction'\n"
+  },
+  {
+    "match_id": 10,
+    "candidate_id": "baseline-benchmark",
+    "seed": 900009,
+    "agent_color": "black",
+    "outcome": "ERROR",
+    "termination": "Lab exception: TypeError: Pawn.__init__() missing 1 required positional argument: 'direction'",
+    "duration_s": 0.0,
+    "plies": 0,
+    "moves": [],
+    "candidate_config": {
+      "piece_values": {
+        "pawn": 100,
+        "knight": 320,
+        "bishop": 330,
+        "right": 700,
+        "queen": 900,
+        "king": 20000
+      },
+      "pawn_scale": 1.0,
+      "aspiration_delta": 250,
+      "tt_max_size": 200000
+    },
+    "think_time_s": 2.0,
+    "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 157, in _play_task\n    result = _RUNNER.play_one_game(\n        game_id, 2, \"Strong\", f\"variant_{seed}\", colour\n    )\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\run_fresh_18_tournament_diagnostic_v70_overnight.py\", line 97, in play_one_game\n    board, players = make_fresh_board(board_sample_name)\n                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 137, in <lambda>\n    _RUNNER.make_fresh_board = lambda name: _variant_factory(_RUNNER, name)\n                                            ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\overnight_selfplay_lab_v70.py\", line 95, in _variant_factory\n    squares[y][x] = Square(type(piece)(player_by_name[piece.player.name]))\n                           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\arnav\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python313\\site-packages\\chessmaker\\events\\event_publisher.py\", line 79, in __init__\n    original_init(self, *args, **kwargs)\n    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: Pawn.__init__() missing 1 required positional argument: 'direction'\n"
+  }
+]
