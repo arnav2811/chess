@@ -1,0 +1,11 @@
+game_id,pair_id,seed,board,candidate_color,outcome_for_candidate,termination,plies,wall_time_s,process_cpu_s
+1,1,730069,sample0,white,WIN,Stalemate (no more possible moves) - black loses,37,352.405,350.609
+2,1,730069,sample0,black,LOSS,Checkmate - black loses,17,101.524,100.812
+3,2,730070,sample1,white,WIN,Checkmate - black loses,33,306.714,305.109
+4,2,730070,sample1,black,LOSS,Checkmate - black loses,19,172.323,171.344
+5,3,730071,sample2,white,WIN,Checkmate - black loses,23,125.125,124.609
+6,3,730071,sample2,black,LOSS,Checkmate - black loses,17,101.306,100.703
+7,4,730072,sample3,white,WIN,Stalemate (no more possible moves) - black loses,33,326.468,324.625
+8,4,730072,sample3,black,LOSS,Checkmate - black loses,33,325.231,323.359
+9,5,730073,sample4,white,LOSS,Checkmate - white loses,34,321.082,319.297
+10,5,730073,sample4,black,WIN,Checkmate - white loses,26,249.993,248.359

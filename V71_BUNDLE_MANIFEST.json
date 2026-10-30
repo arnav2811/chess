@@ -1,0 +1,26 @@
+{
+  "agent_v69_frozen_overnight.py": {
+    "bytes": 88193,
+    "sha256": "df5cfb7305e8374ed45b6a862e6934cf0f3168e7c7eca9b1c18e9cfd517e08bd"
+  },
+  "agent_v71_adaptive_tactical_hybrid.py": {
+    "bytes": 106941,
+    "sha256": "488b051b3dce2e49f3b883a16dc12eddaba31510a0596bde7b83247c933865de"
+  },
+  "head_to_head_v69_vs_v71.py": {
+    "bytes": 26018,
+    "sha256": "bff8116f002f750272d118a5df8492a1f61adb53d52cddf92ae1d8e85fd04032"
+  },
+  "test_agent_v71.py": {
+    "bytes": 8040,
+    "sha256": "b7d10336d331256645d9dcdce1336bf1eaeab0ed7769309ae3026c4fc9ea24c6"
+  },
+  "CHANGELOG_v5.5_to_v7.1.md": {
+    "bytes": 28841,
+    "sha256": "3f0cbda762eeeb4a0d90cc40b336c614e9b8bd7bf063e9ce2ed1d609da052815"
+  },
+  "V71_EXPERIMENTAL_REPORT.md": {
+    "bytes": 9521,
+    "sha256": "d906043659235d6a51916c27015832c7e5c6ebc728c823158832256c38b3f9d6"
+  }
+}

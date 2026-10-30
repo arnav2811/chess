@@ -1,0 +1,79 @@
+{
+  "games_completed": 20,
+  "wins": 10,
+  "draws": 0,
+  "losses": 10,
+  "errors": 0,
+  "candidate_score_pct": 50.0,
+  "by_color": {
+    "white": {
+      "games": 10,
+      "W": 9,
+      "D": 0,
+      "L": 1
+    },
+    "black": {
+      "games": 10,
+      "W": 1,
+      "D": 0,
+      "L": 9
+    }
+  },
+  "by_board": {
+    "sample0": {
+      "games": 4,
+      "W": 2,
+      "D": 0,
+      "L": 2
+    },
+    "sample1": {
+      "games": 4,
+      "W": 2,
+      "D": 0,
+      "L": 2
+    },
+    "sample2": {
+      "games": 4,
+      "W": 2,
+      "D": 0,
+      "L": 2
+    },
+    "sample3": {
+      "games": 4,
+      "W": 2,
+      "D": 0,
+      "L": 2
+    },
+    "sample4": {
+      "games": 4,
+      "W": 2,
+      "D": 0,
+      "L": 2
+    }
+  },
+  "elapsed_wall_s": 973.48,
+  "games_per_hour": 73.96,
+  "average_game_wall_s": 301.21,
+  "candidate_search": {
+    "v7.1": {
+      "moves": 328,
+      "weighted_avg_depth": 2.817,
+      "max_depth": 6,
+      "total_nodes": 355700,
+      "puct_calls": 0,
+      "puct_simulations": 0,
+      "puct_overrides": 0,
+      "puct_time_s": 0.0
+    },
+    "v6.9": {
+      "moves": 328,
+      "weighted_avg_depth": 2.829,
+      "max_depth": 6,
+      "total_nodes": 348428,
+      "puct_calls": 0,
+      "puct_simulations": 0,
+      "puct_overrides": 0,
+      "puct_time_s": 0.0
+    }
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "games_completed": 10,
+  "wins": 4,
+  "draws": 0,
+  "losses": 6,
+  "errors": 0,
+  "v7_score_pct": 40.0,
+  "by_color": {
+    "white": {
+      "games": 5,
+      "W": 3,
+      "D": 0,
+      "L": 2
+    },
+    "black": {
+      "games": 5,
+      "W": 1,
+      "D": 0,
+      "L": 4
+    }
+  },
+  "by_board": {
+    "sample0": {
+      "games": 2,
+      "W": 1,
+      "D": 0,
+      "L": 1
+    },
+    "sample1": {
+      "games": 2,
+      "W": 0,
+      "D": 0,
+      "L": 2
+    },
+    "sample2": {
+      "games": 2,
+      "W": 1,
+      "D": 0,
+      "L": 1
+    },
+    "sample3": {
+      "games": 2,
+      "W": 1,
+      "D": 0,
+      "L": 1
+    },
+    "sample4": {
+      "games": 2,
+      "W": 1,
+      "D": 0,
+      "L": 1
+    }
+  },
+  "elapsed_wall_s": 364.1,
+  "games_per_hour": 98.88,
+  "average_game_wall_s": 231.49,
+  "candidate_search": {
+    "v7.0": {
+      "moves": 136,
+      "weighted_avg_depth": 3.177,
+      "max_depth": 7,
+      "total_nodes": 188622
+    },
+    "v6.9": {
+      "moves": 137,
+      "weighted_avg_depth": 3.241,
+      "max_depth": 7,
+      "total_nodes": 181899
+    }
+  }
+}

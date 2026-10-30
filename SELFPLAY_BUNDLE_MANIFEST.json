@@ -1,0 +1,77 @@
+{
+  "title": "Chess Fragments 2-PC self-play control bundle",
+  "experiment": "100 v6.9-v6.9 self-play games + 100 v7.1-v7.1 self-play games (PUCT off)",
+  "engine_source_hashes": {
+    "agent_v69_frozen_overnight.py": "df5cfb7305e8374ed45b6a862e6934cf0f3168e7c7eca9b1c18e9cfd517e08bd",
+    "agent_v71_adaptive_tactical_hybrid.py": "488b051b3dce2e49f3b883a16dc12eddaba31510a0596bde7b83247c933865de"
+  },
+  "expected_jobs": {
+    "pc1": {
+      "games_per_engine": 50,
+      "seed": 730069
+    },
+    "pc2": {
+      "games_per_engine": 50,
+      "seed": 730169
+    },
+    "workers_default": 8,
+    "thinking_time_s": 14.0,
+    "game_clock_s": 300.0
+  },
+  "runtime_dependency": "chessmaker must already be installed/importable in the coursework Python environment.",
+  "created_in_environment": "3.13.5",
+  "files": {
+    "README_2PC_SELFPLAY.md": {
+      "bytes": 6382,
+      "sha256": "8d9baa845dabff760330ea97809948e54ac1d12fd0606d052ae7b2a748462b07"
+    },
+    "agent_v69_frozen_overnight.py": {
+      "bytes": 88193,
+      "sha256": "df5cfb7305e8374ed45b6a862e6934cf0f3168e7c7eca9b1c18e9cfd517e08bd"
+    },
+    "agent_v71_adaptive_tactical_hybrid.py": {
+      "bytes": 106941,
+      "sha256": "488b051b3dce2e49f3b883a16dc12eddaba31510a0596bde7b83247c933865de"
+    },
+    "extension/__init__.py": {
+      "bytes": 52,
+      "sha256": "2bb210215f52b4deacc2ba4e45d556378e05033ac56276c8e381d5c7d8843af1"
+    },
+    "extension/board_rules.py": {
+      "bytes": 2668,
+      "sha256": "f405aa6937d7ef5118241ce8450f7cf587adfe36906f220815f26731c3a1bead"
+    },
+    "extension/board_utils.py": {
+      "bytes": 3989,
+      "sha256": "1cbb5c4f0f2faf6fadcd3ee94020185abc3e793cc73bde9ffe070582ae413ce8"
+    },
+    "extension/piece_pawn.py": {
+      "bytes": 276,
+      "sha256": "cf51f355767515d40a9f81d3e887a3b8a17e9dfb6f277eaa0f46a14e01715d42"
+    },
+    "extension/piece_right.py": {
+      "bytes": 966,
+      "sha256": "b688058ffc24bbd19837eca1ca222639f660f5b3be9383933db0b18e26451298"
+    },
+    "merge_selfplay_results.py": {
+      "bytes": 7690,
+      "sha256": "e8d7db59695a87837b96adccf9bf9b543438fc1e6592261e32f488c15b15eb10"
+    },
+    "run_selfplay_pc1.ps1": {
+      "bytes": 1044,
+      "sha256": "e3fb971be0ad863d426257520c58b78932f0a159b8cadc3f63009ce4c680dbb6"
+    },
+    "run_selfplay_pc2.ps1": {
+      "bytes": 1044,
+      "sha256": "042c35ec2f12a96577ce2db9f9b361a2db75161ae8fd94f8660a369a08379141"
+    },
+    "selfplay_control_runner.py": {
+      "bytes": 35673,
+      "sha256": "8bca6cff154b71afe8d2f95886031a9868bc4daa8c67023a3daf01dc263f4e1d"
+    },
+    "test_selfplay_control_runner.py": {
+      "bytes": 2898,
+      "sha256": "ad9ce3b0e873eefb16ed24591c40140d50926a5d2cf7e53c442552279a0a5c5e"
+    }
+  }
+}
