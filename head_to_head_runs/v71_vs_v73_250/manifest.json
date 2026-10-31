@@ -1,0 +1,30 @@
+{
+  "title": "Paired head-to-head: frozen v7.1 vs v7.3 (PUCT OFF)",
+  "created_local": "2026-10-31T17:26:19",
+  "computer_seed": 730371,
+  "games_requested": 250,
+  "workers": 4,
+  "thinking_time_s_per_move": 14.0,
+  "game_clock_s_per_player": 300.0,
+  "boards": [
+    "sample0",
+    "sample1",
+    "sample2",
+    "sample3",
+    "sample4"
+  ],
+  "pairing": "same board and engine-specific RNG seeds; v7.3 plays White and Black once per pair",
+  "v73_root_puct": false,
+  "engine_files": {
+    "agent_v71_adaptive_tactical_hybrid.py": {
+      "path": "C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\agent_v71_adaptive_tactical_hybrid.py",
+      "sha256": "488b051b3dce2e49f3b883a16dc12eddaba31510a0596bde7b83247c933865de"
+    },
+    "agent_v73_emperor.py": {
+      "path": "C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\agent_v73_emperor.py",
+      "sha256": "e2d98f8f6d09cf127d8318cb7944d102cc9fc678dbd9a7d62e11b0d731963c7b"
+    }
+  },
+  "python": "3.13.14 (tags/v3.13.14:fd17997, Jun 10 2026, 13:03:48) [MSC v.1944 64 bit (AMD64)]",
+  "output_directory": "C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\head_to_head_runs\\v71_vs_v73_250"
+}

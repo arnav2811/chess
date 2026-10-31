@@ -1,50 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-board-theme="tournament-green">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chess Fragments — AI Arena</title>
-  <meta name="description" content="5×5 Chess Fragments AI Arena — play against or watch your AI agents battle in real time." />
+  <title>Chess Fragments — Grandmaster AI Arena</title>
+  <meta name="description" content="5×5 Chess Fragments AI Arena — Play against or watch elite AI engines battle with Chess.com aesthetics, real-time evaluation, clocks, and move scrubbing." />
+  
+  <!-- Modern Google Fonts: Plus Jakarta Sans, Outfit, and JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  
   <script src="socket.io.min.js"></script>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=7.1" />
 </head>
 <body>
-  <!-- Ambient background lighting with classy subtle blue-green hues -->
+  <!-- Ambient background lighting with deep English forest and racing emerald hues -->
   <div class="bg-grid"></div>
   <div class="bg-glow left-glow"></div>
   <div class="bg-glow center-glow"></div>
   <div class="bg-glow right-glow"></div>
 
-  <!-- ── Top Header ────────────────────────────────────────── -->
+  <!-- ── Top Header (Chess.com Elite English Bar) ───────────── -->
   <header class="top-bar">
     <div class="logo">
-      <div class="logo-badge">
-        <span class="logo-icon">♟</span>
+      <div class="logo-badge" title="Chess Fragments Grandmaster Arena">
+        <span class="logo-icon">♔</span>
       </div>
       <div class="logo-text-group">
-        <span class="logo-text">Chess Fragments</span>
-        <span class="logo-sub">AI Arena &bull; 5&times;5 Grandmaster Engine</span>
+        <div class="logo-title-row">
+          <span class="logo-text">Chess Fragments</span>
+          <span class="logo-badge-pill">5×5 ARENA</span>
+        </div>
+        <span class="logo-sub">English Grandmaster Engine &bull; Royal Chess Edition</span>
       </div>
     </div>
 
+    <!-- Center active engine telemetry pill -->
     <div class="header-center-info">
-      <div class="active-agent-pill" id="header-agent-pill" title="Currently active AI agent file">
+      <div class="active-agent-pill" id="header-agent-pill" title="Currently active AI engine module">
         <span class="pill-dot"></span>
-        <span class="pill-label">Engine:</span>
+        <span class="pill-label">ENGINE:</span>
         <span class="pill-name" id="header-agent-name">agent.py</span>
       </div>
     </div>
 
+    <!-- Header Actions & Controls -->
     <div class="header-actions">
-      <button class="icon-btn" id="btn-sound-toggle" title="Toggle Move Sounds">
+      <!-- Board Theme Selector -->
+      <div class="header-control-group" title="Select Board Color Theme">
+        <span class="control-label">🎨</span>
+        <select id="board-theme-select" class="header-select">
+          <option value="tournament-green" selected>Chess.com Green & Buff</option>
+          <option value="royal-emerald">Royal English Emerald</option>
+          <option value="classic-bw">Classic Slate & Bone White</option>
+          <option value="oxford-midnight">Oxford Midnight & Frost</option>
+        </select>
+      </div>
+
+      <!-- Piece Rendering Style -->
+      <div class="header-control-group" title="Piece Vector Style">
+        <span class="control-label">♟</span>
+        <select id="piece-set-select" class="header-select">
+          <option value="staunton-svg" selected>Tournament Vector (SVG)</option>
+          <option value="unicode">Classic Unicode Glyphs</option>
+        </select>
+      </div>
+
+      <!-- Sound Toggle -->
+      <button class="icon-btn" id="btn-sound-toggle" title="Toggle Move Audio (Authentic Wood Piece Taps)">
         <span id="sound-icon">🔊</span>
       </button>
-      <button class="btn btn-sm btn-outline" id="btn-open-guide" title="How to run tournaments and host">
-        📖 Runner & Hosting Guide
+
+      <!-- Runner Guide Modal -->
+      <button class="btn btn-sm btn-outline" id="btn-open-guide" title="Tournament runner instructions & batch hosting">
+        📖 Runner Guide
       </button>
-      <button class="btn btn-sm btn-stop-server" id="btn-stop-hosting" title="Stop UI server process">
+
+      <!-- Stop Hosting Server Process -->
+      <button class="btn btn-sm btn-stop-server" id="btn-stop-hosting" title="Terminate background UI server process">
         🛑 Stop Hosting
       </button>
+
+      <!-- Server Connection Status -->
       <div class="conn-status" id="conn-status">
         <span class="dot disconnected" id="conn-dot"></span>
         <span id="conn-label">Connecting…</span>
@@ -55,15 +93,16 @@
   <!-- ── Main 3-Column Arena Layout ────────────────────────── -->
   <main class="layout">
 
-    <!-- LEFT PANEL: Match Setup & Agent Hub -->
+    <!-- LEFT PANEL: Match Setup & Engine Hub -->
     <aside class="panel panel-left glass">
       <div class="panel-header">
         <h2 class="panel-title"><span class="icon">⚙</span>Match Setup</h2>
+        <span class="panel-tag">CHESS.COM STYLE</span>
       </div>
 
-      <!-- Agent Selection -->
+      <!-- AI Agent Selection -->
       <div class="form-group">
-        <label for="agent-select">AI Agent File</label>
+        <label for="agent-select">Active AI Engine File</label>
         <div class="agent-select-row">
           <select id="agent-select" class="select-input"></select>
           <button class="btn btn-sm btn-accent" id="btn-load-agent" title="Load selected agent into memory">Load</button>
@@ -87,7 +126,7 @@
 
       <!-- Board Variant Selection (Samples 0 through 4) -->
       <div class="form-group">
-        <label for="board-select">Board Variant</label>
+        <label for="board-select">Board Variant (Setup)</label>
         <select id="board-select" class="select-input">
           <option value="sample0">Sample 0 — Standard (R N K B Q)</option>
           <option value="sample1">Sample 1 — Mirrored Setup</option>
@@ -111,10 +150,10 @@
       <div class="form-group">
         <label for="tc-select">Chess Clock Time Control</label>
         <select id="tc-select" class="select-input">
-          <option value="300" selected>5 min (Tournament Budget — 300s)</option>
+          <option value="300" selected>5 min (Tournament Rapid — 300s)</option>
           <option value="180">3 min (Blitz — 180s)</option>
           <option value="60">1 min (Bullet — 60s)</option>
-          <option value="600">10 min (Rapid — 600s)</option>
+          <option value="600">10 min (Classical — 600s)</option>
           <option value="0">Unlimited (No Time Limit)</option>
         </select>
       </div>
@@ -124,10 +163,10 @@
         <label>Game Mode (Auto-Flips Board)</label>
         <div class="side-picker" id="side-picker">
           <button class="side-btn active" data-side="white" title="Play as White (Auto-flips White to bottom)">
-            <span class="side-symbol">♙</span> White
+            <span class="side-symbol">♔</span> White
           </button>
           <button class="side-btn" data-side="black" title="Play as Black (Auto-flips Black to bottom)">
-            <span class="side-symbol">♟</span> Black
+            <span class="side-symbol">♚</span> Black
           </button>
           <button class="side-btn" data-side="watch" title="Watch AI vs AI in real time">
             <span class="side-symbol">👁</span> Watch
@@ -137,7 +176,7 @@
 
       <!-- Opponent Selection -->
       <div class="form-group" id="opp-group">
-        <label for="opp-select">Opponent</label>
+        <label for="opp-select">Opponent Engine</label>
         <select id="opp-select" class="select-input">
           <option value="baseline">Baseline Opponent (opponent.py)</option>
           <option value="strong">Strong Opponent (strong_opponent.py)</option>
@@ -172,13 +211,13 @@
       <!-- Live Engine Telemetry Card -->
       <div class="stats-box" id="stats-box">
         <div class="stats-header">
-          <span class="stats-title">Engine Telemetry</span>
+          <span class="stats-title">Live Engine Telemetry</span>
           <span class="stats-live-tag">LIVE</span>
         </div>
         <div class="stats-grid">
           <div class="stat-card">
             <span class="stat-label">Last Move Time</span>
-            <span class="stat-val highlight-teal" id="stat-time">—</span>
+            <span class="stat-val highlight-emerald" id="stat-time">—</span>
           </div>
           <div class="stat-card">
             <span class="stat-label">Search Depth</span>
@@ -195,9 +234,9 @@
         </div>
       </div>
 
-      <!-- Piece Guide -->
+      <!-- Piece Legend -->
       <div class="legend-card">
-        <div class="legend-title">Special Piece Guide</div>
+        <div class="legend-title">5×5 Piece Rules</div>
         <div class="legend-content">
           <div class="legend-item"><span class="piece-tag right-tag">R</span><strong>Right:</strong> Rook + Knight hybrid (Chancellor)</div>
           <div class="legend-item"><span class="piece-tag">P</span><strong>Pawn_Q:</strong> Promotes to Queen upon reaching rank 4</div>
@@ -211,9 +250,13 @@
       <!-- Top Player Bar (Black by default, or White if flipped) -->
       <div class="player-bar" id="player-black-bar">
         <div class="player-left">
-          <div class="player-avatar black-avatar" id="top-avatar">♚</div>
+          <div class="player-avatar black-avatar" id="top-avatar">
+            <span class="avatar-piece">♚</span>
+            <span class="avatar-online-dot"></span>
+          </div>
           <div class="player-meta">
             <div class="player-name-row">
+              <span class="player-title-badge" id="black-title-badge">BOT</span>
               <span class="player-name" id="black-name">Black</span>
               <span class="player-badge" id="black-role">Opponent</span>
             </div>
@@ -234,19 +277,18 @@
         </div>
       </div>
 
-      <!-- Board Arena Wrapper -->
+      <!-- Board Arena Wrapper with Evaluation Bar -->
       <div class="board-arena">
-        <!-- Chess.com-style Evaluation Bar with +/- score -->
+        <!-- Chess.com-style Evaluation Bar with floating +/- score -->
         <div class="eval-bar-wrapper" title="Material & Engine Evaluation (+ White / - Black)">
           <div class="eval-bar-fill" id="eval-bar-fill" style="height: 50%;"></div>
           <div class="eval-score-badge" id="eval-score-badge">0.0</div>
         </div>
 
         <div class="board-frame">
-          <!-- Coordinates & 5x5 Grid -->
-          <div class="coord-col col-left" id="coords-y-left">
-            <span>4</span><span>3</span><span>2</span><span>1</span><span>0</span>
-          </div>
+          <!-- Hidden fallback coordinate tags for legacy listeners -->
+          <div id="coords-y-left" style="display:none"></div>
+          <div id="coords-y-right" style="display:none"></div>
 
           <div class="board-container" id="board-container">
             <div id="board" class="board"></div>
@@ -273,25 +315,24 @@
               </div>
             </div>
           </div>
-
-          <div class="coord-col col-right" id="coords-y-right">
-            <span>4</span><span>3</span><span>2</span><span>1</span><span>0</span>
-          </div>
         </div>
       </div>
 
-      <div class="coord-row" id="coords-x">
-        <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
-      </div>
+      <!-- Hidden fallback file coordinate container -->
+      <div id="coords-x" style="display:none"></div>
 
       <!-- Bottom Player Bar (White by default, or Black if flipped) -->
       <div class="player-bar" id="player-white-bar">
         <div class="player-left">
-          <div class="player-avatar white-avatar" id="bottom-avatar">♔</div>
+          <div class="player-avatar white-avatar" id="bottom-avatar">
+            <span class="avatar-piece">♔</span>
+            <span class="avatar-online-dot"></span>
+          </div>
           <div class="player-meta">
             <div class="player-name-row">
+              <span class="player-title-badge white-title" id="white-title-badge">YOU</span>
               <span class="player-name" id="white-name">White</span>
-              <span class="player-badge" id="white-role">You</span>
+              <span class="player-badge" id="white-role">Human</span>
             </div>
             <div class="captured-and-advantage-row">
               <div class="captured-tray" id="white-captured" title="Pieces captured by White"></div>
@@ -310,28 +351,8 @@
         </div>
       </div>
 
-      <!-- Chess.com Move Scrubbing Navigation Bar -->
-      <div class="move-nav-bar" id="move-nav-bar">
-        <button class="nav-btn" id="btn-nav-first" title="First Position (Home)">⏮</button>
-        <button class="nav-btn" id="btn-nav-prev" title="Previous Move (←)">◀</button>
-        <div class="nav-info" id="nav-info">
-          <span class="nav-status-dot live-dot" id="nav-status-dot"></span>
-          <span class="nav-ply-text" id="nav-ply-text">Live Game</span>
-        </div>
-        <button class="nav-btn" id="btn-nav-next" title="Next Move (→)">▶</button>
-        <button class="nav-btn" id="btn-nav-last" title="Live Position (End)">⏭</button>
-      </div>
-
-      <!-- Quick Board Action Toolbar -->
-      <div class="board-toolbar">
-        <div class="board-toolbar-buttons">
-          <button class="btn btn-sm btn-tool" id="btn-flip-board" title="Flip Board Perspective (Key: F)">
-            🔁 Flip Board
-          </button>
-          <button class="btn btn-sm btn-tool btn-undo" id="btn-undo-move" title="Undo Last Move (Key: U or Ctrl+Z)">
-            ↶ Undo Move
-          </button>
-        </div>
+      <!-- Sleek Match Status Bar -->
+      <div class="board-status-row">
         <div class="status-indicator-pill">
           <span class="status-bullet"></span>
           <span id="status-text">Select game parameters and click Start Match</span>
@@ -340,20 +361,54 @@
       </div>
     </section>
 
-    <!-- RIGHT PANEL: Move Ledger & Engine Console -->
+    <!-- RIGHT PANEL: Chess.com Move Ledger & Engine Console -->
     <aside class="panel panel-right glass">
-      <!-- Move History with Clickable Rows -->
-      <div class="panel-section">
+      <!-- Paired Turn Move Ledger (Chess.com Table Format) -->
+      <div class="panel-section ledger-section">
         <div class="panel-header">
           <h2 class="panel-title"><span class="icon">📋</span>Move Ledger</h2>
           <span class="move-count-badge" id="move-count-badge">0 moves</span>
         </div>
+        
+        <!-- Table Column Header -->
+        <div class="ledger-table-header">
+          <span class="th-num">#</span>
+          <span class="th-move">White</span>
+          <span class="th-move">Black</span>
+        </div>
+
+        <!-- Scrollable Move Container -->
         <div class="move-history-container" id="move-history">
           <div class="history-empty">No moves recorded yet</div>
         </div>
+
+        <!-- Chess.com Move Scrubbing Navigation Bar -->
+        <div class="move-nav-bar" id="move-nav-bar">
+          <button class="nav-btn" id="btn-nav-first" title="First Position (Home)">⏮</button>
+          <button class="nav-btn" id="btn-nav-prev" title="Previous Move (←)">◀</button>
+          <div class="nav-info" id="nav-info">
+            <span class="nav-status-dot live-dot" id="nav-status-dot"></span>
+            <span class="nav-ply-text" id="nav-ply-text">Live Game</span>
+          </div>
+          <button class="nav-btn" id="btn-nav-next" title="Next Move (→)">▶</button>
+          <button class="nav-btn" id="btn-nav-last" title="Live Position (End)">⏭</button>
+        </div>
+
+        <!-- In-Game Action Buttons Row -->
+        <div class="ledger-actions-row">
+          <button class="btn btn-sm btn-tool btn-undo" id="btn-undo-move" title="Undo Last Move (Key: U or Ctrl+Z)">
+            ↶ Undo
+          </button>
+          <button class="btn btn-sm btn-tool" id="btn-flip-board" title="Flip Board Perspective (Key: F)">
+            🔁 Flip Board
+          </button>
+          <button class="btn btn-sm btn-danger" id="btn-resign" style="display:none" title="Resign Match">
+            ⚑ Resign
+          </button>
+        </div>
       </div>
 
-      <!-- Live Engine Log -->
+      <!-- Live Engine Telemetry & Server Log -->
       <div class="panel-section flex-grow">
         <div class="panel-header">
           <h2 class="panel-title"><span class="icon">📡</span>Engine Telemetry Log</h2>
@@ -362,7 +417,7 @@
         <div class="log-panel" id="log-panel">
           <div class="log-entry info">
             <span class="log-ts">[Ready]</span>
-            <span class="log-msg">Chess Fragments Arena online. Select an agent to begin.</span>
+            <span class="log-msg">Chess Fragments Grandmaster Arena online. Select an agent to begin.</span>
           </div>
         </div>
       </div>
@@ -439,6 +494,6 @@
   <!-- Toast notification banner -->
   <div id="toast" class="toast"></div>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=7.1"></script>
 </body>
 </html>

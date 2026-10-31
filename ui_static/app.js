@@ -1,22 +1,171 @@
 /* ══════════════════════════════════════════════════════════════════
    Chess Fragments AI Arena — app.js
-   Real-time 5x5 board UI, Move Review / Scrubbing, Rock-Solid Clocks,
-   Auto-Flip Board, Stylized Right Piece, Audio Synthesizer
+   Royal English Emerald & Bone White Theme Inspired by Chess.com
    ══════════════════════════════════════════════════════════════════ */
 
 "use strict";
 
-// ── Piece Unicode Symbols ─────────────────────────────────────────
+// ── High-Definition Vector Chess Piece Library (Staunton / Neo) ───
+// Self-contained, resolution-independent vector pieces inspired by Chess.com
+const SVG_PIECES = {
+  white: {
+    pawn: `<svg viewBox="0 0 45 45" class="piece-svg">
+      <path d="M 22.5 9 C 20.3 9 18.5 10.8 18.5 13 C 18.5 13.9 18.8 14.7 19.3 15.4 C 17.3 16.5 16 18.6 16 21 C 16 23 16.9 24.8 18.4 26 C 15.4 27.1 11 31.6 11 39.5 L 34 39.5 C 34 31.6 29.6 27.1 26.6 26 C 28.1 24.8 29 23 29 21 C 29 18.6 27.7 16.5 25.7 15.4 C 26.2 14.7 26.5 13.9 26.5 13 C 26.5 10.8 24.7 9 22.5 9 Z" fill="#ffffff" stroke="#16241a" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="M 12 39.5 L 33 39.5" stroke="#16241a" stroke-width="1.6"/>
+    </svg>`,
+    knight: `<svg viewBox="0 0 45 45" class="piece-svg">
+      <path d="M 22 10 C 32.5 11 38.5 18 38 39 L 14 39 C 14 30.5 23.5 32 22 17 C 22 17 20 16 18 19 C 16.5 21 14.5 21.5 12.5 20 C 11 18.5 12 16 13.5 14.5 C 15 13 17.5 11.5 19.5 11 C 20 8.5 21 6.5 22 10 Z" fill="#ffffff" stroke="#16241a" stroke-width="1.6" stroke-linejoin="round"/>
+      <circle cx="16" cy="17" r="1.5" fill="#16241a"/>
+      <path d="M 12 39 L 37 39" stroke="#16241a" stroke-width="1.6"/>
+      <path d="M 24 16 C 26 21 28 26 33 29" fill="none" stroke="#16241a" stroke-width="1.3" stroke-linecap="round"/>
+    </svg>`,
+    bishop: `<svg viewBox="0 0 45 45" class="piece-svg">
+      <g fill="#ffffff" stroke="#16241a" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M 9 39 L 36 39 C 36 34.5 31.5 32 30 29 C 33 25.5 34.5 20 31.5 14 C 28.5 8 22.5 8 22.5 8 C 22.5 8 16.5 8 13.5 14 C 10.5 20 12 25.5 15 29 C 13.5 32 9 34.5 9 39 Z"/>
+        <circle cx="22.5" cy="6" r="2.2" fill="#ffffff"/>
+        <path d="M 17.5 26 L 27.5 26"/>
+        <path d="M 22.5 13 L 22.5 21" stroke-width="1.4"/>
+        <path d="M 19 16 L 26 16" stroke-width="1.4"/>
+      </g>
+    </svg>`,
+    rook: `<svg viewBox="0 0 45 45" class="piece-svg">
+      <g fill="#ffffff" stroke="#16241a" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M 9 39 L 36 39 L 36 35.5 L 33 33.5 L 33 22 L 35 19 L 35 11 L 30.5 11 L 30.5 15 L 26.5 15 L 26.5 11 L 22.5 11 L 18.5 11 L 18.5 15 L 14.5 15 L 14.5 11 L 10 11 L 10 19 L 12 22 L 12 33.5 L 9 35.5 Z"/>
+        <path d="M 12 35.5 L 33 35.5"/>
+        <path d="M 13 22 L 32 22"/>
+      </g>
+    </svg>`,
+    queen: `<svg viewBox="0 0 45 45" class="piece-svg">
+      <g fill="#ffffff" stroke="#16241a" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M 9 39 L 36 39 L 37 34 L 33 24 L 38 15 L 29.5 23 L 22.5 12 L 15.5 23 L 7 15 L 12 24 L 8 34 Z"/>
+        <circle cx="7" cy="13.5" r="2"/>
+        <circle cx="15.5" cy="11.5" r="2"/>
+        <circle cx="22.5" cy="9.5" r="2"/>
+        <circle cx="29.5" cy="11.5" r="2"/>
+        <circle cx="38" cy="13.5" r="2"/>
+        <path d="M 11 34 L 34 34"/>
+      </g>
+    </svg>`,
+    king: `<svg viewBox="0 0 45 45" class="piece-svg">
+      <g fill="#ffffff" stroke="#16241a" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M 22.5 11.5 L 22.5 5 M 19 8 L 26 8" stroke-width="2"/>
+        <path d="M 9 39 L 36 39 L 36 34 C 36 31 32 28 32 25 C 36 21 35 14 31 13 C 27 12 23 16 22.5 16 C 22 16 18 12 14 13 C 10 14 9 21 13 25 C 13 28 9 31 9 34 Z"/>
+        <circle cx="22.5" cy="19.5" r="2.5" fill="#16241a"/>
+        <path d="M 12 35 L 33 35"/>
+      </g>
+    </svg>`,
+    right: {
+      fairy: `<svg viewBox="0 0 45 45" class="piece-svg piece-right-svg">
+        <g fill="#ffffff" stroke="#16241a" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
+          <!-- Castle Tower Body -->
+          <path d="M 9 39 L 36 39 L 36 35.5 L 33 33.5 L 33 21 L 35 18 L 35 11 L 30.5 11 L 30.5 14.5 L 26.5 14.5 L 26.5 11 L 22.5 11 L 18.5 11 L 18.5 14.5 L 14.5 14.5 L 14.5 11 L 10 11 L 10 18 L 12 21 L 12 33.5 L 9 35.5 Z"/>
+          <path d="M 12 35.5 L 33 35.5"/>
+          <path d="M 13 21 L 32 21"/>
+        </g>
+        <!-- Stylized Double-Struck ℝ Insignia -->
+        <text x="22.5" y="30.5" font-family="'Cambria Math', 'Times New Roman', serif" font-size="12" font-weight="900" fill="#16241a" text-anchor="middle">ℝ</text>
+      </svg>`,
+      hybrid: `<svg viewBox="0 0 45 45" class="piece-svg piece-right-svg">
+        <g fill="#ffffff" stroke="#16241a" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
+          <path d="M 9 39 L 36 39 L 36 35.5 L 33 33.5 L 33 21 L 35 18 L 35 11 L 30.5 11 L 30.5 14.5 L 26.5 14.5 L 26.5 11 L 22.5 11 L 18.5 11 L 18.5 14.5 L 14.5 14.5 L 14.5 11 L 10 11 L 10 18 L 12 21 L 12 33.5 L 9 35.5 Z"/>
+          <path d="M 12 35.5 L 33 35.5"/>
+          <!-- Knight Crest Head -->
+          <path d="M 18 29 C 19 23 23 21 27 23 C 25 25 24 28 22 29 Z" fill="#2d6a4f" stroke="#16241a" stroke-width="1.2"/>
+        </g>
+      </svg>`,
+      standard: `<svg viewBox="0 0 45 45" class="piece-svg piece-right-svg">
+        <g fill="#ffffff" stroke="#16241a" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
+          <path d="M 9 39 L 36 39 L 36 35.5 L 33 33.5 L 33 21 L 35 18 L 35 11 L 30.5 11 L 30.5 15 L 26.5 15 L 26.5 11 L 22.5 11 L 18.5 11 L 18.5 15 L 14.5 15 L 14.5 11 L 10 11 L 10 18 L 12 21 L 12 33.5 L 9 35.5 Z"/>
+          <path d="M 12 35.5 L 33 35.5"/>
+          <path d="M 13 21 L 32 21"/>
+        </g>
+      </svg>`
+    }
+  },
+  black: {
+    pawn: `<svg viewBox="0 0 45 45" class="piece-svg">
+      <path d="M 22.5 9 C 20.3 9 18.5 10.8 18.5 13 C 18.5 13.9 18.8 14.7 19.3 15.4 C 17.3 16.5 16 18.6 16 21 C 16 23 16.9 24.8 18.4 26 C 15.4 27.1 11 31.6 11 39.5 L 34 39.5 C 34 31.6 29.6 27.1 26.6 26 C 28.1 24.8 29 23 29 21 C 29 18.6 27.7 16.5 25.7 15.4 C 26.2 14.7 26.5 13.9 26.5 13 C 26.5 10.8 24.7 9 22.5 9 Z" fill="#18251e" stroke="#f0f7f2" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="M 12 39.5 L 33 39.5" stroke="#f0f7f2" stroke-width="1.4"/>
+    </svg>`,
+    knight: `<svg viewBox="0 0 45 45" class="piece-svg">
+      <path d="M 22 10 C 32.5 11 38.5 18 38 39 L 14 39 C 14 30.5 23.5 32 22 17 C 22 17 20 16 18 19 C 16.5 21 14.5 21.5 12.5 20 C 11 18.5 12 16 13.5 14.5 C 15 13 17.5 11.5 19.5 11 C 20 8.5 21 6.5 22 10 Z" fill="#18251e" stroke="#f0f7f2" stroke-width="1.6" stroke-linejoin="round"/>
+      <circle cx="16" cy="17" r="1.5" fill="#f0f7f2"/>
+      <path d="M 12 39 L 37 39" stroke="#f0f7f2" stroke-width="1.4"/>
+      <path d="M 24 16 C 26 21 28 26 33 29" fill="none" stroke="#52b788" stroke-width="1.2" stroke-linecap="round"/>
+    </svg>`,
+    bishop: `<svg viewBox="0 0 45 45" class="piece-svg">
+      <g fill="#18251e" stroke="#f0f7f2" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M 9 39 L 36 39 C 36 34.5 31.5 32 30 29 C 33 25.5 34.5 20 31.5 14 C 28.5 8 22.5 8 22.5 8 C 22.5 8 16.5 8 13.5 14 C 10.5 20 12 25.5 15 29 C 13.5 32 9 34.5 9 39 Z"/>
+        <circle cx="22.5" cy="6" r="2.2" fill="#18251e"/>
+        <path d="M 17.5 26 L 27.5 26"/>
+        <path d="M 22.5 13 L 22.5 21" stroke-width="1.4" stroke="#52b788"/>
+        <path d="M 19 16 L 26 16" stroke-width="1.4" stroke="#52b788"/>
+      </g>
+    </svg>`,
+    rook: `<svg viewBox="0 0 45 45" class="piece-svg">
+      <g fill="#18251e" stroke="#f0f7f2" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M 9 39 L 36 39 L 36 35.5 L 33 33.5 L 33 22 L 35 19 L 35 11 L 30.5 11 L 30.5 15 L 26.5 15 L 26.5 11 L 22.5 11 L 18.5 11 L 18.5 15 L 14.5 15 L 14.5 11 L 10 11 L 10 19 L 12 22 L 12 33.5 L 9 35.5 Z"/>
+        <path d="M 12 35.5 L 33 35.5"/>
+        <path d="M 13 22 L 32 22"/>
+      </g>
+    </svg>`,
+    queen: `<svg viewBox="0 0 45 45" class="piece-svg">
+      <g fill="#18251e" stroke="#f0f7f2" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M 9 39 L 36 39 L 37 34 L 33 24 L 38 15 L 29.5 23 L 22.5 12 L 15.5 23 L 7 15 L 12 24 L 8 34 Z"/>
+        <circle cx="7" cy="13.5" r="2"/>
+        <circle cx="15.5" cy="11.5" r="2"/>
+        <circle cx="22.5" cy="9.5" r="2"/>
+        <circle cx="29.5" cy="11.5" r="2"/>
+        <circle cx="38" cy="13.5" r="2"/>
+        <path d="M 11 34 L 34 34"/>
+      </g>
+    </svg>`,
+    king: `<svg viewBox="0 0 45 45" class="piece-svg">
+      <g fill="#18251e" stroke="#f0f7f2" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M 22.5 11.5 L 22.5 5 M 19 8 L 26 8" stroke-width="2" stroke="#52b788"/>
+        <path d="M 9 39 L 36 39 L 36 34 C 36 31 32 28 32 25 C 36 21 35 14 31 13 C 27 12 23 16 22.5 16 C 22 16 18 12 14 13 C 10 14 9 21 13 25 C 13 28 9 31 9 34 Z"/>
+        <circle cx="22.5" cy="19.5" r="2.5" fill="#52b788"/>
+        <path d="M 12 35 L 33 35"/>
+      </g>
+    </svg>`,
+    right: {
+      fairy: `<svg viewBox="0 0 45 45" class="piece-svg piece-right-svg">
+        <g fill="#18251e" stroke="#f0f7f2" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
+          <path d="M 9 39 L 36 39 L 36 35.5 L 33 33.5 L 33 21 L 35 18 L 35 11 L 30.5 11 L 30.5 14.5 L 26.5 14.5 L 26.5 11 L 22.5 11 L 18.5 11 L 18.5 14.5 L 14.5 14.5 L 14.5 11 L 10 11 L 10 18 L 12 21 L 12 33.5 L 9 35.5 Z"/>
+          <path d="M 12 35.5 L 33 35.5"/>
+          <path d="M 13 21 L 32 21"/>
+        </g>
+        <text x="22.5" y="30.5" font-family="'Cambria Math', 'Times New Roman', serif" font-size="12" font-weight="900" fill="#74c69d" text-anchor="middle">ℝ</text>
+      </svg>`,
+      hybrid: `<svg viewBox="0 0 45 45" class="piece-svg piece-right-svg">
+        <g fill="#18251e" stroke="#f0f7f2" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
+          <path d="M 9 39 L 36 39 L 36 35.5 L 33 33.5 L 33 21 L 35 18 L 35 11 L 30.5 11 L 30.5 14.5 L 26.5 14.5 L 26.5 11 L 22.5 11 L 18.5 11 L 18.5 14.5 L 14.5 14.5 L 14.5 11 L 10 11 L 10 18 L 12 21 L 12 33.5 L 9 35.5 Z"/>
+          <path d="M 12 35.5 L 33 35.5"/>
+          <path d="M 18 29 C 19 23 23 21 27 23 C 25 25 24 28 22 29 Z" fill="#52b788" stroke="#f0f7f2" stroke-width="1.2"/>
+        </g>
+      </svg>`,
+      standard: `<svg viewBox="0 0 45 45" class="piece-svg piece-right-svg">
+        <g fill="#18251e" stroke="#f0f7f2" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
+          <path d="M 9 39 L 36 39 L 36 35.5 L 33 33.5 L 33 21 L 35 18 L 35 11 L 30.5 11 L 30.5 15 L 26.5 15 L 26.5 11 L 22.5 11 L 18.5 11 L 18.5 15 L 14.5 15 L 14.5 11 L 10 11 L 10 18 L 12 21 L 12 33.5 L 9 35.5 Z"/>
+          <path d="M 12 35.5 L 33 35.5"/>
+          <path d="M 13 21 L 32 21"/>
+        </g>
+      </svg>`
+    }
+  }
+};
+
+// ── Piece Unicode Symbols (Classic Fallback) ──────────────────────
 const PIECE_SYMBOLS = {
   king:   { white: "♔", black: "♚" },
   queen:  { white: "♕", black: "♛" },
-  right:  { white: "♜", black: "♜" }, // Standard fallback
+  right:  { white: "♜", black: "♜" },
   bishop: { white: "♗", black: "♝" },
   knight: { white: "♘", black: "♞" },
   pawn:   { white: "♙", black: "♟" },
 };
 
-// ── Web Audio API Synthesizer (Zero External Audio Files) ────────
+// ── Web Audio Synthesizer (Authentic Tournament Wood Board Taps) ──
 class SoundSynthesizer {
   constructor() {
     this.ctx = null;
@@ -37,57 +186,71 @@ class SoundSynthesizer {
     if (!this.enabled) return;
     this.init();
     if (!this.ctx) return;
+    const now = this.ctx.currentTime;
 
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    osc.type = "triangle";
-    osc.frequency.setValueAtTime(260, this.ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + 0.08);
+    // High transient piece-contact click
+    const oscClick = this.ctx.createOscillator();
+    const gainClick = this.ctx.createGain();
+    oscClick.type = "sine";
+    oscClick.frequency.setValueAtTime(820, now);
+    oscClick.frequency.exponentialRampToValueAtTime(110, now + 0.024);
+    gainClick.gain.setValueAtTime(0.35, now);
+    gainClick.gain.exponentialRampToValueAtTime(0.001, now + 0.024);
+    oscClick.connect(gainClick);
+    gainClick.connect(this.ctx.destination);
+    oscClick.start(now);
+    oscClick.stop(now + 0.025);
 
-    gain.gain.setValueAtTime(0.28, this.ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
-
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
-    osc.start();
-    osc.stop(this.ctx.currentTime + 0.09);
+    // Deep resonant acoustic wood thump (Chess.com wood piece impact)
+    const oscWood = this.ctx.createOscillator();
+    const gainWood = this.ctx.createGain();
+    oscWood.type = "triangle";
+    oscWood.frequency.setValueAtTime(205, now);
+    oscWood.frequency.exponentialRampToValueAtTime(80, now + 0.085);
+    gainWood.gain.setValueAtTime(0.42, now);
+    gainWood.gain.exponentialRampToValueAtTime(0.001, now + 0.085);
+    oscWood.connect(gainWood);
+    gainWood.connect(this.ctx.destination);
+    oscWood.start(now);
+    oscWood.stop(now + 0.09);
   }
 
   playCapture() {
     if (!this.enabled) return;
     this.init();
     if (!this.ctx) return;
-
     const now = this.ctx.currentTime;
+
+    // Crisp double-wood strike
     const osc1 = this.ctx.createOscillator();
-    const osc2 = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-
-    osc1.type = "sine";
-    osc2.type = "triangle";
-    osc1.frequency.setValueAtTime(420, now);
-    osc1.frequency.exponentialRampToValueAtTime(140, now + 0.12);
-    osc2.frequency.setValueAtTime(240, now);
-    osc2.frequency.exponentialRampToValueAtTime(90, now + 0.12);
-
-    gain.gain.setValueAtTime(0.35, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-
-    osc1.connect(gain);
-    osc2.connect(gain);
-    gain.connect(this.ctx.destination);
-
+    const gain1 = this.ctx.createGain();
+    osc1.type = "triangle";
+    osc1.frequency.setValueAtTime(440, now);
+    osc1.frequency.exponentialRampToValueAtTime(130, now + 0.075);
+    gain1.gain.setValueAtTime(0.48, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.075);
+    osc1.connect(gain1);
+    gain1.connect(this.ctx.destination);
     osc1.start(now);
-    osc2.start(now);
-    osc1.stop(now + 0.13);
-    osc2.stop(now + 0.13);
+    osc1.stop(now + 0.08);
+
+    const osc2 = this.ctx.createOscillator();
+    const gain2 = this.ctx.createGain();
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(180, now + 0.015);
+    osc2.frequency.exponentialRampToValueAtTime(65, now + 0.11);
+    gain2.gain.setValueAtTime(0.38, now + 0.015);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+    osc2.connect(gain2);
+    gain2.connect(this.ctx.destination);
+    osc2.start(now + 0.015);
+    osc2.stop(now + 0.115);
   }
 
   playVictory() {
     if (!this.enabled) return;
     this.init();
     if (!this.ctx) return;
-
     const notes = [523.25, 659.25, 783.99, 1046.50];
     notes.forEach((freq, idx) => {
       const osc = this.ctx.createOscillator();
@@ -149,11 +312,18 @@ let state = {
 let lastFrom = null;
 let lastTo = null;
 let myChoice = "white"; // selected side ("white", "black", "watch")
-let isFlipped = false;  // board perspective: true = Black at bottom, false = White at bottom
+let isFlipped = false;  // board perspective
 let agentThinking = false;
 let reviewIndex = -1;   // -1 = live, 0 = initial position, 1..N = after move N
 let serverTimeOffset = 0; // ms difference between server timestamp and client clock
-let rightPieceStyle = localStorage.getItem("chess_right_style") || "fairy"; // "fairy" | "hybrid" | "standard"
+
+// User Preferences & Visual Theme State
+let currentBoardTheme = localStorage.getItem("chess_board_theme") || "tournament-green";
+let currentPieceSet   = localStorage.getItem("chess_piece_set") || "staunton-svg";
+let rightPieceStyle   = localStorage.getItem("chess_right_style") || "fairy";
+
+// Initialize Board Theme attribute on document root
+document.documentElement.setAttribute("data-board-theme", currentBoardTheme);
 
 // ── DOM References ────────────────────────────────────────────────
 const boardEl          = document.getElementById("board");
@@ -164,6 +334,8 @@ const logEl            = document.getElementById("log-panel");
 const agentSelect      = document.getElementById("agent-select");
 const headerAgentName  = document.getElementById("header-agent-name");
 const boardSelect      = document.getElementById("board-select");
+const boardThemeSelect = document.getElementById("board-theme-select");
+const pieceSetSelect   = document.getElementById("piece-set-select");
 const rightStyleSelect = document.getElementById("right-style-select");
 const tcSelect         = document.getElementById("tc-select");
 const oppSelect        = document.getElementById("opp-select");
@@ -193,6 +365,8 @@ const whiteBar         = document.getElementById("player-white-bar");
 const blackBar         = document.getElementById("player-black-bar");
 const whiteRole        = document.getElementById("white-role");
 const blackRole        = document.getElementById("black-role");
+const whiteTitleBadge  = document.getElementById("white-title-badge");
+const blackTitleBadge  = document.getElementById("black-title-badge");
 const whiteSpinner     = document.getElementById("white-spinner");
 const blackSpinner     = document.getElementById("black-spinner");
 const whiteCaptured    = document.getElementById("white-captured");
@@ -221,13 +395,13 @@ const reviewBanner     = document.getElementById("review-banner");
 const reviewPlyNum     = document.getElementById("review-ply-num");
 const btnJumpLive      = document.getElementById("btn-jump-live");
 
-// Initialize Right style select
-if (rightStyleSelect) {
-  rightStyleSelect.value = rightPieceStyle;
-}
+// Initialize Select Dropdowns
+if (boardThemeSelect) boardThemeSelect.value = currentBoardTheme;
+if (pieceSetSelect)   pieceSetSelect.value   = currentPieceSet;
+if (rightStyleSelect) rightStyleSelect.value = rightPieceStyle;
 
 // ── Toast Banner Notification ─────────────────────────────────────
-function showToast(msg, duration = 3000) {
+function showToast(msg, duration = 2800) {
   let toast = document.getElementById("toast");
   if (!toast) return;
   toast.textContent = msg;
@@ -279,7 +453,6 @@ socket.on("state_update", (data) => {
     }
   }
 
-  // If user was viewing live, stay at live; if reviewing, keep reviewIndex
   renderAll();
 });
 
@@ -297,9 +470,9 @@ socket.on("agent_list", ({ agents }) => {
 socket.on("agent_loaded", ({ name, ok, error }) => {
   if (ok) {
     headerAgentName.textContent = name;
-    showToast(`✓ Loaded agent: ${name}`);
+    showToast(`✓ Loaded engine: ${name}`);
   } else {
-    showToast(`✗ Failed to load agent: ${error || "error"}`);
+    showToast(`✗ Failed to load engine: ${error || "error"}`);
   }
 });
 
@@ -351,7 +524,16 @@ function escapeHtml(s) {
     .replace(/>/g, "&gt;");
 }
 
-// ── Piece Symbol Resolver (Respects Custom Right Piece Style) ─────
+// ── Piece Visual Resolvers (Vector SVG vs Unicode) ────────────────
+function getPieceSvg(name, color) {
+  const colSet = SVG_PIECES[color] || SVG_PIECES.white;
+  if (name === "right") {
+    const rSet = colSet.right || SVG_PIECES.white.right;
+    return rSet[rightPieceStyle] || rSet.fairy;
+  }
+  return colSet[name] || colSet.pawn;
+}
+
 function getPieceUnicode(name, color) {
   if (name === "right") {
     if (rightPieceStyle === "fairy") return "ℝ";
@@ -361,7 +543,7 @@ function getPieceUnicode(name, color) {
   return PIECE_SYMBOLS[name]?.[color] ?? "?";
 }
 
-// ── Clocks Ticking (Rock-Solid Server-Epoch Synchronized) ─────────
+// ── Clocks Ticking (High-Precision Server Epoch Synchronized) ─────
 function formatClockTime(seconds) {
   if (seconds >= 99999 || state.time_control === 0) return "∞";
   const s = Math.max(0, seconds);
@@ -376,18 +558,13 @@ function formatClockTime(seconds) {
 }
 
 function calculateCurrentClocks() {
-  // If reviewing a past move snapshot, display that move's recorded clock time
   if (reviewIndex > 0 && state.move_history && state.move_history[reviewIndex - 1]) {
     const snap = state.move_history[reviewIndex - 1];
     if (snap.white_time !== undefined && snap.black_time !== undefined) {
-      return {
-        white: snap.white_time,
-        black: snap.black_time,
-      };
+      return { white: snap.white_time, black: snap.black_time };
     }
   }
 
-  // Unlimited time or inactive game
   if (!state.active || state.result || state.time_control === 0) {
     return {
       white: state.white_time_left ?? 300,
@@ -395,7 +572,6 @@ function calculateCurrentClocks() {
     };
   }
 
-  // Exact live calculation from turn_start_time and server offset
   const now = (Date.now() + serverTimeOffset) / 1000;
   const turnStart = state.turn_start_time || now;
   const elapsed = Math.max(0, now - turnStart);
@@ -465,7 +641,6 @@ function getActiveMoveHighlights() {
     const mv = state.move_history[reviewIndex - 1];
     return { from: mv.from, to: mv.to };
   }
-  // Live position: highlight last move in history
   if (state.move_history && state.move_history.length > 0) {
     const last = state.move_history[state.move_history.length - 1];
     return { from: last.from, to: last.to };
@@ -479,9 +654,9 @@ function renderBoard() {
 
   if (!currentGrid) {
     boardEl.innerHTML = `
-      <div style="grid-column: 1/-1; grid-row: 1/-1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.5rem; color:#5b727c; font-size:0.85rem; text-align:center;">
-        <span style="font-size:2rem; color:#2dd4bf; opacity:0.4;">♟</span>
-        Click <strong>▶ Start Match</strong><br/>to begin game
+      <div style="grid-column: 1/-1; grid-row: 1/-1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.6rem; color:#52b788; font-size:0.85rem; text-align:center;">
+        <span style="font-size:2.4rem; color:#52b788; opacity:0.6;">♔</span>
+        Click <strong>▶ Start Match</strong><br/>to begin match
       </div>`;
     whiteSpinner.style.display = "none";
     blackSpinner.style.display = "none";
@@ -492,8 +667,10 @@ function renderBoard() {
   const legalSet = isReviewing ? new Set() : new Set((state.legal_targets || []).map(([x, y]) => `${x},${y}`));
   const highlights = getActiveMoveHighlights();
 
-  // Auto-flip: when isFlipped is true, Black rank 0 is at bottom, White rank 4 is at top
-  const yCoords = isFlipped ? [0, 1, 2, 3, 4] : [4, 3, 2, 1, 0];
+  // Perspective:
+  // When isFlipped is false (White perspective): White (y=4) at bottom, Black (y=0) at top
+  // When isFlipped is true (Black perspective): Black (y=0) at bottom, White (y=4) at top
+  const yCoords = isFlipped ? [4, 3, 2, 1, 0] : [0, 1, 2, 3, 4];
   const xCoords = isFlipped ? [4, 3, 2, 1, 0] : [0, 1, 2, 3, 4];
 
   updateCoordinateLabels(yCoords, xCoords);
@@ -507,6 +684,20 @@ function renderBoard() {
       sq.className = `sq ${isLight ? "light" : "dark"}`;
       sq.dataset.x = x;
       sq.dataset.y = y;
+
+      // Chess.com style embedded corner coordinates
+      if (c === 0) {
+        const rankSpan = document.createElement("span");
+        rankSpan.className = `sq-coord sq-coord-rank ${isLight ? "coord-dark" : "coord-light"}`;
+        rankSpan.textContent = y;
+        sq.appendChild(rankSpan);
+      }
+      if (r === 4) {
+        const fileSpan = document.createElement("span");
+        fileSpan.className = `sq-coord sq-coord-file ${isLight ? "coord-dark" : "coord-light"}`;
+        fileSpan.textContent = x;
+        sq.appendChild(fileSpan);
+      }
 
       const cell = currentGrid[y] ? currentGrid[y][x] : null;
 
@@ -527,15 +718,17 @@ function renderBoard() {
       }
 
       if (cell) {
-        const pieceEl = document.createElement("span");
+        const pieceEl = document.createElement("div");
         pieceEl.className = `piece ${cell.color}-piece`;
-        pieceEl.textContent = getPieceUnicode(cell.piece, cell.color);
 
-        if (cell.piece === "right") {
-          if (rightPieceStyle === "fairy") {
-            pieceEl.classList.add("piece-right-fairy");
-          } else if (rightPieceStyle === "standard") {
-            pieceEl.classList.add("piece-right-badge");
+        if (currentPieceSet === "staunton-svg") {
+          pieceEl.innerHTML = getPieceSvg(cell.piece, cell.color);
+        } else {
+          pieceEl.classList.add("piece-unicode");
+          pieceEl.textContent = getPieceUnicode(cell.piece, cell.color);
+          if (cell.piece === "right") {
+            if (rightPieceStyle === "fairy") pieceEl.classList.add("piece-right-fairy");
+            else if (rightPieceStyle === "standard") pieceEl.classList.add("piece-right-badge");
           }
         }
 
@@ -575,7 +768,7 @@ function updateCoordinateLabels(yCoords, xCoords) {
 
 function onSquareClick(x, y) {
   if (reviewIndex >= 0) {
-    showToast("Reviewing past move. Click '⚡ Return to Live' to make moves.");
+    showToast("Viewing move history. Click '⚡ Return to Live' to play.");
     return;
   }
   if (!state.active || state.result) return;
@@ -585,52 +778,89 @@ function onSquareClick(x, y) {
   socket.emit("select_square", { x, y });
 }
 
+// ── Chess.com Paired-Turn Move Ledger Table ────────────────────────
 function renderHistory() {
   const hist = state.move_history || [];
   moveCountBadge.textContent = `${hist.length} plies`;
+
   if (hist.length === 0) {
     historyEl.innerHTML = '<div class="history-empty">No moves recorded yet</div>';
     return;
   }
 
   historyEl.innerHTML = "";
-  hist.forEach((m, idx) => {
-    const row = document.createElement("div");
-    row.className = "move-row";
-    row.dataset.idx = idx;
+  const totalTurns = Math.ceil(hist.length / 2);
 
-    if (reviewIndex === -1 && idx === hist.length - 1) {
-      row.classList.add("active-move");
-    } else if (reviewIndex === idx + 1) {
-      row.classList.add("active-review-move");
+  for (let t = 0; t < totalTurns; t++) {
+    const whiteIdx = t * 2;
+    const blackIdx = t * 2 + 1;
+    const whiteMove = hist[whiteIdx];
+    const blackMove = hist[blackIdx];
+
+    const turnRow = document.createElement("div");
+    turnRow.className = "turn-row";
+
+    // Turn Number
+    const numCol = document.createElement("span");
+    numCol.className = "turn-num";
+    numCol.textContent = `${t + 1}.`;
+    turnRow.appendChild(numCol);
+
+    // White Move Cell
+    const whiteCell = createMoveCell(whiteMove, whiteIdx, hist.length);
+    turnRow.appendChild(whiteCell);
+
+    // Black Move Cell
+    if (blackMove) {
+      const blackCell = createMoveCell(blackMove, blackIdx, hist.length);
+      turnRow.appendChild(blackCell);
+    } else {
+      const emptyCell = document.createElement("div");
+      emptyCell.className = "turn-cell empty-cell";
+      turnRow.appendChild(emptyCell);
     }
 
-    const pSymbol = getPieceUnicode(m.piece, m.player);
-    const notation = `${pSymbol} (${m.from[0]},${m.from[1]}) → (${m.to[0]},${m.to[1]})`;
-    const capHtml = m.captured ? '<span class="cap-mark">×</span>' : "";
-    const timeHtml = m.agent_time ? `<span class="move-time-tag">${m.agent_time}s</span>` : "";
+    historyEl.appendChild(turnRow);
+  }
 
-    row.innerHTML = `
-      <span class="move-num">${m.ply}.</span>
-      <span class="move-cell">${notation} ${capHtml}</span>
-      ${timeHtml}
-    `;
-
-    // Click on any move to scrub / review directly
-    row.addEventListener("click", () => {
-      setReviewIndex(idx + 1);
-    });
-
-    historyEl.appendChild(row);
-  });
-
-  // Auto-scroll history to active item
-  const activeItem = historyEl.querySelector(".active-review-move") || historyEl.querySelector(".active-move");
-  if (activeItem) {
-    activeItem.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  // Scroll active move into view
+  const activeCell = historyEl.querySelector(".active-review-move") || historyEl.querySelector(".active-live-move");
+  if (activeCell) {
+    activeCell.scrollIntoView({ block: "nearest", behavior: "smooth" });
   } else if (reviewIndex === -1) {
     historyEl.scrollTop = historyEl.scrollHeight;
   }
+}
+
+function createMoveCell(m, idx, totalHistLen) {
+  const cell = document.createElement("div");
+  cell.className = "turn-cell";
+
+  const plyNum = idx + 1;
+  const isReviewed = (reviewIndex === plyNum);
+  const isLiveLatest = (reviewIndex === -1 && idx === totalHistLen - 1);
+
+  if (isReviewed) {
+    cell.classList.add("active-review-move");
+  } else if (isLiveLatest) {
+    cell.classList.add("active-live-move");
+  }
+
+  const pSymbol = getPieceUnicode(m.piece, m.player);
+  const isCap = Boolean(m.captured);
+  const notation = `${pSymbol} (${m.from[0]},${m.from[1]})${isCap ? '×' : '→'}(${m.to[0]},${m.to[1]})`;
+  const timeTag = m.agent_time ? `<span class="move-time-tag">${m.agent_time}s</span>` : '';
+
+  cell.innerHTML = `
+    <span class="move-notation ${isCap ? 'is-cap-move' : ''}">${notation}</span>
+    ${timeTag}
+  `;
+
+  cell.addEventListener("click", () => {
+    setReviewIndex(plyNum);
+  });
+
+  return cell;
 }
 
 function renderStats() {
@@ -642,14 +872,26 @@ function renderStats() {
 }
 
 function renderPlayerBars() {
-  const human = state.human_side;
+  const human = (state.active || state.result) ? state.human_side : (myChoice === "watch" ? null : myChoice);
   if (human === "white") {
-    whiteRole.textContent = "You (Human)";
+    whiteTitleBadge.textContent = "YOU";
+    whiteTitleBadge.className = "player-title-badge white-title";
+    blackTitleBadge.textContent = "BOT";
+    blackTitleBadge.className = "player-title-badge";
+    whiteRole.textContent = "Human";
     blackRole.textContent = `AI (${state.agent_name || "Agent"})`;
   } else if (human === "black") {
-    blackRole.textContent = "You (Human)";
+    blackTitleBadge.textContent = "YOU";
+    blackTitleBadge.className = "player-title-badge white-title";
+    whiteTitleBadge.textContent = "BOT";
+    whiteTitleBadge.className = "player-title-badge";
+    blackRole.textContent = "Human";
     whiteRole.textContent = `AI (${state.agent_name || "Agent"})`;
   } else {
+    whiteTitleBadge.textContent = "AI";
+    whiteTitleBadge.className = "player-title-badge white-title";
+    blackTitleBadge.textContent = "BOT";
+    blackTitleBadge.className = "player-title-badge";
     whiteRole.textContent = `AI (${state.agent_name || "Agent"})`;
     blackRole.textContent = `Opponent (${state.opponent_type || "AI"})`;
   }
@@ -657,13 +899,13 @@ function renderPlayerBars() {
   // Perspective bar ordering: player's side always sits at the bottom
   if (isFlipped) {
     whiteBar.style.order = "1";
-    blackBar.style.order = "4";
+    blackBar.style.order = "3";
   } else {
     blackBar.style.order = "1";
-    whiteBar.style.order = "4";
+    whiteBar.style.order = "3";
   }
 
-  // Captured pieces tray (reflects reviewed position if in review mode)
+  // Captured pieces tray
   let capWhite = state.captured_by_white || [];
   let capBlack = state.captured_by_black || [];
 
@@ -677,20 +919,14 @@ function renderPlayerBars() {
   }
 
   whiteCaptured.innerHTML = capWhite
-    .map(
-      (p) =>
-        `<span class="cap-chip" title="Captured Black ${p}">${getPieceUnicode(p, "black")}</span>`
-    )
+    .map((p) => `<span class="cap-chip" title="Captured Black ${p}">${getPieceUnicode(p, "black")}</span>`)
     .join("");
 
   blackCaptured.innerHTML = capBlack
-    .map(
-      (p) =>
-        `<span class="cap-chip" title="Captured White ${p}">${getPieceUnicode(p, "white")}</span>`
-    )
+    .map((p) => `<span class="cap-chip" title="Captured White ${p}">${getPieceUnicode(p, "white")}</span>`)
     .join("");
 
-  // Material Advantage badges
+  // Material Advantage badges (+1, +3)
   let wAdv = state.white_advantage || 0;
   let bAdv = state.black_advantage || 0;
 
@@ -766,7 +1002,7 @@ function renderEvaluation() {
 
 function renderStatus() {
   if (reviewIndex >= 0) {
-    statusEl.textContent = `Review Mode — Viewing position at Ply ${reviewIndex}. (Keys: [←/→] step, [End] live)`;
+    statusEl.textContent = `Review Mode — Viewing Ply ${reviewIndex}. (Keys: [←/→] step, [End] live)`;
     btnResign.style.display = "none";
     return;
   }
@@ -807,21 +1043,21 @@ function renderResult() {
   if (res.includes("draw")) {
     resultIcon.textContent = "🤝";
     resultTitle.textContent = "Draw Game";
-    resultTitle.style.color = "#f59e0b";
+    resultTitle.style.color = "#e5c158";
   } else if (res.includes("white") && (res.includes("wins") || !res.includes("loses"))) {
     resultIcon.textContent = "♔";
     resultTitle.textContent = "White Wins!";
-    resultTitle.style.color = "#99f6e4";
+    resultTitle.style.color = "#74c69d";
     sounds.playVictory();
   } else if (res.includes("black") && (res.includes("wins") || !res.includes("loses"))) {
     resultIcon.textContent = "♚";
     resultTitle.textContent = "Black Wins!";
-    resultTitle.style.color = "#38bdf8";
+    resultTitle.style.color = "#52b788";
     sounds.playVictory();
   } else {
     resultIcon.textContent = "🏁";
     resultTitle.textContent = "Match Concluded";
-    resultTitle.style.color = "#f59e0b";
+    resultTitle.style.color = "#e5c158";
   }
 
   resultSub.textContent = state.result;
@@ -841,7 +1077,7 @@ function setReviewIndex(idx) {
   }
 
   if (idx < -1) idx = -1;
-  if (idx > total) idx = -1; // wrap past last move back to live
+  if (idx > total) idx = -1;
 
   reviewIndex = idx;
   renderBoard();
@@ -869,7 +1105,6 @@ function updateNavControls() {
   }
 
   if (reviewIndex === -1) {
-    // Live Game mode
     btnNavFirst.disabled = false;
     btnNavPrev.disabled = false;
     btnNavNext.disabled = true;
@@ -878,7 +1113,6 @@ function updateNavControls() {
     navPlyText.textContent = state.active ? `Live • Ply ${state.ply}` : (state.result ? "Game Over" : "Live Game");
     reviewBanner.style.display = "none";
   } else {
-    // Review mode active
     btnNavFirst.disabled = (reviewIndex === 0);
     btnNavPrev.disabled = (reviewIndex === 0);
     btnNavNext.disabled = false;
@@ -934,26 +1168,27 @@ btnJumpLive.addEventListener("click", () => {
   showToast("⚡ Returned to Live Position");
 });
 
-// ── Event Handlers & Interactions ─────────────────────────────────
+// ── Event Handlers & Theme Switching ──────────────────────────────
 
-// Side Picker (with Auto-Flip)
-sidePicker.querySelectorAll(".side-btn").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    sidePicker.querySelectorAll(".side-btn").forEach((b) => b.classList.remove("active"));
-    btn.classList.add("active");
-    myChoice = btn.dataset.side;
-
-    // Auto flip board perspective according to chosen color
-    if (myChoice === "black") {
-      isFlipped = true;
-    } else if (myChoice === "white" || myChoice === "watch") {
-      isFlipped = false;
-    }
-
-    renderAll();
-    showToast(isFlipped ? "Perspective: Black (Auto-Flipped to bottom)" : "Perspective: White (Bottom)");
+// Board Theme Switcher
+if (boardThemeSelect) {
+  boardThemeSelect.addEventListener("change", (e) => {
+    currentBoardTheme = e.target.value;
+    document.documentElement.setAttribute("data-board-theme", currentBoardTheme);
+    localStorage.setItem("chess_board_theme", currentBoardTheme);
+    showToast(`Board theme: ${boardThemeSelect.options[boardThemeSelect.selectedIndex].text}`);
   });
-});
+}
+
+// Piece Set Switcher (SVG vs Unicode)
+if (pieceSetSelect) {
+  pieceSetSelect.addEventListener("change", (e) => {
+    currentPieceSet = e.target.value;
+    localStorage.setItem("chess_piece_set", currentPieceSet);
+    renderAll();
+    showToast(`Piece set: ${pieceSetSelect.options[pieceSetSelect.selectedIndex].text}`);
+  });
+}
 
 // Right Piece Style Selector
 if (rightStyleSelect) {
@@ -964,6 +1199,24 @@ if (rightStyleSelect) {
     showToast(`Right piece style: ${rightStyleSelect.options[rightStyleSelect.selectedIndex].text}`);
   });
 }
+
+// Side Picker (with Auto-Flip)
+sidePicker.querySelectorAll(".side-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    sidePicker.querySelectorAll(".side-btn").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    myChoice = btn.dataset.side;
+
+    if (myChoice === "black") {
+      isFlipped = true;
+    } else if (myChoice === "white" || myChoice === "watch") {
+      isFlipped = false;
+    }
+
+    renderAll();
+    showToast(isFlipped ? "Perspective: Black (Auto-Flipped to bottom)" : "Perspective: White (Bottom)");
+  });
+});
 
 // Watch Speed Range Slider
 speedRange.addEventListener("input", (e) => {
@@ -980,7 +1233,6 @@ btnNewGame.addEventListener("click", () => {
   reviewIndex = -1;
   resultOverlay.style.display = "none";
 
-  // Auto flip according to side choice
   if (myChoice === "black") {
     isFlipped = true;
   } else if (myChoice === "white" || myChoice === "watch") {
@@ -1049,10 +1301,10 @@ btnStopHosting.addEventListener("click", () => {
     showToast("Server stopping. You may close this tab.");
     setTimeout(() => {
       document.body.innerHTML = `
-        <div style="height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:sans-serif;color:#94a3b8;background:#090f12;gap:1rem;">
-          <h2 style="color:#f8fafc;">Server Stopped</h2>
+        <div style="height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:sans-serif;color:#9ab3a3;background:#09100c;gap:1rem;">
+          <h2 style="color:#fbfbf9;">Server Stopped</h2>
           <p>The Chess Fragments UI server on port 5000 has been shut down.</p>
-          <p>To restart hosting, double-click <code style="color:#2dd4bf;">start_ui.bat</code> in the project folder.</p>
+          <p>To restart hosting, double-click <code style="color:#52b788;">start_ui.bat</code> in the project folder.</p>
         </div>`;
     }, 500);
   }
@@ -1103,7 +1355,6 @@ btnGuideGotIt.addEventListener("click", () => {
 document.addEventListener("keydown", (e) => {
   if (e.target.tagName === "SELECT" || e.target.tagName === "INPUT") return;
 
-  // Move Scrubbing Navigation Keys
   if (e.key === "ArrowLeft") {
     e.preventDefault();
     btnNavPrev.click();
@@ -1125,7 +1376,6 @@ document.addEventListener("keydown", (e) => {
     return;
   }
 
-  // Quick action shortcuts
   if (e.key === "u" || e.key === "U" || (e.ctrlKey && (e.key === "z" || e.key === "Z"))) {
     e.preventDefault();
     triggerUndo();
@@ -1141,4 +1391,4 @@ document.addEventListener("keydown", (e) => {
 
 // Initial boot
 socket.emit("list_agents");
-addLog("Chess Fragments Grandmaster UI ready", "info");
+addLog("Chess Fragments Royal English Grandmaster Arena ready", "info");

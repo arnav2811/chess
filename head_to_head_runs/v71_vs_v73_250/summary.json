@@ -1,0 +1,126 @@
+{
+  "title": "Paired head-to-head: frozen v7.1 vs v7.3 with PUCT disabled",
+  "games_completed": 250,
+  "v73": {
+    "wins": 112,
+    "draws": 1,
+    "losses": 137,
+    "errors": 0,
+    "score_pct": 45.0
+  },
+  "by_v73_colour": {
+    "white": {
+      "games": 125,
+      "W": 99,
+      "D": 1,
+      "L": 25,
+      "errors": 0
+    },
+    "black": {
+      "games": 125,
+      "W": 13,
+      "D": 0,
+      "L": 112,
+      "errors": 0
+    }
+  },
+  "by_board": {
+    "sample0": {
+      "games": 50,
+      "W": 25,
+      "D": 0,
+      "L": 25,
+      "errors": 0
+    },
+    "sample1": {
+      "games": 50,
+      "W": 26,
+      "D": 0,
+      "L": 24,
+      "errors": 0
+    },
+    "sample2": {
+      "games": 50,
+      "W": 25,
+      "D": 0,
+      "L": 25,
+      "errors": 0
+    },
+    "sample3": {
+      "games": 50,
+      "W": 25,
+      "D": 0,
+      "L": 25,
+      "errors": 0
+    },
+    "sample4": {
+      "games": 50,
+      "W": 11,
+      "D": 1,
+      "L": 38,
+      "errors": 0
+    }
+  },
+  "paired_colour_reversal": {
+    "v73_wins_both": 5,
+    "v71_wins_both": 17,
+    "split": 102,
+    "draw_or_error": 1
+  },
+  "engine_search_metrics": {
+    "v71": {
+      "moves": 3483,
+      "weighted_average_depth": 2.728,
+      "median_depth": 2,
+      "p90_depth": 6,
+      "moves_depth_ge_6": 364,
+      "moves_depth_ge_8": 100,
+      "moves_depth_ge_10": 2,
+      "max_depth": 10,
+      "total_nodes": 2048876,
+      "average_move_time_s": 8.5601,
+      "aggregate_nps": 68.7,
+      "puct_calls": 0,
+      "puct_overrides": 0,
+      "tt_hits": 0,
+      "tt_cutoffs": 0,
+      "lmr_one_ply": 0,
+      "lmr_two_ply": 0,
+      "aspiration_fail_low": 0,
+      "aspiration_fail_high": 0,
+      "check_extensions": 0,
+      "mobility_extensions": 0
+    },
+    "v73": {
+      "moves": 3471,
+      "weighted_average_depth": 2.695,
+      "median_depth": 2,
+      "p90_depth": 5,
+      "moves_depth_ge_6": 321,
+      "moves_depth_ge_8": 56,
+      "moves_depth_ge_10": 3,
+      "max_depth": 10,
+      "total_nodes": 2080894,
+      "average_move_time_s": 8.6538,
+      "aggregate_nps": 69.3,
+      "puct_calls": 0,
+      "puct_overrides": 0,
+      "tt_hits": 238298,
+      "tt_cutoffs": 92312,
+      "lmr_one_ply": 32831,
+      "lmr_two_ply": 0,
+      "aspiration_fail_low": 1142,
+      "aspiration_fail_high": 604,
+      "check_extensions": 0,
+      "mobility_extensions": 12650
+    }
+  },
+  "average_plies": 27.82,
+  "average_game_wall_s": 239.69,
+  "puct_disabled_validation": {
+    "v73_puct_calls": 0,
+    "v73_puct_overrides": 0
+  },
+  "elapsed_wall_s": 15254.29,
+  "games_per_hour": 59.0
+}
