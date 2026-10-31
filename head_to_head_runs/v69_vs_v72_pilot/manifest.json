@@ -1,0 +1,30 @@
+{
+  "title": "Paired head-to-head: frozen v6.9 vs v7.2 (PUCT OFF)",
+  "created_local": "2026-10-30T20:08:15",
+  "computer_seed": 730269,
+  "games_requested": 20,
+  "workers": 8,
+  "thinking_time_s_per_move": 14.0,
+  "game_clock_s_per_player": 300.0,
+  "boards": [
+    "sample0",
+    "sample1",
+    "sample2",
+    "sample3",
+    "sample4"
+  ],
+  "pairing": "same board and engine-specific RNG seeds; v7.2 plays White and Black once per pair",
+  "v72_root_puct": false,
+  "engine_files": {
+    "agent_v69_frozen_overnight.py": {
+      "path": "C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\agent_v69_frozen_overnight.py",
+      "sha256": "df5cfb7305e8374ed45b6a862e6934cf0f3168e7c7eca9b1c18e9cfd517e08bd"
+    },
+    "agent_v72_mobility_aware.py": {
+      "path": "C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\agent_v72_mobility_aware.py",
+      "sha256": "7360db1d0482cd3dd3965a279c2c733507307efad42690ec305408468d331883"
+    }
+  },
+  "python": "3.13.14 (tags/v3.13.14:fd17997, Jun 10 2026, 13:03:48) [MSC v.1944 64 bit (AMD64)]",
+  "output_directory": "C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\head_to_head_runs\\v69_vs_v72_pilot"
+}

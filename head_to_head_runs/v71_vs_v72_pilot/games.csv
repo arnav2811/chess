@@ -1,0 +1,21 @@
+game_id,pair_id,pair_variant,board,seed,v72_color,winner_color,winner_engine,outcome_for_v72,termination,plies,wall_time_s,process_cpu_s,v71_clock_remaining_s,v72_clock_remaining_s,move_count
+1,1,A,sample0,730369,white,white,v72,WIN,Checkmate - black loses,17,101.706,100.797,264.974,233.469,17
+2,1,B,sample0,730369,black,white,v71,LOSS,Stalemate (no more possible moves) - black loses,31,289.533,286.734,142.883,167.777,31
+3,2,A,sample1,730379,white,white,v72,WIN,Checkmate - black loses,27,248.155,245.859,169.911,182.064,27
+4,2,B,sample1,730379,black,white,v71,LOSS,Stalemate (no more possible moves) - black loses,39,396.929,393.078,109.782,93.558,39
+5,3,A,sample2,730389,white,white,v72,WIN,Checkmate - black loses,17,102.342,101.734,264.836,232.919,17
+6,3,B,sample2,730389,black,white,v71,LOSS,Stalemate (no more possible moves) - black loses,31,289.061,286.969,143.244,167.853,31
+7,4,A,sample3,730399,white,black,v71,LOSS,Checkmate - white loses,18,164.575,162.766,223.371,212.162,18
+8,4,B,sample3,730399,black,white,v71,LOSS,Checkmate - black loses,35,343.154,340.266,135.666,121.36,35
+9,5,A,sample4,730409,white,white,v72,WIN,Stalemate (no more possible moves) - black loses,49,480.078,476.297,56.653,63.531,49
+10,5,B,sample4,730409,black,white,v71,LOSS,Checkmate - black loses,27,258.525,255.922,170.866,170.745,27
+11,6,A,sample0,730419,white,white,v72,WIN,Stalemate (no more possible moves) - black loses,37,342.139,336.359,143.418,114.711,37
+12,6,B,sample0,730419,black,white,v71,LOSS,Stalemate (no more possible moves) - black loses,35,316.128,313.203,128.806,155.275,35
+13,7,A,sample1,730429,white,white,v72,WIN,Checkmate - black loses,27,247.673,245.375,170.496,181.968,27
+14,7,B,sample1,730429,black,white,v71,LOSS,Stalemate (no more possible moves) - black loses,39,396.627,389.875,109.984,93.663,39
+15,8,A,sample2,730439,white,white,v72,WIN,Checkmate - black loses,17,101.784,100.562,264.998,233.303,17
+16,8,B,sample2,730439,black,white,v71,LOSS,Stalemate (no more possible moves) - black loses,31,288.253,283.906,143.894,168.013,31
+17,9,A,sample3,730449,white,black,v71,LOSS,Checkmate - white loses,18,163.751,162.5,223.04,213.321,18
+18,9,B,sample3,730449,black,white,v71,LOSS,Checkmate - black loses,35,339.947,337.0,139.144,121.092,35
+19,10,A,sample4,730459,white,white,v72,WIN,Checkmate - black loses,19,165.464,164.125,213.193,221.431,19
+20,10,B,sample4,730459,black,white,v71,LOSS,Checkmate - black loses,27,257.384,255.328,172.143,170.609,27

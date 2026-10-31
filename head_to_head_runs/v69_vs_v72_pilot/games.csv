@@ -1,0 +1,21 @@
+game_id,pair_id,pair_variant,board,seed,v72_color,winner_color,winner_engine,outcome_for_v72,termination,plies,wall_time_s,process_cpu_s,v69_clock_remaining_s,v72_clock_remaining_s,move_count
+1,1,A,sample0,730269,white,white,v72,WIN,Checkmate - black loses,35,316.737,312.891,155.521,127.988,35
+2,1,B,sample0,730269,black,white,v69,LOSS,Stalemate (no more possible moves) - black loses,31,285.397,282.969,147.027,167.758,31
+3,2,A,sample1,730279,white,white,v72,WIN,Checkmate - black loses,27,248.411,245.328,169.72,182.001,27
+4,2,B,sample1,730279,black,white,v69,LOSS,Checkmate - black loses,17,155.506,153.531,219.826,224.764,17
+5,3,A,sample2,730289,white,white,v72,WIN,Checkmate - black loses,17,101.66,100.812,264.728,233.703,17
+6,3,B,sample2,730289,black,white,v69,LOSS,Stalemate (no more possible moves) - black loses,31,286.299,280.672,146.18,167.682,31
+7,4,A,sample3,730299,white,black,v69,LOSS,Checkmate - white loses,24,219.615,217.703,199.267,181.278,24
+8,4,B,sample3,730299,black,black,v72,WIN,v69 (white) exceeded the 14.00s move budget,26,837.409,280.953,-404.54,167.234,27
+9,5,A,sample4,730309,white,white,v72,WIN,Checkmate - black loses,25,210.46,208.281,202.458,187.238,25
+10,5,B,sample4,730309,black,white,v69,LOSS,v72 (black) exceeded the 14.00s move budget,27,850.872,294.297,148.147,-398.906,28
+11,6,A,sample0,730319,white,white,v72,WIN,Checkmate - black loses,31,281.539,276.172,166.919,151.768,31
+12,6,B,sample0,730319,black,white,v69,LOSS,Stalemate (no more possible moves) - black loses,31,286.575,281.719,146.473,167.162,31
+13,7,A,sample1,730329,white,white,v72,WIN,Checkmate - black loses,27,248.174,244.25,169.882,182.087,27
+14,7,B,sample1,730329,black,black,v72,WIN,Stalemate (no more possible moves) - white loses,38,369.217,366.062,104.804,126.165,38
+15,8,A,sample2,730339,white,white,v72,WIN,Checkmate - black loses,35,293.56,288.469,179.411,127.205,35
+16,8,B,sample2,730339,black,white,v69,LOSS,Stalemate (no more possible moves) - black loses,31,289.067,285.984,143.13,167.95,31
+17,9,A,sample3,730349,white,black,v69,LOSS,Checkmate - white loses,24,219.837,215.781,199.612,180.715,24
+18,9,B,sample3,730349,black,white,v69,LOSS,v72 (black) exceeded the 14.00s move budget,29,862.796,306.328,137.051,-399.725,30
+19,10,A,sample4,730359,white,white,v72,WIN,Stalemate (no more possible moves) - black loses,49,480.397,473.531,56.463,63.415,49
+20,10,B,sample4,730359,black,white,v69,LOSS,Checkmate - black loses,25,223.131,219.562,195.128,181.812,25
