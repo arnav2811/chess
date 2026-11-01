@@ -1,0 +1,87 @@
+{
+  "candidate": "v7.5 Endgame Depth",
+  "created_utc": "2026-11-01T04:25:09Z",
+  "status": "experimental; live ChessMaker smoke test and tournaments not run in this environment",
+  "changes": [
+    "retrograde tablebase integration in Negamax and quiescence",
+    "deadline polling every eight nodes and at root-loop boundaries",
+    "aged history ordering persists between turns within a game",
+    "modestly earlier second-ply LMR threshold with existing tactical protections"
+  ],
+  "tests_verified": [
+    "py_compile for agent and harness files",
+    "65 tablebase configurations loaded",
+    "decisive K+Q tablebase score verified via agent probe helper",
+    "history ageing and persistence regression passed",
+    "LMR threshold and tactical exemption regression passed",
+    "expired-root fallback regression passed"
+  ],
+  "not_verified": [
+    "ChessMaker live Board/Piece integration (package unavailable in build environment)",
+    "average search depth / NPS improvement on actual games",
+    "clock-forfeit rate",
+    "tournament win rate"
+  ],
+  "files": {
+    "agent_v75_endgame_depth.py": {
+      "size_bytes": 133641,
+      "sha256": "f76b8a927f61a81e1323c30d02053b571c1ebf4e25211046e9a4d389f637e470"
+    },
+    "agent_v74_tactical_guard.py": {
+      "size_bytes": 128048,
+      "sha256": "f071799b7ac06d30a3f912adc541313942e536cf0c1285d5cff294e73abd57dd"
+    },
+    "endgame_tablebase.py": {
+      "size_bytes": 5025,
+      "sha256": "5fce28b47cb89fa89805bb3092c9c5b62fdc9d54d2c00ab4a550ba7a9a8a0132"
+    },
+    "endgame_tb_snippet.py": {
+      "size_bytes": 4709674,
+      "sha256": "242855c997ac3aaad1f5f1bdc5842b443687b4e7ed01a36bbeb867984aa7aa0a"
+    },
+    "run_v75_18_tournament.py": {
+      "size_bytes": 10833,
+      "sha256": "18fc02e5ace40ac87e729dd7b628d8c8f1edae29c3de4145fb3ab9176fdeb267"
+    },
+    "run_v74_v75_head_to_head.py": {
+      "size_bytes": 7938,
+      "sha256": "b6e77186b7732adb9c3838375631c6b9eb2c691a40a55e483cfaed53cd417f31"
+    },
+    "smoke_test_v75.py": {
+      "size_bytes": 1491,
+      "sha256": "35491ea22399ed73ab34a2ea6710ff03ec75f9ef749d16a47c2c63d8b3849c22"
+    },
+    "test_v75_tablebase.py": {
+      "size_bytes": 1936,
+      "sha256": "24f182263032cd30c2317f4dd9349b166fee2e1922ec986686597bdda92e2a7c"
+    },
+    "test_v75_search_controls.py": {
+      "size_bytes": 1973,
+      "sha256": "843beb9439386fc0284e6f0b1b627b8de7fe37cecb2195020628bfaf92e52288"
+    },
+    "validate_v75.ps1": {
+      "size_bytes": 1415,
+      "sha256": "a815180b7de0273ca55efebf4ea6483025b0d94e0cc434e71318f49da48c49d2"
+    },
+    "V75_README.md": {
+      "size_bytes": 3706,
+      "sha256": "3f74683f075848328df07a8055ac358d1b5b3fc14f9c8e2ab1e1394b868b8e26"
+    },
+    "extension/board_utils.py": {
+      "size_bytes": 3872,
+      "sha256": "1cbb5c4f0f2faf6fadcd3ee94020185abc3e793cc73bde9ffe070582ae413ce8"
+    },
+    "extension/board_rules.py": {
+      "size_bytes": 2598,
+      "sha256": "f405aa6937d7ef5118241ce8450f7cf587adfe36906f220815f26731c3a1bead"
+    },
+    "extension/piece_right.py": {
+      "size_bytes": 940,
+      "sha256": "b688058ffc24bbd19837eca1ca222639f660f5b3be9383933db0b18e26451298"
+    },
+    "extension/piece_pawn.py": {
+      "size_bytes": 269,
+      "sha256": "cf51f355767515d40a9f81d3e887a3b8a17e9dfb6f277eaa0f46a14e01715d42"
+    }
+  }
+}
