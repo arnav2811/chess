@@ -1,3 +1,5 @@
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 """Offline regression tests for the v7.4 Tactical Guard.
 
 ChessMaker is stubbed. These tests exercise the guard's material accounting,

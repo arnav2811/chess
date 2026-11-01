@@ -1,3 +1,5 @@
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 """Offline tests for unique-position v7.4 self-play tooling (no ChessMaker needed)."""
 import unittest
 from emperor_v74_diverse_selfplay import BOARDS, LAYOUT_ROWS, position_signature, summarize

@@ -1,3 +1,5 @@
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 """Smoke-test v7.5 import, tablebase loading, and one legal agent decision."""
 from itertools import cycle
 from chessmaker.chess.base import Player, Board, Square

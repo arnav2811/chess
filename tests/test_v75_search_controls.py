@@ -1,3 +1,5 @@
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 """Framework-independent regressions for v7.5 deadline/history/LMR controls."""
 import time
 from types import SimpleNamespace

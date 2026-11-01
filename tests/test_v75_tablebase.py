@@ -1,3 +1,5 @@
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 """Fast, framework-independent test of v7.5's actual retrograde probe path."""
 from types import SimpleNamespace
 import endgame_tablebase as tb

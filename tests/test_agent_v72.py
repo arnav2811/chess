@@ -1,3 +1,5 @@
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 """Offline structural tests for agent_v72_mobility_aware.py.
 
 These tests deliberately stub extension.board_utils so they can run without
