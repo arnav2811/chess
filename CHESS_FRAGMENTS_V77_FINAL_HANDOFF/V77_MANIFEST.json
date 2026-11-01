@@ -1,0 +1,218 @@
+{
+  "package": "Chess Fragments v7.7 Final Claude Handoff",
+  "build_id": "v7.7-final-stalemate-repetition-guards",
+  "created_date": "2026-11-01",
+  "package_status": "offline regressions passed; live ChessMaker validation not available in build environment",
+  "active_project_files": [
+    "agent_v77_final.py",
+    "endgame_tablebase_v77.py",
+    "endgame_tb_snippet_v77.py",
+    "agent_v74_tactical_guard_v77baseline.py",
+    "run_v77_18_tournament.py",
+    "run_v74_v77_head_to_head.py",
+    "play_v77.py",
+    "smoke_test_v77.py",
+    "validate_v77.ps1",
+    "test_v77_tablebase.py",
+    "test_v77_historical_tablebase_corpus.py",
+    "test_v77_engineering_controls.py",
+    "test_v77_final_guards.py",
+    "benchmark_v77_tt_hash.py",
+    "V77_README.md",
+    "V77_CHANGELOG.md",
+    "V77_VALIDATION_REPORT.md",
+    "V77_HANDOFF_FOR_CLAUDE.md",
+    "V77_CODE_DIFF_FROM_V76.patch",
+    "V77_TT_HASH_MICROBENCH.json",
+    "V77_historical_tablebase_regression_600run.jsonl",
+    "V77_historical_tablebase_regression_600run_summary.json"
+  ],
+  "included_evidence_directories": [
+    "evidence/v76_results",
+    "evidence/history",
+    "project_helpers_reference/extension"
+  ],
+  "verification": {
+    "python_compile": "PASS",
+    "tablebase_configurations": 65,
+    "historical_unique_positions": 555,
+    "historical_wdl_counts": {
+      "WIN": 240,
+      "LOSS": 227,
+      "DRAW": 88
+    },
+    "targeted_v77_guard_regressions": "PASS",
+    "search_control_regressions": "PASS",
+    "tt_key_microbenchmark": "PASS; final synthetic median improvement 5.46%; not whole-engine NPS",
+    "live_chessmaker_smoke_test": "BLOCKED: chessmaker module is not installed in this build environment",
+    "v77_tournaments": "NOT RUN in build environment"
+  },
+  "files": [
+    {
+      "path": "V77_CHANGELOG.md",
+      "size_bytes": 2134,
+      "sha256": "79e8275b5300e2a8f51b953979e11dced13f11485e7bb25a85a6479abc3457a5"
+    },
+    {
+      "path": "V77_CODE_DIFF_FROM_V76.patch",
+      "size_bytes": 14182,
+      "sha256": "57e90f1efed1441823b68b1f2cb84dcd32f5334cffc1c75fe12637416969b3df"
+    },
+    {
+      "path": "V77_HANDOFF_FOR_CLAUDE.md",
+      "size_bytes": 12713,
+      "sha256": "b8e3fb3c9ae266bc5fc77f5a606dc96ffb4ad0489d944bd3642b1b81a836c4c4"
+    },
+    {
+      "path": "V77_README.md",
+      "size_bytes": 5589,
+      "sha256": "eca8bbc92a7cf35746ec49942a951cc03bb7c8d1e33eb3701568dcafc8268907"
+    },
+    {
+      "path": "V77_TT_HASH_MICROBENCH.json",
+      "size_bytes": 390,
+      "sha256": "4538e2078de9381c23664ab6b3a86cc03d952568d24bbed5092b94b2ad40c005"
+    },
+    {
+      "path": "V77_VALIDATION_REPORT.md",
+      "size_bytes": 2436,
+      "sha256": "f890d5f5b1d7cccbf2de58beeca3ee7d009bef901961461cac916556a9f19a4d"
+    },
+    {
+      "path": "V77_historical_tablebase_regression_600run.jsonl",
+      "size_bytes": 192773,
+      "sha256": "6d94eda8bfed2b027b764f3a2dc378e3526ade17889fa481367cdf5ce780359e"
+    },
+    {
+      "path": "V77_historical_tablebase_regression_600run_summary.json",
+      "size_bytes": 493,
+      "sha256": "9b4924fe70a5f2a83131bd3d28e2b150f424a5234d198efb253aa684efc6fa7c"
+    },
+    {
+      "path": "agent_v74_tactical_guard_v77baseline.py",
+      "size_bytes": 128048,
+      "sha256": "f071799b7ac06d30a3f912adc541313942e536cf0c1285d5cff294e73abd57dd"
+    },
+    {
+      "path": "agent_v77_final.py",
+      "size_bytes": 139930,
+      "sha256": "6e09df4875710ee0b087ecba772ac40605645376bb142c5e204405892949ec80"
+    },
+    {
+      "path": "benchmark_v77_tt_hash.py",
+      "size_bytes": 2815,
+      "sha256": "3870ae1d9f68500f85dbb83226e5318e42364e86fad052245e4abafb4574568b"
+    },
+    {
+      "path": "endgame_tablebase_v77.py",
+      "size_bytes": 3702,
+      "sha256": "be24166e37a43b6dc63120681ed83b28a1441918cc92d63dbcce39b39a01c4cd"
+    },
+    {
+      "path": "endgame_tb_snippet_v77.py",
+      "size_bytes": 4709674,
+      "sha256": "242855c997ac3aaad1f5f1bdc5842b443687b4e7ed01a36bbeb867984aa7aa0a"
+    },
+    {
+      "path": "evidence/history/CHESS_FRAGMENTS_ENGINE_DEVELOPMENT_LOG.md",
+      "size_bytes": 57294,
+      "sha256": "554d3ad48e37834d60241f2f18d43929dfc29d650bbf43dafa54e579e42fc834"
+    },
+    {
+      "path": "evidence/history/V76_README.md",
+      "size_bytes": 4026,
+      "sha256": "4b32e64c5c5dffa2d218b82e538a060125d7f108fef36971416d19159a168f7e"
+    },
+    {
+      "path": "evidence/history/V76_VALIDATION_REPORT.md",
+      "size_bytes": 2651,
+      "sha256": "6acd6a32f66fd773f3faadc52ddcced85d8e23fe68af3be271cb5f9852c795db"
+    },
+    {
+      "path": "evidence/history/agent_v76_exact_tablebase_reference.py",
+      "size_bytes": 137127,
+      "sha256": "85fc918fc983c1eb9784131d9ea8ad785346953efe68b9ffdd328ea95a8f4fa1"
+    },
+    {
+      "path": "evidence/v76_results/V76_TOURNAMENT_18_METRICS_SUMMARY.json",
+      "size_bytes": 738,
+      "sha256": "844c6d707b692e4de97ae79a097972a9952088a60c03e83b2aeb774e5290ce6d"
+    },
+    {
+      "path": "evidence/v76_results/V76_TOURNAMENT_18_RESULTS.json",
+      "size_bytes": 153477,
+      "sha256": "7ecf0ae936c012008418231774ddf3fe7dfd26c037de3acb4b45d0e048354f1e"
+    },
+    {
+      "path": "evidence/v76_results/V76_V74_H2H_10.json",
+      "size_bytes": 71737,
+      "sha256": "b8ebd6caebe1a64d59c6d79b45dec8cc6fa0fba9a6ca6f6480406af3bb63937a"
+    },
+    {
+      "path": "play_v77.py",
+      "size_bytes": 7529,
+      "sha256": "84bd28828a8fe24e15a0d25e17d3de9d00da133a2210ebab8e866590371f43e2"
+    },
+    {
+      "path": "project_helpers_reference/extension/board_rules.py",
+      "size_bytes": 2598,
+      "sha256": "f405aa6937d7ef5118241ce8450f7cf587adfe36906f220815f26731c3a1bead"
+    },
+    {
+      "path": "project_helpers_reference/extension/board_utils.py",
+      "size_bytes": 3872,
+      "sha256": "1cbb5c4f0f2faf6fadcd3ee94020185abc3e793cc73bde9ffe070582ae413ce8"
+    },
+    {
+      "path": "project_helpers_reference/extension/piece_pawn.py",
+      "size_bytes": 269,
+      "sha256": "cf51f355767515d40a9f81d3e887a3b8a17e9dfb6f277eaa0f46a14e01715d42"
+    },
+    {
+      "path": "project_helpers_reference/extension/piece_right.py",
+      "size_bytes": 940,
+      "sha256": "b688058ffc24bbd19837eca1ca222639f660f5b3be9383933db0b18e26451298"
+    },
+    {
+      "path": "run_v74_v77_head_to_head.py",
+      "size_bytes": 11513,
+      "sha256": "f8181398a4ad8f4988d3ccddffe8da143c442fd4e750596fc335045b1bcd1ae2"
+    },
+    {
+      "path": "run_v77_18_tournament.py",
+      "size_bytes": 18654,
+      "sha256": "cb35a7c3acebd0757444732de90cdfc53b810646d2bbb6fed454c2faf30566b4"
+    },
+    {
+      "path": "smoke_test_v77.py",
+      "size_bytes": 1483,
+      "sha256": "989a82fe3c052c359efa451513e23e10116ef9f09911dce2b87ed56916b9bf6f"
+    },
+    {
+      "path": "test_v77_engineering_controls.py",
+      "size_bytes": 4924,
+      "sha256": "455204966f9ed692c34c25a28f4e4691a08c0dc9a5b9b175e639c9c771530a22"
+    },
+    {
+      "path": "test_v77_final_guards.py",
+      "size_bytes": 6354,
+      "sha256": "76e959e3ae6d52ce999937bcca092f1d8a1a039019905a8411275c5077ef73c3"
+    },
+    {
+      "path": "test_v77_historical_tablebase_corpus.py",
+      "size_bytes": 4505,
+      "sha256": "1f34ab560858a40570e64b5a47a5350950266357afb252decb53dbb852bf48c8"
+    },
+    {
+      "path": "test_v77_tablebase.py",
+      "size_bytes": 1932,
+      "sha256": "9a373a5517c2c7ceb9d9970ed2fe02d98567a95c98c6c2fb2b79d84ed5a2f708"
+    },
+    {
+      "path": "validate_v77.ps1",
+      "size_bytes": 1960,
+      "sha256": "c4f80deb869170ce1d9953570ba60a9654f85bae416a1424b64d3494c8ca4097"
+    }
+  ],
+  "manifest_note": "SHA-256 covers every packaged file except this manifest itself."
+}

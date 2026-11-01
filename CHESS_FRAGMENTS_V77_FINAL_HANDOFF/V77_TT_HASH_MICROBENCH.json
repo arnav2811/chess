@@ -1,0 +1,14 @@
+{
+  "loops_per_run": 200000,
+  "runs": 5,
+  "median_seconds": {
+    "legacy_sorted_tuple": 1.123,
+    "candidate_frozenset": 1.0648
+  },
+  "keys_per_second": {
+    "legacy_sorted_tuple": 178098,
+    "candidate_frozenset": 187827
+  },
+  "relative_key_construction_change_pct": 5.46,
+  "note": "Synthetic 18-piece board objects; this is a hash-routine microbenchmark, not whole-engine NPS."
+}

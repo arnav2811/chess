@@ -1,0 +1,296 @@
+--- evidence/history/agent_v76_exact_tablebase_reference.py	2026-11-01 11:36:04.795620809 +0000
++++ agent_v77_final.py	2026-11-01 11:39:26.541584489 +0000
+@@ -1,5 +1,5 @@
+ # ═══════════════════════════════════════════════════════════════════════════════
+-# agent_v76_exact_tablebase.py — Chess Fragments AI Agent (v7.6 Exact Tablebase Candidate)
++# agent_v77_final.py — Chess Fragments AI Agent (v7.7 Final Handoff Candidate)
+ # COMP2321 Coursework — 5×5 Chess Variant with Custom Pieces
+ #
+ # CANDIDATE: v7.4 tactical guards plus exact 65-configuration retrograde WDL,
+@@ -35,9 +35,12 @@
+ #   • Retrograde WDL probing at every covered ≤4-piece search node
+ #   • Per-move instrumentation logged to stderr
+ #
+-# Constraints:
+-#   Single-file agent — no external dependencies beyond Python built-ins,
+-#   the chessmaker library, and the provided board_utils helper.
++# Runtime files:
++#   Keep this agent beside endgame_tablebase_v77.py and
++#   endgame_tb_snippet_v77.py. The tablebase is deliberately a separate
++#   companion module so its embedded retrograde data can be loaded once.
++# Runtime dependencies: Python built-ins, chessmaker, and the project
++#   extension helpers supplied with the existing coursework repository.
+ # ═══════════════════════════════════════════════════════════════════════════════
+ 
+ import time
+@@ -46,14 +49,14 @@
+ import random
+ from collections import OrderedDict
+ 
+-ENGINE_BUILD = "v7.6-exact-tablebase"
++ENGINE_BUILD = "v7.7-final-stalemate-repetition-guards"
+ from extension.board_utils import list_legal_moves_for
+ 
+ # The retrograde data is a companion module (≈4.7 MB source).  Keep the agent
+ # operational if a deployment omits it, but expose availability in diagnostics.
+ try:
+-    from endgame_tablebase import probe_endgame_tb as _probe_endgame_tb
+-    from endgame_tablebase import is_tablebase_loaded as _is_tablebase_loaded
++    from endgame_tablebase_v77 import probe_endgame_tb as _probe_endgame_tb
++    from endgame_tablebase_v77 import is_tablebase_loaded as _is_tablebase_loaded
+     _TABLEBASE_READY = bool(_is_tablebase_loaded())
+ except Exception:
+     _probe_endgame_tb = None
+@@ -334,6 +337,11 @@
+ _last_tb_wins = 0
+ _last_tb_losses = 0
+ _last_tb_draws = 0
++_last_tb_repeat_avoided = False
++_last_stalemate_guard_calls = 0
++_last_stalemate_guard_threats = 0
++_last_stalemate_guard_inconclusive = 0
++_last_stalemate_guard_replacements = 0
+ 
+ 
+ # ─── Repetition Tracking ─────────────────────────────────────────────────────
+@@ -1752,13 +1760,16 @@
+ 
+ 
+ def _solve_root_from_tablebase(board, root_moves, colour, deadline):
+-    """Select a WDL-optimal move directly when every root child is tablebased.
++    """Select an exact-WDL best move, preferring less-repeated equal-WDL children.
+ 
+-    The current position must be covered. Each legal child is then probed; if
+-    any child is unsupported, cloning fails, or the deadline is reached, the
+-    helper declines and ordinary iterative deepening remains in control.
++    WDL score always dominates repetition history. Among children with exactly
++    equal tablebase scores (especially DRAW=0), prefer the child reached fewer
++    times in the current game. If the history data is unavailable, stable move
++    order is retained. Any unsupported child or deadline expiry falls back to
++    ordinary iterative deepening.
+     """
+     global _last_root_evals, _last_root_exact_evals, _last_tb_root_solved
++    global _last_tb_repeat_avoided
+     if time.perf_counter() >= deadline:
+         return None
+     root_score = _tablebase_score(board, colour, 0)
+@@ -1767,7 +1778,7 @@
+ 
+     ordered = _order_moves(root_moves, board, 0, None)
+     solved = []
+-    for piece, move in ordered:
++    for order_index, (piece, move) in enumerate(ordered):
+         if time.perf_counter() >= deadline:
+             return None
+         child = _make_move_on_clone(board, piece, move)
+@@ -1781,23 +1792,39 @@
+             if child_score is None:
+                 return None
+             value = -child_score
+-        solved.append((int(value), piece, move))
++        try:
++            repetition_count = int(_position_history.get(_board_signature(child), 0))
++        except Exception:
++            repetition_count = 0
++        solved.append((int(value), piece, move, repetition_count, order_index))
+ 
+     if not solved:
+         return None
+-    solved.sort(key=lambda row: -row[0])
++    # Primary ordering is the exact tablebase score. Repetition is only a
++    # secondary tie-break and can never trade a win for a draw or a draw for loss.
++    solved.sort(key=lambda row: (-row[0], row[3], row[4]))
+     best_wdl = solved[0][0]
++    root_best_wdl = max(row[0] for row in solved)
++    same_best = [row for row in solved if row[0] == root_best_wdl]
++    if same_best:
++        min_repeat = min(row[3] for row in same_best)
++        original_best = min(same_best, key=lambda row: row[4])
++        chosen_best = solved[0]
++        _last_tb_repeat_avoided = (
++            chosen_best[4] != original_best[4]
++            and chosen_best[3] < original_best[3]
++        )
++
+     # Cross-check root WDL against the best legal child. A disagreement means
+-    # the adapter/index/position is inconsistent; fall back to search instead
+-    # of trusting a potentially malformed tablebase hit.
++    # the adapter/index/position is inconsistent; fall back instead of trusting it.
+     if root_score >= 90000 and best_wdl < 90000:
+         return None
+     if root_score <= -90000 and best_wdl > -90000:
+         return None
+     if abs(root_score) < 90000 and abs(best_wdl) >= 90000:
+         return None
+-    _last_root_evals = list(solved)
+-    _last_root_exact_evals = list(solved)
++    _last_root_evals = [(v, p, m) for v, p, m, _rep, _idx in solved]
++    _last_root_exact_evals = list(_last_root_evals)
+     _last_tb_root_solved = True
+     return solved[0][1], solved[0][2]
+ 
+@@ -1833,6 +1860,7 @@
+     _last_root_evals = []
+     _last_root_exact_evals = []
+     _last_tb_root_solved = False
++    _last_tb_repeat_avoided = False
+     _last_iteration_trace = []
+     _last_aborted_depth = 0
+     _last_aborted_nodes = 0
+@@ -2048,14 +2076,20 @@
+ 
+ 
+ def _opponent_has_immediate_terminal_win(child_board, our_player_name, deadline):
+-    """Prove whether the opponent has a reply that wins immediately by terminality.
++    """Prove whether one opponent reply leaves our side with no legal move.
+ 
+-    In Chess Fragments, any position with no legal moves is a loss. Return None
+-    for an inconclusive check (deadline reached / malformed child), never treat
+-    an unverified move as proven safe.
+-    """
++    In Chess Fragments, no legal moves is a loss. The check is now enabled for
++    high-material non-king moves as well as low-material and king moves: the
++    v7.6 Strong-tier losses demonstrate that the previous high-material fast
++    path left a real blind spot. Return None when the reserved safety budget is
++    exhausted; never treat an unverified move as proven safe.
++    """
++    global _last_stalemate_guard_calls, _last_stalemate_guard_threats
++    global _last_stalemate_guard_inconclusive
++    _last_stalemate_guard_calls += 1
+     try:
+         if time.perf_counter() >= deadline:
++            _last_stalemate_guard_inconclusive += 1
+             return None
+         enemy_moves = list_legal_moves_for(child_board, child_board.current_player)
+         if not enemy_moves:
+@@ -2071,12 +2105,15 @@
+             terminal, score = _check_terminal(after, 2)
+             if terminal:
+                 if score <= -MATE_THRESHOLD:
++                    _last_stalemate_guard_threats += 1
+                     return True
+                 continue
+             if not list_legal_moves_for(after, after.current_player):
++                _last_stalemate_guard_threats += 1
+                 return True
+         return False
+     except Exception:
++        _last_stalemate_guard_inconclusive += 1
+         return None
+ 
+ 
+@@ -2320,23 +2357,21 @@
+     The new guard only substitutes a near-equal exact root alternative after
+     finding a major-piece loss or an unanswerable next-move promotion.
+     """
++    global _last_stalemate_guard_replacements
+     selected_piece, selected_move = _material_blunder_guard(
+         board, player, selected_piece, selected_move, deadline)
+     if selected_piece is None or selected_move is None or time.perf_counter() >= deadline:
+         return selected_piece, selected_move
+-    # Full reply verification remains low-material by default, but a king move
+-    # in a crowded position gets a narrowly targeted stalemate check too. The
+-    # v6.8 Strong/sample2 loss was exactly this pattern: Black's king move let
+-    # White's next king move leave Black with no legal moves. Other high-material
+-    # moves keep v6.8's original fast path to avoid broad extra branching.
++    # v7.6 skipped high-material non-king moves here. Two fresh Strong-tier
++    # losses ended in Black stalemate with 15 pieces still on the board. The
++    # skip meant those candidate moves never received the one-reply terminal
++    # safety check. v7.7 applies the check to every selected move; alternatives
++    # remain capped in crowded positions to protect the clock.
+     try:
+         piece_count = len(board.get_pieces())
+     except Exception:
+         return selected_piece, selected_move
+-    high_material_king_move = (piece_count > 10 and
+-                               _piece_name(selected_piece) == "king")
+-    if piece_count > 10 and not high_material_king_move:
+-        return selected_piece, selected_move
++    high_material = piece_count > 10
+ 
+     child = _make_move_on_clone(board, selected_piece, selected_move)
+     if child is None:
+@@ -2349,8 +2384,8 @@
+     candidate_limit = min(6, 3 + int(round(3 * entropy)))
+     # High-material king safety is an opportunistic guard. Keep alternative
+     # verification bounded so the last-resort safety pass cannot dominate search.
+-    if high_material_king_move:
+-        candidate_limit = min(candidate_limit, 3)
++    if high_material:
++        candidate_limit = min(candidate_limit, 4)
+     candidates = []
+     seen = set()
+     selected_key = _move_key(selected_piece, selected_move)
+@@ -2381,6 +2416,7 @@
+             continue
+         result = _opponent_has_immediate_terminal_win(alt_child, player.name, deadline)
+         if result is False:
++            _last_stalemate_guard_replacements += 1
+             return piece, move
+         if result is None and first_unresolved is None:
+             first_unresolved = (piece, move)
+@@ -2810,7 +2846,9 @@
+     global _last_material_guard_replacement
+     global _last_promotion_guard_triggered, _last_promotion_guard_replacement
+     global _last_tb_probes, _last_tb_hits, _last_tb_wins, _last_tb_losses, _last_tb_draws
+-    global _last_tb_root_solved
++    global _last_tb_root_solved, _last_tb_repeat_avoided
++    global _last_stalemate_guard_calls, _last_stalemate_guard_threats
++    global _last_stalemate_guard_inconclusive, _last_stalemate_guard_replacements
+ 
+     try:
+         call_started = time.perf_counter()
+@@ -2842,6 +2880,11 @@
+         _last_tb_losses = 0
+         _last_tb_draws = 0
+         _last_tb_root_solved = False
++        _last_tb_repeat_avoided = False
++        _last_stalemate_guard_calls = 0
++        _last_stalemate_guard_threats = 0
++        _last_stalemate_guard_inconclusive = 0
++        _last_stalemate_guard_replacements = 0
+         _last_puct_stats = {"used": False, "simulations": 0, "elapsed_s": 0.0}
+         ply = var[0]
+         time_budget = var[1]
+@@ -2909,7 +2952,7 @@
+         # reserve a bounded slice for the rare selected-king-move stalemate check.
+         safety_reserve = (min(0.35, max(0.04, effective_budget * 0.04))
+                           if low_material else
+-                          min(0.45, max(0.06, effective_budget * 0.04)))
++                          min(0.70, max(0.10, effective_budget * 0.06)))
+         search_deadline = deadline - safety_reserve
+ 
+         # TT capacity is maintained by bounded LRU replacement on insertion.
+@@ -3073,6 +3116,11 @@
+         "tablebase_wins": _last_tb_wins,
+         "tablebase_losses": _last_tb_losses,
+         "tablebase_draws": _last_tb_draws,
++        "tablebase_repeat_avoided": _last_tb_repeat_avoided,
++        "stalemate_guard_calls": _last_stalemate_guard_calls,
++        "stalemate_guard_threats": _last_stalemate_guard_threats,
++        "stalemate_guard_inconclusive": _last_stalemate_guard_inconclusive,
++        "stalemate_guard_replacements": _last_stalemate_guard_replacements,
+     }
+     _move_stats_log.append(stats)
+     if _ENABLE_STDERR_LOG:
+@@ -3082,7 +3130,7 @@
+         partial = (f" partial={_last_aborted_depth}:{_last_aborted_nodes}"
+                    if _last_aborted_depth else "")
+         print(
+-            f"[agent v7.6-exact-tablebase] ply={ply:>3d}  {player_name:>5s}  "
++            f"[agent v7.7-final] ply={ply:>3d}  {player_name:>5s}  "
+             f"depth={_last_depth_reached}  nodes={_last_nodes_searched:>7d}  "
+             f"ebf={_last_branching_factor:.2f}  nps={nps:>6d}  "
+             f"iter={trace}{partial}  "
+@@ -3095,6 +3143,11 @@
+             f"promo={int(_last_promotion_guard_triggered)}→{int(_last_promotion_guard_replacement)}  "
+             f"tb={_last_tb_hits}/{_last_tb_probes}  "
+             f"tb_root={int(_last_tb_root_solved)}  "
++            f"tb_repeat={int(_last_tb_repeat_avoided)}  "
++            f"stale_guard={_last_stalemate_guard_calls}/"
++            f"{_last_stalemate_guard_threats}/"
++            f"{_last_stalemate_guard_replacements}/"
++            f"{_last_stalemate_guard_inconclusive}  "
+             f"puct=off  time={elapsed:.2f}s",
+             file=sys.stderr,
+         )
