@@ -1,0 +1,11 @@
+game_id,board,opening_seed,opening_plies,opening_side_to_move,opening_signature,winner_color,outcome,termination,plies,wall_time_s,process_cpu_s,white_clock_remaining_s,black_clock_remaining_s,move_count
+1,sample0,3377220364756781445,10,white,d3498ca8b76e487c19c5c20939fdad726142f589486c4210f1f4a3ddda0c3270,black,BLACK_WIN,Stalemate (no more possible moves) - white loses,26,124.01,122.469,228.446,247.691,16
+2,sample1,1276148548980137665,5,black,1e59512f567e085d7d0e2859f7bc56cc456367f79280627e00a51427b55d259c,white,WHITE_WIN,Checkmate - black loses,21,105.168,104.812,256.964,237.98,16
+3,sample2,2596246067016194578,14,white,4fcf226eb95b6d14122ae4fd8e46a59a9dc798f44341355fc58150c20f5d92dd,white,WHITE_WIN,Stalemate (no more possible moves) - black loses,41,255.43,254.156,177.695,167.088,27
+4,sample3,1853668546828487790,7,black,2f6c189c862beeb2128a52ba9cb618c5edb6ecb6ec66444bd1ef4b0ce6b14aa2,white,WHITE_WIN,Checkmate - black loses,33,205.806,203.891,197.003,197.403,26
+5,sample4,255408880644411514,14,white,5bfbb302094907273c866b5dbf6635bd915169cbb2d032eaab7b5d92b8f1e01d,white,WHITE_WIN,Stalemate (no more possible moves) - black loses,23,33.333,33.25,287.299,279.531,9
+6,sample5,6234992995705333952,7,black,729acd5b04d8b03fbeff7cb604b3cc2b796f68f244b07ef13d5ed86c4a6c1ba9,black,BLACK_WIN,Checkmate - white loses,24,140.144,138.438,228.748,231.24,17
+7,sample6,3358202933654372135,14,white,6908c7edb4cce1cffcec2252ce5f14d8d0c17a0daa941896a5aa8dce472ef0bc,black,BLACK_WIN,Checkmate - white loses,40,241.376,240.266,166.788,192.045,26
+8,sample7,2335324579338857428,7,black,d4b4a7a0e2a16e48cbce724caf02fea4c322bd90d199470f7c702e5e8e6f9d43,white,WHITE_WIN,Checkmate - black loses,11,15.212,15.0,295.14,289.783,4
+9,sample8,5039027522001039796,14,white,2c1c6ce3ba801b54365c4e418b741c1d4384af51ba1c8796a25a4e918f2fa5a6,black,BLACK_WIN,Checkmate - white loses,30,113.765,112.5,248.791,237.665,16
+10,sample9,1980618016271775169,11,black,22b037bbd778743f4b3cc982f2235f11eec0186199945947f2c873ff59c50dbf,black,BLACK_WIN,Checkmate - white loses,12,0.745,0.75,300.0,299.377,1

@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   
   <script src="socket.io.min.js"></script>
-  <link rel="stylesheet" href="style.css?v=7.1" />
+  <link rel="stylesheet" href="style.css?v=7.6" />
 </head>
 <body>
   <!-- Ambient background lighting with deep English forest and racing emerald hues -->
@@ -293,15 +293,6 @@
           <div class="board-container" id="board-container">
             <div id="board" class="board"></div>
 
-            <!-- Review Mode Floating Notification Banner -->
-            <div class="review-banner" id="review-banner" style="display:none">
-              <div class="review-banner-text">
-                <span class="icon">🔍</span>
-                <span>Reviewing Ply <strong id="review-ply-num">0</strong></span>
-              </div>
-              <button class="btn btn-xs btn-primary" id="btn-jump-live">⚡ Return to Live</button>
-            </div>
-
             <!-- Game Over Overlay Modal -->
             <div id="result-overlay" class="result-overlay" style="display:none">
               <div class="result-card">
@@ -382,6 +373,15 @@
           <div class="history-empty">No moves recorded yet</div>
         </div>
 
+        <!-- Review Mode Status & Jump to Live (In Right Sidebar, NEVER over the board!) -->
+        <div class="review-banner" id="review-banner" style="display:none">
+          <div class="review-banner-text">
+            <span class="icon">🔍</span>
+            <span>Reviewing Ply <strong id="review-ply-num">0</strong></span>
+          </div>
+          <button class="btn btn-xs btn-primary" id="btn-jump-live" title="Return to current active board position">⚡ Return to Live</button>
+        </div>
+
         <!-- Chess.com Move Scrubbing Navigation Bar -->
         <div class="move-nav-bar" id="move-nav-bar">
           <button class="nav-btn" id="btn-nav-first" title="First Position (Home)">⏮</button>
@@ -402,7 +402,7 @@
           <button class="btn btn-sm btn-tool" id="btn-flip-board" title="Flip Board Perspective (Key: F)">
             🔁 Flip Board
           </button>
-          <button class="btn btn-sm btn-danger" id="btn-resign" style="display:none" title="Resign Match">
+          <button class="btn btn-sm btn-danger" id="btn-resign-ledger" style="display:none" title="Resign Match">
             ⚑ Resign
           </button>
         </div>
@@ -494,6 +494,6 @@
   <!-- Toast notification banner -->
   <div id="toast" class="toast"></div>
 
-  <script src="app.js?v=7.1"></script>
+  <script src="app.js?v=7.6"></script>
 </body>
 </html>

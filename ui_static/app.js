@@ -344,6 +344,7 @@ const speedRange       = document.getElementById("speed-range");
 const speedVal         = document.getElementById("speed-val");
 const btnNewGame       = document.getElementById("btn-new-game");
 const btnResign        = document.getElementById("btn-resign");
+const btnResignLedger  = document.getElementById("btn-resign-ledger");
 const btnUndoAction    = document.getElementById("btn-undo-action");
 const btnUndoMove      = document.getElementById("btn-undo-move");
 const btnLoadAgent     = document.getElementById("btn-load-agent");
@@ -1004,6 +1005,7 @@ function renderStatus() {
   if (reviewIndex >= 0) {
     statusEl.textContent = `Review Mode — Viewing Ply ${reviewIndex}. (Keys: [←/→] step, [End] live)`;
     btnResign.style.display = "none";
+    if (btnResignLedger) btnResignLedger.style.display = "none";
     return;
   }
 
@@ -1014,10 +1016,13 @@ function renderStatus() {
       statusEl.textContent = "Configure match parameters and click Start Match";
     }
     btnResign.style.display = "none";
+    if (btnResignLedger) btnResignLedger.style.display = "none";
     return;
   }
 
-  btnResign.style.display = state.human_side ? "inline-flex" : "none";
+  const showResign = state.human_side ? "inline-flex" : "none";
+  btnResign.style.display = showResign;
+  if (btnResignLedger) btnResignLedger.style.display = showResign;
   const cp = state.current_player;
   const human = state.human_side;
   if (!cp) return;
@@ -1274,11 +1279,13 @@ btnUndoMove.addEventListener("click", triggerUndo);
 btnUndoAction.addEventListener("click", triggerUndo);
 
 // Resign
-btnResign.addEventListener("click", () => {
+function triggerResign() {
   if (confirm("Are you sure you want to resign this game?")) {
     socket.emit("resign");
   }
-});
+}
+btnResign.addEventListener("click", triggerResign);
+if (btnResignLedger) btnResignLedger.addEventListener("click", triggerResign);
 
 // Manual Flip Board Toggle
 btnFlipBoard.addEventListener("click", () => {
@@ -1294,20 +1301,53 @@ btnSoundToggle.addEventListener("click", () => {
   showToast(sounds.enabled ? "Move sounds enabled" : "Move sounds muted");
 });
 
-// Stop Hosting
-btnStopHosting.addEventListener("click", () => {
-  if (confirm("Stop hosting the Chess Fragments server?\nThe server process will terminate.")) {
-    socket.emit("shutdown_server");
-    showToast("Server stopping. You may close this tab.");
-    setTimeout(() => {
-      document.body.innerHTML = `
-        <div style="height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:sans-serif;color:#9ab3a3;background:#09100c;gap:1rem;">
-          <h2 style="color:#fbfbf9;">Server Stopped</h2>
-          <p>The Chess Fragments UI server on port 5000 has been shut down.</p>
-          <p>To restart hosting, double-click <code style="color:#52b788;">start_ui.bat</code> in the project folder.</p>
-        </div>`;
-    }, 500);
+// Stop Hosting (2-Stage Confirmation with HTTP POST + SocketIO — No native popup blocker issues)
+let stopConfirmActive = false;
+let stopConfirmTimer = null;
+
+btnStopHosting.addEventListener("click", async () => {
+  if (!stopConfirmActive) {
+    stopConfirmActive = true;
+    btnStopHosting.classList.add("confirm-stop");
+    btnStopHosting.innerHTML = "⚠️ Confirm Stop?";
+    showToast("Click again to confirm server shutdown");
+    clearTimeout(stopConfirmTimer);
+    stopConfirmTimer = setTimeout(() => {
+      stopConfirmActive = false;
+      btnStopHosting.classList.remove("confirm-stop");
+      btnStopHosting.innerHTML = "🛑 Stop Hosting";
+    }, 4500);
+    return;
   }
+
+  // Second click = verified immediate shutdown
+  clearTimeout(stopConfirmTimer);
+  btnStopHosting.disabled = true;
+  btnStopHosting.innerHTML = "⏳ Stopping…";
+  showToast("🛑 Terminating Chess Fragments server process...");
+
+  // Send through both SocketIO and HTTP POST route for 100% guarantee
+  try {
+    socket.emit("shutdown_server");
+  } catch(e) {}
+
+  try {
+    await fetch("/api/shutdown", { method: "POST" });
+  } catch(e) {}
+
+  setTimeout(() => {
+    document.body.innerHTML = `
+      <div style="height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;color:#a3b899;background:#0d1611;gap:1.2rem;text-align:center;padding:2rem;">
+        <div style="font-size:3.5rem;">🛑</div>
+        <h2 style="color:#ffffff;font-size:1.8rem;font-weight:800;letter-spacing:-0.02em;">Chess Fragments Server Stopped</h2>
+        <p style="color:#92a498;max-width:440px;line-height:1.6;font-size:0.95rem;">
+          The Python UI server process on port 5000 has been safely shut down. You can close this browser tab.
+        </p>
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(82,183,136,0.3);padding:0.75rem 1.4rem;border-radius:8px;font-size:0.85rem;color:#e8f5e9;">
+          To restart hosting anytime: double-click <code style="color:#52b788;font-weight:700;">start_ui.bat</code> in the project folder.
+        </div>
+      </div>`;
+  }, 400);
 });
 
 // Load Agent

@@ -1,0 +1,54 @@
+{
+  "title": "EMPEROR v7.4 unique-position self-play",
+  "games_requested": 10,
+  "workers": 2,
+  "thinking_time_s_per_move": 12.0,
+  "game_clock_s_per_player": 300.0,
+  "seed": 740599,
+  "opening_plies_min": 4,
+  "opening_plies_max": 14,
+  "opening_side_to_move_balance": "alternating 50/50",
+  "opening_generation": "legal random playout; mild quiet-move preference; capture opportunities retained; unique canonical position hash",
+  "board_layouts": [
+    "sample0",
+    "sample1",
+    "sample2",
+    "sample3",
+    "sample4",
+    "sample5",
+    "sample6",
+    "sample7",
+    "sample8",
+    "sample9",
+    "sample10",
+    "sample11",
+    "sample12"
+  ],
+  "engine": {
+    "file": "agent_v74_tactical_guard.py",
+    "sha256": "f071799b7ac06d30a3f912adc541313942e536cf0c1285d5cff294e73abd57dd"
+  },
+  "puct": false,
+  "check_extensions": false,
+  "root_random_tiebreak": false,
+  "material_guard_max_score_loss_cp": 150,
+  "python": "3.13.14 (tags/v3.13.14:fd17997, Jun 10 2026, 13:03:48) [MSC v.1944 64 bit (AMD64)]",
+  "output_directory": "C:\\Users\\arnav\\Downloads\\CW-COMP2321-fullgame -Post Cut V5.6\\emperor_lab\\v74_pilot10_overnight",
+  "unique_opening_positions_generated": 10,
+  "opening_side_to_move_counts": {
+    "white": 5,
+    "black": 5
+  },
+  "board_layout_counts": {
+    "sample0": 1,
+    "sample1": 1,
+    "sample2": 1,
+    "sample3": 1,
+    "sample4": 1,
+    "sample5": 1,
+    "sample6": 1,
+    "sample7": 1,
+    "sample8": 1,
+    "sample9": 1
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "games": 600,
+  "unique_opening_positions": 600,
+  "opening_position_duplicates": 0,
+  "unique_complete_trajectories": 600,
+  "repeated_trajectory_games": 0,
+  "max_trajectory_repeats": 1,
+  "unique_decision_positions": 10364,
+  "decision_position_revisits": 326,
+  "outcomes": {
+    "BLACK_WIN": 326,
+    "WHITE_WIN": 271,
+    "DRAW": 3
+  },
+  "games_by_board": {
+    "sample0": 47,
+    "sample1": 47,
+    "sample2": 46,
+    "sample3": 46,
+    "sample4": 46,
+    "sample5": 46,
+    "sample6": 46,
+    "sample7": 46,
+    "sample8": 46,
+    "sample9": 46,
+    "sample10": 46,
+    "sample11": 46,
+    "sample12": 46
+  },
+  "games_by_opening_side_to_move": {
+    "white": 300,
+    "black": 300
+  },
+  "guard_counters": {
+    "material_guard_replacements": 12,
+    "promotion_guard_replacements": 2,
+    "material_guard_triggers": 313,
+    "promotion_guard_triggers": 127
+  },
+  "tactical_event_counts": {
+    "capture": 4698,
+    "material_guard_trigger": 313,
+    "immediate_major_piece_hang": 1006,
+    "promotion_allowed_next_ply": 287,
+    "promotion_played": 304,
+    "promotion_guard_trigger": 127
+  },
+  "unique_tactical_positions": 3332,
+  "major_piece_hangs": 1006,
+  "promotion_events": 304,
+  "promotions_allowed_next_ply": 287,
+  "average_game_plies_total": 26.73,
+  "captured_material_cp_total": 1495330
+}

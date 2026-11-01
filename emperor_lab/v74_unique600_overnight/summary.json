@@ -1,0 +1,97 @@
+{
+  "title": "EMPEROR v7.4 unique-position self-play",
+  "games_completed": 600,
+  "outcomes": {
+    "BLACK_WIN": 326,
+    "WHITE_WIN": 271,
+    "DRAW": 3
+  },
+  "unique_start_positions": 600,
+  "opening_side_to_move_counts": {
+    "white": 300,
+    "black": 300
+  },
+  "unique_complete_trajectories": 600,
+  "repeated_trajectory_games": 0,
+  "maximum_trajectory_repeat": 1,
+  "by_board": {
+    "sample0": {
+      "games": 47,
+      "unique": 47
+    },
+    "sample1": {
+      "games": 47,
+      "unique": 47
+    },
+    "sample2": {
+      "games": 46,
+      "unique": 46
+    },
+    "sample3": {
+      "games": 46,
+      "unique": 46
+    },
+    "sample4": {
+      "games": 46,
+      "unique": 46
+    },
+    "sample5": {
+      "games": 46,
+      "unique": 46
+    },
+    "sample6": {
+      "games": 46,
+      "unique": 46
+    },
+    "sample7": {
+      "games": 46,
+      "unique": 46
+    },
+    "sample8": {
+      "games": 46,
+      "unique": 46
+    },
+    "sample9": {
+      "games": 46,
+      "unique": 46
+    },
+    "sample10": {
+      "games": 46,
+      "unique": 46
+    },
+    "sample11": {
+      "games": 46,
+      "unique": 46
+    },
+    "sample12": {
+      "games": 46,
+      "unique": 46
+    }
+  },
+  "search_metrics": {
+    "moves": 10696,
+    "average_depth": 2.313,
+    "median_depth": 2.0,
+    "p90_depth": 4,
+    "max_depth": 49,
+    "moves_depth_ge_6": 310,
+    "moves_depth_ge_8": 98,
+    "moves_depth_ge_10": 42,
+    "total_nodes": 3845059,
+    "average_move_time_s": 8.5587,
+    "aggregate_nps": 42.0,
+    "tt_hits": 295243,
+    "tt_cutoffs": 106375,
+    "lmr_one_ply": 26866,
+    "material_guard_triggers": 313,
+    "material_guard_replacements": 12,
+    "promotion_guard_triggers": 127,
+    "promotion_guard_replacements": 2,
+    "puct_calls": 0,
+    "errors": 0,
+    "timeouts": 6
+  },
+  "average_plies_after_start": 17.82,
+  "elapsed_wall_s": 23023.41,
+  "games_per_hour": 93.82
+}

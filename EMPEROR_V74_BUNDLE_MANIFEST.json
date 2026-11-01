@@ -1,0 +1,38 @@
+{
+  "bundle": "EMPEROR v7.4 Tactical Guard + Diverse Self-Play Lab",
+  "candidate_status": "experimental; not promoted",
+  "engine_source": "agent_v74_tactical_guard.py",
+  "engine_sha256_canonical_lf": "f071799b7ac06d30a3f912adc541313942e536cf0c1285d5cff294e73abd57dd",
+  "baseline_source": "agent_v73_emperor.py",
+  "baseline_sha256_canonical_lf": "e2d98f8f6d09cf127d8318cb7944d102cc9fc678dbd9a7d62e11b0d731963c7b",
+  "offline_tests": "19 passed in the authoring environment",
+  "live_chessmaker_validation": "not run here: chessmaker is not installed in the authoring environment",
+  "selfplay_design": {
+    "default_games": 600,
+    "default_thinking_time_seconds_per_move": 8,
+    "default_game_clock_seconds_per_player": 300,
+    "unique_start_positions": "canonical hash deduplication before games start",
+    "side_to_move": "alternating 50/50",
+    "layouts": 13,
+    "randomized_legal_prelude_plies": [
+      4,
+      14
+    ],
+    "engines": "two isolated instances of the same v7.4 source",
+    "puct": false,
+    "check_extensions": false,
+    "root_random_tiebreak": false
+  },
+  "files": [
+    "agent_v73_emperor.py",
+    "agent_v74_tactical_guard.py",
+    "test_agent_v74.py",
+    "head_to_head_v73_vs_v74.py",
+    "emperor_v74_diverse_selfplay.py",
+    "analyze_emperor_v74_selfplay.py",
+    "test_emperor_v74_diverse_lab.py",
+    "V74_CHANGELOG.md",
+    "V74_TACTICAL_GUARD_README.md",
+    "EMPEROR_V74_DIVERSE_LAB_README.md"
+  ]
+}
