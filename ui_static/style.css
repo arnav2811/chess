@@ -43,10 +43,10 @@
   /* ── Board Tile Colors (Default: Chess.com Tournament Green & Buff) ── */
   --sq-light:           #eeeed2; /* Chess.com warm cream buff */
   --sq-dark:            #779954; /* Chess.com signature tournament olive-emerald */
-  --sq-selected:        rgba(247, 215, 74, 0.72); /* Chess.com sunny golden yellow */
-  --sq-last-move:       rgba(186, 202, 68, 0.65); /* Chess.com lime-yellow last move */
-  --sq-legal-dot:       rgba(20, 50, 30, 0.28);
-  --sq-capture-ring:    rgba(20, 50, 30, 0.35);
+  --sq-selected:        rgba(247, 215, 74, 0.45); /* Chess.com soft sunny golden yellow */
+  --sq-last-move:       rgba(245, 246, 130, 0.35); /* Chess.com soft low-opacity warm lime-yellow */
+  --sq-legal-dot:       rgba(0, 0, 0, 0.28);
+  --sq-capture-ring:    rgba(0, 0, 0, 0.32);
   --board-bezel:        #253327;
   --board-bezel-border: rgba(119, 153, 84, 0.45);
 
@@ -73,34 +73,34 @@
 [data-board-theme="tournament-green"] {
   --sq-light:           #eeeed2;
   --sq-dark:            #779954;
-  --sq-selected:        rgba(247, 215, 74, 0.72);
-  --sq-last-move:       rgba(186, 202, 68, 0.65);
-  --sq-legal-dot:       rgba(20, 50, 30, 0.28);
-  --sq-capture-ring:    rgba(20, 50, 30, 0.35);
+  --sq-selected:        rgba(247, 215, 74, 0.45);
+  --sq-last-move:       rgba(245, 246, 130, 0.35);
+  --sq-legal-dot:       rgba(0, 0, 0, 0.28);
+  --sq-capture-ring:    rgba(0, 0, 0, 0.32);
   --board-bezel:        #253327;
   --board-bezel-border: rgba(119, 153, 84, 0.45);
 }
 
 /* 2. Royal English Racing Emerald & Bone Ivory */
 [data-board-theme="royal-emerald"] {
-  --sq-light:           #f5f4ed;
-  --sq-dark:            #2d5a3f;
-  --sq-selected:        rgba(245, 197, 24, 0.72);
-  --sq-last-move:       rgba(64, 145, 108, 0.58);
-  --sq-legal-dot:       rgba(15, 35, 25, 0.3);
-  --sq-capture-ring:    rgba(15, 35, 25, 0.4);
-  --board-bezel:        #16241b;
-  --board-bezel-border: rgba(45, 90, 63, 0.55);
+  --sq-light:           #f4f6ee;
+  --sq-dark:            #34684b;
+  --sq-selected:        rgba(245, 197, 24, 0.45);
+  --sq-last-move:       rgba(245, 246, 130, 0.33);
+  --sq-legal-dot:       rgba(0, 0, 0, 0.28);
+  --sq-capture-ring:    rgba(0, 0, 0, 0.32);
+  --board-bezel:        #18261e;
+  --board-bezel-border: rgba(52, 104, 75, 0.6);
 }
 
 /* 3. Classic Slate & Bone White (Monochrome Tournament) */
 [data-board-theme="classic-bw"] {
   --sq-light:           #f8fafc;
   --sq-dark:            #374151;
-  --sq-selected:        rgba(245, 158, 11, 0.68);
-  --sq-last-move:       rgba(100, 116, 139, 0.55);
-  --sq-legal-dot:       rgba(30, 41, 59, 0.3);
-  --sq-capture-ring:    rgba(30, 41, 59, 0.42);
+  --sq-selected:        rgba(245, 158, 11, 0.42);
+  --sq-last-move:       rgba(245, 246, 130, 0.32);
+  --sq-legal-dot:       rgba(0, 0, 0, 0.28);
+  --sq-capture-ring:    rgba(0, 0, 0, 0.32);
   --board-bezel:        #111827;
   --board-bezel-border: rgba(75, 85, 99, 0.45);
 }
@@ -109,10 +109,10 @@
 [data-board-theme="oxford-midnight"] {
   --sq-light:           #e2e8f0;
   --sq-dark:            #1e293b;
-  --sq-selected:        rgba(217, 119, 6, 0.7);
-  --sq-last-move:       rgba(59, 130, 246, 0.5);
-  --sq-legal-dot:       rgba(15, 23, 42, 0.3);
-  --sq-capture-ring:    rgba(15, 23, 42, 0.42);
+  --sq-selected:        rgba(217, 119, 6, 0.45);
+  --sq-last-move:       rgba(245, 246, 130, 0.33);
+  --sq-legal-dot:       rgba(0, 0, 0, 0.28);
+  --sq-capture-ring:    rgba(0, 0, 0, 0.32);
   --board-bezel:        #0f172a;
   --board-bezel-border: rgba(30, 41, 59, 0.6);
 }
@@ -812,7 +812,7 @@ html, body {
 /* ── Player Bar (Chess.com Elite Card) ────────────────────────── */
 .player-bar {
   width: 100%;
-  max-width: 480px;
+  max-width: 516px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1034,7 +1034,7 @@ html, body {
 /* Eval Bar (Chess.com Vertical Pill) */
 .eval-bar-wrapper {
   width: 20px;
-  height: min(440px, 54vh);
+  height: min(470px, 57vh);
   background: #18251e;
   border: 1.5px solid var(--border-medium);
   border-radius: 6px;
@@ -1084,8 +1084,8 @@ html, body {
 
 .board-container {
   position: relative;
-  width: min(440px, 54vh);
-  height: min(440px, 54vh);
+  width: min(470px, 57vh);
+  height: min(470px, 57vh);
   border-radius: var(--radius-md);
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0,0,0,0.6);
@@ -1160,32 +1160,62 @@ html, body {
 /* Chess.com Selected Square */
 .sq.selected {
   background-color: var(--sq-selected) !important;
-  box-shadow: inset 0 0 0 3px var(--gold-glow), 0 0 16px rgba(229, 193, 88, 0.45);
+  box-shadow: inset 0 0 0 2.5px rgba(245, 197, 24, 0.85) !important;
 }
 
 /* Chess.com Last Move Squares */
 .sq.last-from, .sq.last-to {
   background-color: var(--sq-last-move) !important;
+  transition: background-color 0.2s ease;
 }
 
-/* Chess.com Legal Move Targets */
+/* Chess.com Legal Move Targets (Centered Dot for Empty Destination) */
 .sq.legal-target::after {
   content: "";
   position: absolute;
-  width: 28%;
-  height: 28%;
+  width: 26%;
+  height: 26%;
   border-radius: 50%;
-  background: var(--sq-legal-dot);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  background: rgba(0, 0, 0, 0.28);
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.45), 0 2px 4px rgba(0, 0, 0, 0.25);
   pointer-events: none;
+  z-index: 15;
+  transition: transform 0.15s ease, background-color 0.15s ease;
 }
+.sq.legal-target:hover::after {
+  transform: scale(1.25);
+  background: rgba(0, 0, 0, 0.45);
+}
+
+/* Chess.com Legal Capture Ring (Over piece, for diagonal pawn & piece captures) */
 .sq.legal-target.has-piece::after {
-  width: 84%;
-  height: 84%;
+  width: 86%;
+  height: 86%;
   border-radius: 50%;
   background: transparent;
-  border: 4.5px solid var(--sq-capture-ring);
-  box-shadow: 0 0 8px rgba(0,0,0,0.25);
+  border: 5px solid rgba(0, 0, 0, 0.32);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.8), 0 0 0 1.5px rgba(255, 255, 255, 0.4);
+  box-sizing: border-box;
+  pointer-events: none;
+  z-index: 15;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.sq.legal-target.has-piece:hover::after {
+  transform: scale(1.05);
+  border-color: rgba(230, 57, 70, 0.75);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.95), 0 0 12px rgba(230, 57, 70, 0.45);
+}
+
+/* Prevent native browser blue selection rectangle anywhere on the board */
+.board-arena, .board-frame, .board-container, .board, .sq, .piece, .piece-svg {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-drag: none;
+}
+::selection {
+  background: transparent;
 }
 
 /* Chess.com Embedded Corner Coordinates */
@@ -1234,19 +1264,22 @@ html, body {
   cursor: grabbing;
 }
 
-/* SVG Piece Vectors */
+/* SVG Piece Vectors (Chess.com Elite High-Contrast Rendering) */
 .piece-svg {
-  width: 82%;
-  height: 82%;
+  width: 90%;
+  height: 90%;
   display: block;
   pointer-events: none;
-  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.45));
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .white-piece .piece-svg {
-  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.55)) drop-shadow(0 1px 2px rgba(255, 255, 255, 0.4));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.38));
 }
 .black-piece .piece-svg {
-  filter: drop-shadow(0 4px 7px rgba(0, 0, 0, 0.8));
+  /* Crisp 1px contour rim + elevation shadow: 100% visible and sharp on ANY square theme */
+  filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.85))
+          drop-shadow(0 1px 2px rgba(255, 255, 255, 0.45))
+          drop-shadow(0 3px 5px rgba(0, 0, 0, 0.55));
 }
 
 /* Unicode Fallback Style */

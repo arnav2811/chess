@@ -217,6 +217,18 @@ def _serialise_state():
     if gs["legal_targets"]:
         legal_targets = [(x, y) for x, y in gs["legal_targets"]]
 
+    all_legal_moves = {}
+    if gs["board"] is not None and gs["active"] and not gs["result"]:
+        try:
+            legal = list_legal_moves_for(gs["board"], gs["board"].current_player)
+            for pc, mv in legal:
+                key = f"{pc.position.x},{pc.position.y}"
+                if key not in all_legal_moves:
+                    all_legal_moves[key] = []
+                all_legal_moves[key].append([mv.position.x, mv.position.y])
+        except Exception:
+            pass
+
     w_clock, b_clock = _calculate_live_clocks()
     diff = w_mat - b_mat
 
@@ -230,6 +242,7 @@ def _serialise_state():
         "board": board_data,
         "selected": gs["selected_piece"],
         "legal_targets": legal_targets,
+        "all_legal_moves": all_legal_moves,
         "move_history": gs["move_history"][-80:],
         "agent_name": gs["agent_name"],
         "board_sample": gs["board_sample_name"],
