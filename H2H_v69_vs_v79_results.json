@@ -1,0 +1,143 @@
+{
+  "matchup": "v7.9 vs v6.9 (subprocess-isolated v3)",
+  "total_games": 12,
+  "wins_v79": 8,
+  "draws": 0,
+  "losses_v79": 4,
+  "errors": 0,
+  "win_rate_pct": 66.7,
+  "games": [
+    {
+      "game": 1,
+      "board": "sample0",
+      "v79_color": "white",
+      "label": "sample0 | v7.9=White, v6.9=Black",
+      "outcome_v79": "WIN",
+      "termination": "black thinking time out",
+      "plies": 140,
+      "duration_s": 432.3,
+      "pieces_left": 3
+    },
+    {
+      "game": 2,
+      "board": "sample0",
+      "v79_color": "black",
+      "label": "sample0 | v7.9=Black, v6.9=White",
+      "outcome_v79": "LOSS",
+      "termination": "Checkmate - black loses",
+      "plies": 18,
+      "duration_s": 101.2,
+      "pieces_left": 12
+    },
+    {
+      "game": 3,
+      "board": "sample0",
+      "v79_color": "white",
+      "label": "sample0 | v7.9=White, v6.9=Black",
+      "outcome_v79": "WIN",
+      "termination": "black thinking time out",
+      "plies": 144,
+      "duration_s": 419.7,
+      "pieces_left": 3
+    },
+    {
+      "game": 4,
+      "board": "sample0",
+      "v79_color": "black",
+      "label": "sample0 | v7.9=Black, v6.9=White",
+      "outcome_v79": "LOSS",
+      "termination": "Stalemate (no more possible moves) - black loses",
+      "plies": 36,
+      "duration_s": 326.9,
+      "pieces_left": 4
+    },
+    {
+      "game": 5,
+      "board": "sample1",
+      "v79_color": "white",
+      "label": "sample1 | v7.9=White, v6.9=Black",
+      "outcome_v79": "WIN",
+      "termination": "Checkmate - black loses",
+      "plies": 134,
+      "duration_s": 467.0,
+      "pieces_left": 3
+    },
+    {
+      "game": 6,
+      "board": "sample1",
+      "v79_color": "black",
+      "label": "sample1 | v7.9=Black, v6.9=White",
+      "outcome_v79": "WIN",
+      "termination": "white thinking time out",
+      "plies": 121,
+      "duration_s": 454.9,
+      "pieces_left": 3
+    },
+    {
+      "game": 7,
+      "board": "sample1",
+      "v79_color": "white",
+      "label": "sample1 | v7.9=White, v6.9=Black",
+      "outcome_v79": "WIN",
+      "termination": "black thinking time out",
+      "plies": 126,
+      "duration_s": 467.4,
+      "pieces_left": 3
+    },
+    {
+      "game": 8,
+      "board": "sample1",
+      "v79_color": "black",
+      "label": "sample1 | v7.9=Black, v6.9=White",
+      "outcome_v79": "WIN",
+      "termination": "white thinking time out",
+      "plies": 129,
+      "duration_s": 453.9,
+      "pieces_left": 3
+    },
+    {
+      "game": 9,
+      "board": "sample2",
+      "v79_color": "white",
+      "label": "sample2 | v7.9=White, v6.9=Black",
+      "outcome_v79": "WIN",
+      "termination": "Checkmate - black loses",
+      "plies": 24,
+      "duration_s": 123.1,
+      "pieces_left": 7
+    },
+    {
+      "game": 10,
+      "board": "sample2",
+      "v79_color": "black",
+      "label": "sample2 | v7.9=Black, v6.9=White",
+      "outcome_v79": "LOSS",
+      "termination": "Stalemate (no more possible moves) - black loses",
+      "plies": 34,
+      "duration_s": 314.8,
+      "pieces_left": 4
+    },
+    {
+      "game": 11,
+      "board": "sample2",
+      "v79_color": "white",
+      "label": "sample2 | v7.9=White, v6.9=Black",
+      "outcome_v79": "WIN",
+      "termination": "Checkmate - black loses",
+      "plies": 24,
+      "duration_s": 123.5,
+      "pieces_left": 7
+    },
+    {
+      "game": 12,
+      "board": "sample2",
+      "v79_color": "black",
+      "label": "sample2 | v7.9=Black, v6.9=White",
+      "outcome_v79": "LOSS",
+      "termination": "Stalemate (no more possible moves) - black loses",
+      "plies": 38,
+      "duration_s": 326.1,
+      "pieces_left": 4
+    }
+  ]
+}

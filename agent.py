@@ -1,33 +1,73 @@
 # ═══════════════════════════════════════════════════════════════════════════════
-# agent.py — Chess Fragments AI Agent (v6.0 evaluation-focused upgrade)
+# agent.py — Chess Fragments AI Agent (v7.9 — Submission Candidate)
 # COMP2321 Coursework — 5×5 Chess Variant with Custom Pieces
+#
+# agent.py — Chess Fragments AI Agent (v8.0 — Submission Candidate)
+# COMP2321 Coursework — 5×5 Chess Variant with Custom Pieces
+#
+# v8.0 over v7.9: (1) check extensions enabled — sees mate threats deeper as
+# Black; (2) self-stalemate guard added — _we_are_immediately_stalemated()
+# ensures we don't play a move that lets the opponent reply by leaving US with
+# zero legal moves; (3) mobility crisis penalty increased (0-moves: 220→420,
+# 1-move: 145→260) to more strongly avoid near-stalemate positions.
+# Tournament baseline: 18W/0D/0L (v7.9). H2H target: beat v6.9 as both colours.
 #
 # Architecture at a Glance:
 #   • Iterative Deepening Negamax with Alpha-Beta Pruning
 #   • Principal Variation Search (PVS) with zero-window re-search
 #   • Aspiration Windows (±250 cp, auto-widens on fail)
-#   • Transposition Table (200 k entries, coordinate-keyed moves)
-#   • 6-Tier Move Ordering: PV > MVV-LVA > Promotion > Killers > History > Centre
+#   • Transposition Table (200 k entries, frozenset piece-position keys — not Zobrist)
+#   • Tactical move ordering: PV > MVV-LVA > Promotion > Quiet Check > Killers > History
+#   • Side- and piece-aware killer/history keys (no cross-colour heuristic aliasing)
 #   • Late Move Reductions (LMR) for non-tactical late moves
 #   • Quiescence Search (captures/promotions + bounded check evasions)
 #   • Frontier Futility Pruning at depth 1
-#   • Anti-Stalemate King Mobility Gradient (stalemate = loss)
+#   • Anti-Stalemate Guard: one-reply terminal-safety veto (always active, v7.9+)
 #   • Promotion-race evaluation and safety-weighted piece mobility
 #   • Turn-aware exchange liability and endgame mating drive
 #   • Own-clock budgeting for the 300 s per-player limit
 #   • Self-Learning Opening Book (plies 1–2)
 #   • Repetition Avoidance (prevents fivefold-repetition draws)
+#   • Check extensions disabled by default; existing low-mobility extensions retained
+#   • Root PUCT/MCTS probe retained for experiments but disabled by default
+#   • Dynamic 0/1/2-ply LMR with tactical, killer and history safeguards
+#   • Aged cross-turn history ordering, reset only at new-game boundaries
+#   • Root and node deadline checks with completed-iteration fallback
+#   • Bounded LRU transposition table (no wholesale flush at 90% capacity)
+#   • Directional aspiration-window widening
+#   • Optional reproducible root tie-breaking (disabled by default)
+#   • Tactical quiet-check quiescence alongside captures (strictly bounded)
+#   • Deterministic fail-safe move selection
+#   • Retrograde WDL probing at every covered ≤4-piece search node
 #   • Per-move instrumentation logged to stderr
 #
-# Constraints:
-#   Single-file agent — no external dependencies beyond Python built-ins,
-#   the chessmaker library, and the provided board_utils helper.
+# Runtime files:
+#   Keep this agent beside endgame_tablebase_v77.py and
+#   endgame_tb_snippet_v77.py. The tablebase is deliberately a separate
+#   companion module so its embedded retrograde data can be loaded once.
+# Runtime dependencies: Python built-ins, chessmaker, and the project
+#   extension helpers supplied with the existing coursework repository.
 # ═══════════════════════════════════════════════════════════════════════════════
 
 import time
-import random
 import sys
+import math
+import random
+from collections import OrderedDict
+
+ENGINE_BUILD = "v8.1-zobrist-see-rfp"
 from extension.board_utils import list_legal_moves_for
+
+# The retrograde data is a companion module (≈4.7 MB source).  Keep the agent
+# operational if a deployment omits it, but expose availability in diagnostics.
+try:
+    from endgame_tablebase_v77 import probe_endgame_tb as _probe_endgame_tb
+    from endgame_tablebase_v77 import is_tablebase_loaded as _is_tablebase_loaded
+    _TABLEBASE_READY = bool(_is_tablebase_loaded())
+except Exception:
+    _probe_endgame_tb = None
+    _is_tablebase_loaded = None
+    _TABLEBASE_READY = False
 
 
 # ─── Python Compatibility ─────────────────────────────────────────────────────
@@ -158,6 +198,15 @@ TT_UPPER = 2    # Score is an upper bound (all moves failed to raise α)
 MATE_SCORE = 99_999
 MATE_THRESHOLD = 90_000
 
+# ─── Draw Contempt ────────────────────────────────────────────────────────────
+# Rules: ONLY a win is a win. Draws are treated the same as losses.
+# This contempt value is subtracted from any draw score so the engine
+# always prefers a fighting continuation over a repetition, K-vs-K, or
+# tablebase DRAW outcome.  The value is large enough to make a draw worse
+# than any heuristic positional advantage but well below MATE_THRESHOLD so
+# it cannot mask a genuine win or loss score.
+DRAW_CONTEMPT = 60_000   # treat draws as a significant loss
+
 
 def _score_to_tt(score, ply_from_root):
     """Normalize mate-distance scores before storing them in the TT."""
@@ -176,7 +225,7 @@ def _score_from_tt(score, ply_from_root):
         return score + ply_from_root
     return score
 
-_tt = {}
+_tt = OrderedDict()
 _TT_MAX_SIZE = 200_000
 
 
@@ -187,6 +236,44 @@ _TT_MAX_SIZE = 200_000
 # saving the entire 12 s thinking budget.  No disk I/O — stays within the
 # single-file coursework constraint.
 # ──────────────────────────────────────────────────────────────────────────────
+
+# ─── Verified static opening book (coordinate-keyed) ───────────────────────────
+# v6.6 carried a self-learning in-memory cache but never consulted the supplied
+# opening_book.py table. That left known black-side bait-pawn traps unprotected.
+# Embed only the two defensive replies that correspond to the measured v6.6 losses. Do not override other openings.
+_SELECTIVE_OPENING_RAW = {'nqkbrppppp....PPPPP.RBKQN_black_2': (3, 1, 3, 2), 'rbkqnpppppP.....PPPPNQKBR_black_2': (1, 1, 1, 2)}
+_OPENING_SYMBOL_TO_NAME = {"p": "pawn", "n": "knight", "b": "bishop",
+                          "r": "right", "q": "queen", "k": "king"}
+
+def _decode_static_opening_key(raw_key):
+    board_text, side_to_move, ply_text = raw_key.rsplit("_", 2)
+    if len(board_text) != 25:
+        return None
+    pieces = []
+    for i, ch in enumerate(board_text):
+        if ch == ".":
+            continue
+        name = _OPENING_SYMBOL_TO_NAME.get(ch.lower())
+        if name is None:
+            return None
+        pieces.append((name, "white" if ch.isupper() else "black", i % 5, i // 5))
+    return (tuple(sorted(pieces)), side_to_move, int(ply_text))
+
+_STATIC_OPENINGS = {
+    decoded: move for raw, move in _SELECTIVE_OPENING_RAW.items()
+    for decoded in (_decode_static_opening_key(raw),) if decoded is not None
+}
+
+def _opening_position_key(board, player_name, ply):
+    pieces = tuple(sorted((_piece_name(p), p.player.name, p.position.x, p.position.y)
+                          for p in board.get_pieces()))
+    return (pieces, player_name, int(ply))
+
+def _lookup_static_opening(board, player_name, ply):
+    if ply not in (1, 2):
+        return None
+    return _STATIC_OPENINGS.get(_opening_position_key(board, player_name, ply))
+
 
 _opening_book = {}   # (board_hash, player_name, ply) → (fx, fy, tx, ty)
 
@@ -204,8 +291,8 @@ _opening_book = {}   # (board_hash, player_name, ply) → (fx, fy, tx, ty)
 # search within the same time budget.
 # ──────────────────────────────────────────────────────────────────────────────
 
-_killer_moves = {}   # depth → [(from_pos, to_pos), ...]  (max 2 per depth)
-_history = {}        # (fx, fy, tx, ty) → cumulative score
+_killer_moves = {}   # (side, piece_type, ply) → [coordinate move keys]
+_history = {}        # (side, piece_type, from/to) → bounded cutoff score
 
 
 # ─── Global Search State ──────────────────────────────────────────────────────
@@ -214,13 +301,62 @@ _nodes_searched = 0
 _deadline = 0.0
 _ASPIRATION_DELTA = 250    # Initial aspiration-window half-width (centipawns)
 
+# PUCT remains available in the source for controlled research, but it is
+# DISABLED in the v7.4 candidate. The 200-game v6.9-v7.1 comparison was run
+# with PUCT off, and the earlier PUCT-on pilot did not justify its cost.
+# Do not enable this in a promotion candidate without a separate ablation.
+_ENABLE_ROOT_PUCT = False
+_ENABLE_CHECK_EXTENSION = True   # v8.0: enabled — critical for seeing mate threats as Black.
+_ENABLE_QUIET_CHECK_ORDERING = True
+_CHECK_EXTENSION_MAX_PLY = 10
+# Controlled experiments: deterministic search is the default.
+_ENABLE_ROOT_RANDOM_TIEBREAK = False
+_ROOT_TIE_WINDOW_CP = 8
+_ROOT_RANDOM_SEED = 730_073
+# Search diagnostics reset once per move.
+_last_tt_hits = 0
+_last_tt_cutoffs = 0
+_last_lmr_one_ply = 0
+_last_lmr_two_ply = 0
+_last_aspiration_fail_low = 0
+_last_aspiration_fail_high = 0
+_last_random_tiebreak = False
+_PUCT_MAX_SIMULATIONS = 28
+_PUCT_MAX_DEPTH = 4              # Includes the candidate root move.
+_PUCT_MAX_CANDIDATES = 4
+_PUCT_SCORE_WINDOW = 180          # Centipawns from the best completed root score.
+_PUCT_MIN_ENTROPY = 0.38
+_PUCT_C = 1.15
+_PUCT_MAX_TIME = 0.18             # Hard wall-clock allowance per move.
+
 
 # ─── Per-Move Instrumentation ─────────────────────────────────────────────────
 
 _last_depth_reached = 0
 _last_nodes_searched = 0
 _last_branching_factor = 0.0
+_last_iteration_trace = []
+_last_aborted_depth = 0
+_last_aborted_nodes = 0
+_last_check_extensions = 0
+_last_mobility_extensions = 0
 _move_stats_log = []       # One dict per agent() call
+_last_puct_stats = {"used": False, "simulations": 0, "elapsed_s": 0.0}
+_last_material_guard_triggered = False
+_last_material_guard_loss = 0
+_last_material_guard_replacement = False
+_last_promotion_guard_triggered = False
+_last_promotion_guard_replacement = False
+_last_tb_probes = 0
+_last_tb_hits = 0
+_last_tb_wins = 0
+_last_tb_losses = 0
+_last_tb_draws = 0
+_last_tb_repeat_avoided = False
+_last_stalemate_guard_calls = 0
+_last_stalemate_guard_threats = 0
+_last_stalemate_guard_inconclusive = 0
+_last_stalemate_guard_replacements = 0
 
 
 # ─── Repetition Tracking ─────────────────────────────────────────────────────
@@ -249,21 +385,41 @@ _PAWN_ADVANCE_BONUS_BLACK = [0, 10, 30, 60, 0]   # row y for Black
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
-def _hash_board(board):
-    """
-    Hash the current position for the transposition table.
+# ─── Zobrist Hashing ─────────────────────────────────────────────────────────
+# Replaces frozenset-based key with deterministic 64-bit XOR hash.
+# Still O(n) per call (no incremental updates, since we clone the board),
+# but avoids Python tuple+frozenset allocation and uses fast integer XOR.
+# Deterministic seed ensures reproducibility across runs.
+# 7 piece types × 2 colours × 5×5 squares = 350 table entries + 1 side key.
+import random as _zrng
+_zrng.seed(0x5F3759DF)
+_ZOBRIST_PIECE_TYPES = ("pawn", "knight", "bishop", "right", "queen", "king", "rook")
+_ZOBRIST_COLORS = ("white", "black")
+_ZOBRIST_TABLE = {
+    (pt, col, x, y): _zrng.getrandbits(64)
+    for pt in _ZOBRIST_PIECE_TYPES
+    for col in _ZOBRIST_COLORS
+    for x in range(5)
+    for y in range(5)
+}
+_ZOBRIST_SIDE = _zrng.getrandbits(64)   # XOR in when Black to move
+del _zrng
 
-    Uses a sorted tuple of (piece_name, player, x, y) + side-to-move.
-    Python's built-in hash() on tuples is C-optimised and extremely fast.
-    Zobrist hashing was considered but rejected: maintaining incremental XOR
-    across ChessMaker's deep-copy board.clone() architecture is fragile, and
-    collision risk is negligible on a 5×5 board.
+
+def _hash_board(board):
+    """Zobrist-based transposition key.
+
+    XORs per-piece random values from a fixed lookup table; side-to-move is
+    included via a dedicated key.  Produces a 64-bit integer with far fewer
+    Python object allocations than the previous frozenset approach.
     """
-    pieces = []
+    h = 0
     for p in board.get_pieces():
-        pieces.append((_piece_name(p), p.player.name, p.position.x, p.position.y))
-    pieces.sort()
-    return hash((tuple(pieces), board.current_player.name))
+        key = (_piece_name(p), p.player.name, p.position.x, p.position.y)
+        h ^= _ZOBRIST_TABLE.get(key, 0)
+    if board.current_player.name == "black":
+        h ^= _ZOBRIST_SIDE
+    return h
 
 
 def _check_terminal(board, ply_from_root=0):
@@ -288,7 +444,7 @@ def _check_terminal(board, ply_from_root=0):
             return False, 0
 
     if white_king is None and black_king is None:
-        return True, 0   # Mutual annihilation (shouldn't happen, but safe)
+        return True, -DRAW_CONTEMPT  # Mutual annihilation — draw, treated as loss
     if white_king is None:
         score = (-MATE_SCORE + ply_from_root if board.current_player.name == "white"
                  else MATE_SCORE - ply_from_root)
@@ -298,7 +454,9 @@ def _check_terminal(board, ply_from_root=0):
                  else MATE_SCORE - ply_from_root)
         return True, score
     if piece_count == 2:
-        return True, 0   # Only two kings — automatic draw
+        # K-vs-K: draw under standard rules, but we treat draws as losses.
+        # The side to move cannot win from here — return as a (symmetric) loss.
+        return True, -DRAW_CONTEMPT
 
     return False, 0
 
@@ -332,12 +490,24 @@ def _make_move_on_clone(board, piece, move):
     """
     child = board.clone()
     try:
-        # Find the corresponding piece on the cloned board
+        # Fast path: ChessMaker's Board supports square lookup with a Position.
+        # This avoids scanning every piece on every search edge. Keep the old
+        # scan as a compatibility fallback for alternate Board implementations.
         child_piece = None
-        for cp in child.get_player_pieces(piece.player):
-            if type(cp) is type(piece) and cp.position == piece.position:
-                child_piece = cp
-                break
+        try:
+            square = child[piece.position]
+            candidate = getattr(square, "piece", None)
+            if (candidate is not None and type(candidate) is type(piece)
+                    and candidate.player.name == piece.player.name):
+                child_piece = candidate
+        except Exception:
+            child_piece = None
+        if child_piece is None:
+            for cp in child.get_player_pieces(piece.player):
+                if (type(cp) is type(piece) and cp.position == piece.position
+                        and cp.player.name == piece.player.name):
+                    child_piece = cp
+                    break
         if child_piece is None:
             return None
 
@@ -468,8 +638,32 @@ def _build_evaluation_maps(piece_rows, occupancy):
 
     return attacks, cheapest, mobility, safe_mobility
 
+
+def _mobility_crisis_penalty(move_count, is_side_to_move, phase):
+    """Bounded penalty for a side with dangerously few pseudo-legal options.
+
+    On this 5x5 variant, stalemate is a loss. Low mobility is therefore a more
+    urgent strategic weakness than in ordinary chess. Exact terminal detection
+    remains the search's responsibility; this smooth score penalises positions
+    that are approaching a mobility collapse.
+    """
+    base = {0: 420, 1: 260, 2: 130, 3: 55, 4: 22}.get(move_count, 0)
+    if base == 0:
+        return 0
+    if phase > 12:
+        base = int(base * 0.75)
+    if not is_side_to_move:
+        base = int(base * 0.65)
+    return base
+
+
 def evaluate_for_white(board):
     """Evaluate a 5×5 Chess Fragments position from White's perspective.
+
+    v7.2 deliberately retains the complete v7.1 evaluation weights and feature
+    terms. The current evaluator is a strong handcrafted baseline, but its
+    pseudo-attack and exchange-liability estimates are not yet empirically
+    calibrated well enough to justify another unmeasured weight rewrite.
 
     The design borrows *principles*, not copied engine code: compact, tuned
     features; tapered king activity; attack/defence awareness; and explicit
@@ -651,6 +845,16 @@ def evaluate_for_white(board):
     # not a replacement for list_legal_moves_for() or search.
     score += int((mobility[1] - mobility[-1]) * 3)
     score += int((safe_mobility[1] - safe_mobility[-1]) * 2.5)
+
+    # Nonlinear liberty pressure: on a compact board, being reduced to just a
+    # few destinations often precedes a forced tactic or a stalemate loss.
+    # Penalise the side that must move now more heavily.
+    side_to_move = 1 if board.current_player.name == "white" else -1
+    for side in (1, -1):
+        liberty_penalty = _mobility_crisis_penalty(
+            mobility[side], side == side_to_move, phase)
+        score -= side * liberty_penalty
+
     white_centre = black_centre = 0
     for y in (1, 2, 3):
         for x in (1, 2, 3):
@@ -676,23 +880,24 @@ def evaluate_for_white(board):
         attacker_surplus = enemy_count - friendly_count
 
         if attacker_surplus > 0:
-            # Cheap attacks on valuable pieces are more dangerous; multiple
-            # attackers raise the estimate but the penalty remains capped.
+            # A cheaper attacker with more attackers than defenders is a real
+            # conversion threat. Major pieces deserve a larger penalty because
+            # losing a Queen/Right often decides a 5x5 game.
             if enemy_min < value:
-                fraction = 0.24 + 0.045 * min(2, attacker_surplus - 1)
+                fraction = 0.36 + 0.07 * min(2, attacker_surplus - 1)
             else:
-                fraction = 0.15 + 0.035 * min(2, attacker_surplus - 1)
+                fraction = 0.22 + 0.05 * min(2, attacker_surplus - 1)
         else:
-            # Defenders usually make a capture unsound, but an attacked piece
-            # still carries some tactical burden and can be overloaded.
+            # A defended piece is not automatically hanging; retain a smaller
+            # risk premium for overloads and potentially unfavourable exchanges.
             fraction = 0.035 + (0.025 if enemy_min < value else 0.0)
 
         if name in ("queen", "right") and enemy_min < value and attacker_surplus > 0:
-            fraction += 0.035
+            fraction += 0.05
         if side_to_move == side:
-            fraction *= 0.58  # owner has the move and may escape/counterattack
+            fraction *= 0.55  # the owner can still move or counterattack
 
-        liability = min(int(value * 0.42), int(value * fraction))
+        liability = min(int(value * 0.62), int(value * fraction))
         score -= side * liability
 
     # ── King safety and stalemate-resistance ───────────────────────────────
@@ -722,15 +927,17 @@ def evaluate_for_white(board):
                     if max(abs(px - nx), abs(py - ny)) <= 1:
                         friendly_pawn_shield += 1
                         break
-        danger = min(8, zone_pressure) * (8 if phase > 5 else 6)
+        # One open line on a 5x5 board can turn into a forcing attack quickly.
+        # Exposed checks and the lack of safe exits need nonlinear penalties.
+        danger = min(10, zone_pressure) * (10 if phase > 5 else 8)
         if checkers:
-            danger += 75 + min(3, checkers - 1) * 18
+            danger += 135 + min(3, checkers - 1) * 32
         if safe_escapes == 0:
-            danger += 55  # mobility crisis; exact stalemate is handled by search
+            danger += 78  # tactical cage; exact terminal loss is handled by search
         elif safe_escapes == 1:
-            danger += 28
+            danger += 38
         elif safe_escapes == 2:
-            danger += 10
+            danger += 14
         danger -= min(3, friendly_pawn_shield) * (8 if phase > 5 else 3)
         return max(0, danger)
 
@@ -789,86 +996,103 @@ def evaluate_for_white(board):
 
 
 def _move_key(piece, move):
-    """Canonical coordinate key for a move: (from_x, from_y, to_x, to_y)."""
+    """Coordinate key retained for TT/PV matching and board-local move identity."""
     return (piece.position.x, piece.position.y, move.position.x, move.position.y)
 
 
-def _score_move(piece, move, board, depth):
-    """
-    Assign a heuristic priority score to a move for ordering.
+def _heuristic_move_key(piece, move):
+    """Side- and piece-aware key for history/killer learning.
 
-    Priority tiers (highest first):
-      1. Captures scored by MVV-LVA (Most Valuable Victim − Least Valuable Attacker)
-      2. Pawn promotions
-      3. Killer moves (quiet moves that caused β-cutoffs at this depth)
-      4. History heuristic (global cutoff counter)
-      5. Centre proximity
+    A coordinate-only history key aliases different actors and both colours.
+    That is especially harmful in this compact variant, where the same source
+    square coordinates recur frequently in sibling branches.
     """
-    score = 0
-    mk = _move_key(piece, move)
+    return (piece.player.name, _piece_name(piece), *_move_key(piece, move))
 
-    # 1. Captures — MVV-LVA
+
+def _killer_bucket(piece, ply):
+    return (piece.player.name, _piece_name(piece), int(ply))
+
+
+def _score_move(piece, move, board, depth, check_data=None):
+    """Return lexicographic move-ordering fields; never prunes or changes legality.
+
+    Tiers are separate rather than additive, so a large history score cannot
+    accidentally push a quiet move above a capture, promotion or likely check.
+    Quiet-check detection is only a geometric prefilter: a false positive merely
+    changes order, never legality or the returned score.
+    """
     caps = getattr(move, "captures", set())
+    mk = _move_key(piece, move)
+    tier = 1
+    tactical_score = 0
+
+    # 1. Captures — SEE (Static Exchange Evaluation), with MVV-LVA fallback.
+    #    SEE estimates net material gain after the full exchange sequence:
+    #      see_score = victim_value - max(0, attacker_value - victim_value)
+    #    For multi-captures (rare on 5×5), values are summed per target square.
+    #    Winning captures (SEE > 0) are tried before equal/losing ones, but all
+    #    captures stay in tier 6 — above any quiet move.
     if caps:
+        capture_score = 0
         for cap_pos in caps:
             try:
                 victim = board[cap_pos].piece
                 if victim:
                     victim_val = PIECE_VALUES.get(_piece_name(victim), 0)
                     attacker_val = PIECE_VALUES.get(_piece_name(piece), 0)
-                    score += 10000 + victim_val - (attacker_val >> 3)
+                    # Simple 1-ply SEE: assume opponent recaptures with cheapest
+                    # available attacker ≈ our piece value if we hang it there.
+                    see_score = victim_val - max(0, attacker_val - victim_val)
+                    capture_score += 10000 + see_score
             except Exception:
-                score += 5000
+                capture_score += 5000
+        tier, tactical_score = 6, capture_score
 
-    # 2. Pawn promotion
-    if _piece_name(piece) == "pawn":
-        if piece.player.name == "white" and move.position.y == 0:
-            score += 9000
-        elif piece.player.name == "black" and move.position.y == 4:
-            score += 9000
+    # 2. Promotion (captures retain the higher capture tier).
+    is_promotion = (_piece_name(piece) == "pawn" and
+                    ((piece.player.name == "white" and move.position.y == 0) or
+                     (piece.player.name == "black" and move.position.y == 4)))
+    if is_promotion and tier < 5:
+        tier, tactical_score = 5, 0
 
-    # 3. Killer moves
-    if not caps:
-        killers = _killer_moves.get(depth, [])
-        if mk in killers:
-            score += 8000
+    # 3. Likely quiet checks; the prefilter only protects ordering priority.
+    if (_ENABLE_QUIET_CHECK_ORDERING and not caps and check_data is not None):
+        enemy_king = check_data[0]
+        if _move_might_give_check(board, piece, move, check_data) and tier < 4:
+            tier = 4
+            tactical_score = _quiet_check_priority(piece, move, enemy_king)
 
-    # 4. History heuristic
-    score += _history.get(mk, 0)
+    # 4. Side- and piece-scoped killers.
+    if not caps and tier < 3 and mk in _killer_moves.get(_killer_bucket(piece, depth), ()):
+        tier = 3
+        tactical_score = 0
 
-    # 5. Centre preference
+    # History is strictly a within-tier tiebreaker.
+    history_score = _history.get(_heuristic_move_key(piece, move), 0)
     cx, cy = move.position.x, move.position.y
-    centre_dist = abs(cx - 2) + abs(cy - 2)
-    score += (4 - centre_dist) * 3
-
-    return score
+    centre_score = 4 - (abs(cx - 2) + abs(cy - 2))
+    return tier, tactical_score, history_score, centre_score
 
 
 def _order_moves(moves, board, depth=0, tt_best_move=None):
-    """
-    Sort moves by heuristic priority (best first).
-
-    The TT best move (if any) is boosted to ensure it's searched first — this
-    is the single most impactful move-ordering technique, as it represents the
-    principal variation from the previous iteration.
-    """
+    """Order PV/TT first, then tactical and side-aware heuristic priorities."""
+    check_data = _check_prefilter_data(board) if moves else None
     scored = []
     for i, (piece, move) in enumerate(moves):
-        s = _score_move(piece, move, board, depth)
-        if tt_best_move is not None:
-            if _move_key(piece, move) == tt_best_move:
-                s += 100000    # PV move — search first
-        scored.append((s, i, piece, move))
-    scored.sort(key=lambda x: -x[0])
-    return [(p, m) for (_, _, p, m) in scored]
+        mk = _move_key(piece, move)
+        pv_priority = 1 if tt_best_move is not None and mk == tt_best_move else 0
+        score = _score_move(piece, move, board, depth, check_data)
+        scored.append((pv_priority, *score, i, piece, move))
+    scored.sort(key=lambda item: (-item[0], -item[1], -item[2], -item[3], -item[4], item[5]))
+    return [(piece, move) for (_, _, _, _, _, _, piece, move) in scored]
 
 
-def _store_killer(depth, piece, move):
-    """Record a killer move at the given depth (max 2 per depth, FIFO)."""
+def _store_killer(ply, piece, move):
+    """Record one of the two best quiet cutoffs for this side/type/ply bucket."""
     mk = _move_key(piece, move)
-    if depth not in _killer_moves:
-        _killer_moves[depth] = []
-    killers = _killer_moves[depth]
+    bucket = _killer_bucket(piece, ply)
+    killers = _killer_moves.setdefault(bucket, [])
     if mk not in killers:
         killers.insert(0, mk)
         if len(killers) > 2:
@@ -876,9 +1100,101 @@ def _store_killer(depth, piece, move):
 
 
 def _update_history(piece, move, depth):
-    """Increment the history score for a move that caused a β-cutoff."""
+    """Bounded, side- and piece-aware history reward for a beta-cutoff move."""
+    key = _heuristic_move_key(piece, move)
+    bonus = min(512, max(1, int(depth) * int(depth) * 4))
+    _history[key] = min(6000, _history.get(key, 0) + bonus)
+
+
+def _age_history(decay=0.78, floor=12, max_entries=5000):
+    """Age history once per own turn; retain useful experience within a game.
+
+    Scores are search-ordering hints, not evaluation terms. Decay prevents old
+    cutoffs from dominating after the position changes; the cap bounds memory.
+    Game-boundary reset remains in ``agent``.
+    """
+    global _history
+    if not _history:
+        return
+    aged = {}
+    for key, value in _history.items():
+        score = int(value * decay)
+        if score >= floor:
+            aged[key] = score
+    if len(aged) > max_entries:
+        # Keep the strongest learned ordering hints deterministically.
+        keep = sorted(aged.items(), key=lambda item: (-item[1], item[0]))[:max_entries]
+        aged = dict(keep)
+    _history = aged
+
+
+# ─── Search-efficiency helpers ────────────────────────────────────────────────
+
+def _lmr_reduction(depth, move_index, piece, move, is_tactical, in_check, ply):
+    """Conservative dynamic LMR; returns 0, 1 or 2 plies.
+
+    The first reduction threshold stays close to v7.2. A second ply is reserved
+    for genuinely late quiet moves at substantial depth. Moves with strong
+    history/killer evidence are protected from reduction.
+    """
+    if is_tactical or in_check or depth < 3 or ply < 2 or move_index < 3:
+        return 0
     mk = _move_key(piece, move)
-    _history[mk] = _history.get(mk, 0) + depth * depth
+    if mk in _killer_moves.get(_killer_bucket(piece, ply), ()):
+        return 0
+    hist = _history.get(_heuristic_move_key(piece, move), 0)
+    if hist >= 256:
+        return 0
+    if depth >= 8 and move_index >= 11 and hist < 64:
+        return 2
+    return 1
+
+
+def _store_tt_entry(board_hash, depth, flag, score, best_move, ply_from_root):
+    """Store with depth preference and LRU eviction instead of flushing the TT.
+
+    Existing deeper entries are retained. At capacity, only the least-recently
+    used entry is evicted, avoiding the wholesale 90%-full table reset in v7.2.
+    """
+    global _tt
+    previous = _tt.get(board_hash)
+    if previous is not None and previous[0] > depth:
+        _tt.move_to_end(board_hash)
+        return
+    _tt[board_hash] = (
+        depth, flag, _score_to_tt(score, ply_from_root), best_move
+    )
+    _tt.move_to_end(board_hash)
+    while len(_tt) > _TT_MAX_SIZE:
+        _tt.popitem(last=False)
+
+
+def _apply_root_tiebreak(board, selected_piece, selected_move, ply_tag=0):
+    """Optional reproducible choice among genuinely near-equal root moves.
+
+    Disabled by default. Scores come only from the final completed root search;
+    mate-range positions are excluded. This changes variety, not search depth.
+    """
+    global _last_random_tiebreak
+    _last_random_tiebreak = False
+    if not _ENABLE_ROOT_RANDOM_TIEBREAK or len(_last_root_exact_evals) < 2:
+        return selected_piece, selected_move
+    exact = sorted(_last_root_exact_evals, key=lambda row: -row[0])
+    best_score = exact[0][0]
+    if abs(best_score) >= MATE_THRESHOLD:
+        return selected_piece, selected_move
+    eligible = [row for row in exact
+                if best_score - row[0] <= _ROOT_TIE_WINDOW_CP]
+    if len(eligible) < 2:
+        return selected_piece, selected_move
+    # Stable FNV-1a seed: same position + seed yields the same choice.
+    seed = _ROOT_RANDOM_SEED & 0xFFFFFFFF
+    for ch in _board_signature(board):
+        seed = ((seed ^ ord(ch)) * 16777619) & 0xFFFFFFFF
+    seed ^= int(ply_tag) & 0xFFFFFFFF
+    chosen = random.Random(seed).choice(eligible)
+    _last_random_tiebreak = True
+    return chosen[1], chosen[2]
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -914,9 +1230,148 @@ def _is_in_check(board):
     kx, ky = king_pos
     return attacks[enemy][ky][kx] > 0
 
+
+def _check_prefilter_data(board, side_name=None):
+    """Return enemy king square and occupied cells for a single node."""
+    if side_name is None:
+        side_name = board.current_player.name
+    enemy_name = 'black' if side_name == 'white' else 'white'
+    king = None
+    occupied = set()
+    for p in board.get_pieces():
+        xy = (p.position.x, p.position.y)
+        occupied.add(xy)
+        if _piece_name(p) == 'king' and p.player.name == enemy_name:
+            king = xy
+    return king, occupied
+
+
+def _move_might_give_check(board, piece, move, check_data=None):
+    """Cheap direct-check prefilter; exact child-board check confirms candidates."""
+    name = _piece_name(piece)
+    tx, ty = move.position.x, move.position.y
+    side = piece.player.name
+    if check_data is None:
+        check_data = _check_prefilter_data(board, side)
+    king, occupied = check_data
+    if king is None:
+        return False
+    kx, ky = king
+    dx, dy = abs(kx - tx), abs(ky - ty)
+    if name == 'pawn':
+        forward = -1 if side == 'white' else 1
+        return dx == 1 and ky - ty == forward
+    if name == 'knight':
+        return (dx, dy) in ((1, 2), (2, 1))
+    if name == 'king':
+        return max(dx, dy) == 1
+    if name == 'bishop':
+        aligned = dx == dy and dx > 0
+    elif name == 'right':
+        if (dx, dy) in ((1, 2), (2, 1)):
+            return True
+        aligned = (dx == 0 and dy > 0) or (dy == 0 and dx > 0)
+    elif name == 'queen':
+        aligned = ((dx == 0 and dy > 0) or (dy == 0 and dx > 0)
+                   or (dx == dy and dx > 0))
+    else:
+        return False
+    if not aligned:
+        return False
+    sx = 0 if kx == tx else (1 if kx > tx else -1)
+    sy = 0 if ky == ty else (1 if ky > ty else -1)
+    source = (piece.position.x, piece.position.y)
+    x, y = tx + sx, ty + sy
+    while (x, y) != (kx, ky):
+        if (x, y) in occupied and (x, y) != source:
+            return False
+        x += sx
+        y += sy
+    return True
+
+
+def _quiet_check_priority(piece, move, king):
+    """Stable priority among a small number of likely quiet checking moves."""
+    if king is None:
+        return 0
+    dist = abs(king[0] - move.position.x) + abs(king[1] - move.position.y)
+    bonus = {'queen': 16, 'right': 14, 'knight': 12,
+             'bishop': 10, 'pawn': 9, 'king': 0}.get(_piece_name(piece), 0)
+    return bonus + (5 - min(5, dist)) * 10
+
 # ═══════════════════════════════════════════════════════════════════════════════
 #                          QUIESCENCE SEARCH
 # ═══════════════════════════════════════════════════════════════════════════════
+
+
+def _tablebase_score(board, colour, ply_from_root):
+    """Return an exact retrograde WDL score for a covered position.
+
+    Piece collection stops as soon as a fifth man is found. The same list is
+    passed into the adapter, avoiding its previous second get_pieces() scan.
+    DRAW is exactly zero; heuristic anti-draw preferences remain outside the
+    solved WDL table.
+    """
+    global _last_tb_probes, _last_tb_hits, _last_tb_wins, _last_tb_losses, _last_tb_draws
+    if not _TABLEBASE_READY or _probe_endgame_tb is None:
+        return None
+
+    # The retrograde score is from board.current_player's perspective. Refuse
+    # a caller/board side mismatch rather than returning a silently inverted
+    # value into Negamax.
+    try:
+        expected_side = "white" if colour == 1 else "black"
+        if board.current_player.name != expected_side:
+            return None
+    except Exception:
+        return None
+
+    pieces = []
+    try:
+        squares = getattr(board, "_squares", None)
+        if squares is not None:
+            for row in squares:
+                for square in row:
+                    piece = getattr(square, "piece", None)
+                    if piece is not None:
+                        pieces.append(piece)
+                        if len(pieces) > 4:
+                            return None
+        else:
+            for piece in board.get_pieces():
+                pieces.append(piece)
+                if len(pieces) > 4:
+                    return None
+
+        if len(pieces) < 3:
+            return None  # K-v-K is handled by _check_terminal.
+
+        _last_tb_probes += 1
+        hit, score = _probe_endgame_tb(
+            board, _piece_name, ply_from_root=ply_from_root, pieces=pieces
+        )
+        if not hit:
+            return None
+
+        _last_tb_hits += 1
+        if score >= 90000:
+            _last_tb_wins += 1
+        elif score <= -90000:
+            _last_tb_losses += 1
+        else:
+            _last_tb_draws += 1
+            # Do NOT apply draw contempt here. A tablebase DRAW is a
+            # retrograde-proven result: the position is drawn with optimal
+            # play from both sides. Scoring it as -DRAW_CONTEMPT makes the
+            # engine "fight" from a provably drawn position and blunder into
+            # an actual loss (stalemate or zugzwang). Accept the proven draw
+            # as 0 so the engine does not make things worse.
+            # Draw contempt is applied elsewhere (repetition avoidance,
+            # K-vs-K terminal) where the engine *chooses* to repeat/trade.
+            score = 0
+        return int(score)
+    except Exception:
+        return None
 
 
 def _quiescence(board, alpha, beta, colour, q_depth, ply_from_root=0, check_budget=2):
@@ -934,7 +1389,7 @@ def _quiescence(board, alpha, beta, colour, q_depth, ply_from_root=0, check_budg
     global _nodes_searched, _deadline
 
     _nodes_searched += 1
-    if _nodes_searched & 31 == 0:
+    if (_nodes_searched & 7) == 0:
         if time.perf_counter() >= _deadline:
             raise TimeoutError
 
@@ -942,6 +1397,10 @@ def _quiescence(board, alpha, beta, colour, q_depth, ply_from_root=0, check_budg
     is_term, term_score = _check_terminal(board, ply_from_root)
     if is_term:
         return term_score
+
+    tb_score = _tablebase_score(board, colour, ply_from_root)
+    if tb_score is not None:
+        return tb_score
 
     current_player = board.current_player
     in_check = _is_in_check(board)
@@ -951,6 +1410,8 @@ def _quiescence(board, alpha, beta, colour, q_depth, ply_from_root=0, check_budg
     # where a single check can force mate or lose a high-value Right/Queen.
     if in_check:
         evasions = list_legal_moves_for(board, current_player)
+        if time.perf_counter() >= _deadline:
+            raise TimeoutError
         if not evasions:
             return -MATE_SCORE + ply_from_root
 
@@ -977,6 +1438,8 @@ def _quiescence(board, alpha, beta, colour, q_depth, ply_from_root=0, check_budg
 
         best_evasion = -float('inf')
         for piece, move in evasions:
+            if time.perf_counter() >= _deadline:
+                raise TimeoutError
             child = _make_move_on_clone(board, piece, move)
             if child is None:
                 continue
@@ -999,6 +1462,8 @@ def _quiescence(board, alpha, beta, colour, q_depth, ply_from_root=0, check_budg
     # check terminal mobility so a stalemated side is never scored as healthy.
     if q_depth <= 0 or stand_pat >= beta:
         moves = list_legal_moves_for(board, current_player)
+        if time.perf_counter() >= _deadline:
+            raise TimeoutError
         if not moves:
             return -MATE_SCORE + ply_from_root
         if stand_pat >= beta:
@@ -1014,17 +1479,28 @@ def _quiescence(board, alpha, beta, colour, q_depth, ply_from_root=0, check_budg
     # remaining tactical move generation.  Alpha is unchanged when stand_pat
     # is below it, which is the only case in which this test can fire.
     if stand_pat < alpha - 950 and abs(alpha) < MATE_THRESHOLD:
+        # Delta pruning may skip a stalemate if it returns before move generation.
+        # Generate legal moves only on this pruning path, not on every q-node.
+        probe_moves = list_legal_moves_for(board, current_player)
+        if time.perf_counter() >= _deadline:
+            raise TimeoutError
+        if not probe_moves:
+            return -MATE_SCORE + ply_from_root
         return alpha
 
     # Generate and filter to captures (+ promotions), reusing the mobility
     # check above if one was already needed.
     if moves is None:
         moves = list_legal_moves_for(board, current_player)
+        if time.perf_counter() >= _deadline:
+            raise TimeoutError
     if not moves:
         return -MATE_SCORE + ply_from_root
 
     capture_moves = []
     for piece, move in moves:
+        if time.perf_counter() >= _deadline:
+            raise TimeoutError
         caps = getattr(move, "captures", set())
         if caps:
             # MVV-LVA score for sorting
@@ -1044,17 +1520,52 @@ def _quiescence(board, alpha, beta, colour, q_depth, ply_from_root=0, check_budg
                (piece.player.name == "black" and move.position.y == 4):
                 capture_moves.append((9000, piece, move))
 
-    if not capture_moves:
-        return stand_pat
-
     capture_moves.sort(key=lambda x: -x[0])
 
+    # Quiet checks are forcing moves too. The old implementation considered
+    # them only when there were *no* captures, so a checking move could vanish
+    # from the q-search simply because an unrelated capture was available.
+    # Add at most one quiet check beside captures (two if the frontier is quiet),
+    # only near the root of q-search and under the existing check budget.
+    quiet_checks = []
+    if q_depth > 0 and check_budget >= 2 and ply_from_root <= 6:
+        check_data = _check_prefilter_data(board)
+        enemy_king = check_data[0]
+        for piece, move in moves:
+            if getattr(move, "captures", set()):
+                continue
+            if _piece_name(piece) == "pawn" and (
+                (piece.player.name == "white" and move.position.y == 0) or
+                (piece.player.name == "black" and move.position.y == 4)
+            ):
+                continue
+            if _move_might_give_check(board, piece, move, check_data):
+                quiet_checks.append((
+                    _quiet_check_priority(piece, move, enemy_king), piece, move))
+        quiet_checks.sort(key=lambda item: -item[0])
+
+    # Search captures first, then the strongest one quiet check. This avoids
+    # broad branching while preserving the most forcing non-capture alternative.
     for _, piece, move in capture_moves:
         child = _make_move_on_clone(board, piece, move)
         if child is None:
             continue
         val = -_quiescence(child, -beta, -alpha, -colour, q_depth - 1,
                            ply_from_root + 1, check_budget)
+        if val > alpha:
+            alpha = val
+        if alpha >= beta:
+            return alpha
+
+    quiet_limit = 1 if capture_moves else 2
+    for _, piece, move in quiet_checks[:quiet_limit]:
+        if time.perf_counter() >= _deadline:
+            raise TimeoutError
+        child = _make_move_on_clone(board, piece, move)
+        if child is None or not _is_in_check(child):
+            continue
+        val = -_quiescence(child, -beta, -alpha, -colour, q_depth - 1,
+                           ply_from_root + 1, check_budget - 1)
         if val > alpha:
             alpha = val
         if alpha >= beta:
@@ -1066,6 +1577,18 @@ def _quiescence(board, alpha, beta, colour, q_depth, ply_from_root=0, check_budg
 # ═══════════════════════════════════════════════════════════════════════════════
 #                   CORE SEARCH: NEGAMAX + ALPHA-BETA
 # ═══════════════════════════════════════════════════════════════════════════════
+
+
+
+def _frontier_futility_allowed(depth, in_check, alpha, legal_move_count):
+    """Avoid depth-1 futility in low-mobility 5x5 positions.
+
+    A quiet move can win immediately by immobilising the opponent in this
+    variant. Low-branching positions are disproportionately sensitive to that
+    tactic, so futility is reserved for crowded nodes with at least six moves.
+    """
+    return (depth == 1 and not in_check and legal_move_count >= 6
+            and abs(alpha) < 90000)
 
 
 def _negamax(board, depth, alpha, beta, colour, ply_from_root):
@@ -1093,9 +1616,11 @@ def _negamax(board, depth, alpha, beta, colour, ply_from_root):
     int  — Score from the current player's perspective.
     """
     global _nodes_searched, _tt, _deadline
+    global _last_tt_hits, _last_tt_cutoffs
+    global _last_lmr_one_ply, _last_lmr_two_ply
 
     _nodes_searched += 1
-    if _nodes_searched & 31 == 0:      # Time check every 32 nodes
+    if (_nodes_searched & 7) == 0:     # Poll every 8 nodes; root also checks each child
         if time.perf_counter() >= _deadline:
             raise TimeoutError
 
@@ -1103,6 +1628,25 @@ def _negamax(board, depth, alpha, beta, colour, ply_from_root):
     is_term, term_score = _check_terminal(board, ply_from_root)
     if is_term:
         return term_score
+
+    # Probe before the horizon/TT path: covered 3–4-piece positions are solved
+    # immediately by retrograde WDL, rather than spending clock on approximation.
+    tb_score = _tablebase_score(board, colour, ply_from_root)
+    if tb_score is not None:
+        return tb_score
+
+    # ── Reverse Futility Pruning (static null-move) ───────────────────────
+    # If static eval − RFP margin >= beta at depth >= 2 and we are not in
+    # check, the position is probably already too good for the opponent to
+    # continue — return beta immediately.  No pass-turn or board mutation
+    # required; this is purely a static check.  Only applied outside mate
+    # range and when alpha/beta are not already at the root window limits
+    # (guarded by MATE_THRESHOLD to avoid corrupting forced-mate detection).
+    if (depth >= 2 and abs(beta) < MATE_THRESHOLD and abs(alpha) < MATE_THRESHOLD):
+        _rfp_static = colour * evaluate_for_white(board)
+        _rfp_margin = 90 * depth   # 90 cp/ply: conservative for 5×5 variant
+        if _rfp_static - _rfp_margin >= beta:
+            return beta
 
     # Leaf → quiescence search
     if depth <= 0:
@@ -1120,37 +1664,67 @@ def _negamax(board, depth, alpha, beta, colour, ply_from_root):
     tt_best_move = None
 
     if tt_entry is not None:
+        _last_tt_hits += 1
+        _tt.move_to_end(board_hash)
         tt_depth, tt_flag, tt_val, tt_mv = tt_entry
         tt_val = _score_from_tt(tt_val, ply_from_root)
         if tt_depth >= depth:
             if tt_flag == TT_EXACT:
+                _last_tt_cutoffs += 1
                 return tt_val
             elif tt_flag == TT_LOWER:
                 alpha = max(alpha, tt_val)
             elif tt_flag == TT_UPPER:
                 beta = min(beta, tt_val)
             if alpha >= beta:
+                _last_tt_cutoffs += 1
                 return tt_val
         tt_best_move = tt_mv     # Always use TT move for ordering
 
     # ── Move Generation & Ordering ────────────────────────────────────────
     current_player = board.current_player
     moves = list_legal_moves_for(board, current_player)
+    if time.perf_counter() >= _deadline:
+        raise TimeoutError
 
     if not moves:
         # No legal moves = loss (stalemate AND checkmate both lose in this variant)
         return -MATE_SCORE + ply_from_root
 
-    # Single-reply extension: if only 1 legal move, extend depth +1 (zero branching cost)
-    if len(moves) == 1 and ply_from_root < 14:
+    # ── Bounded selective extensions ───────────────────────────────────────
+    # Check detection is pseudo-attack based (pins are not resolved). A false
+    # positive can therefore cost a little search time, but it cannot remove a
+    # legal move or fabricate a result. We use it ONLY to extend, never to prune.
+    # Check at depth 1 as well as deeper nodes: a forcing check on the horizon
+    # should not be evaluated as though the defender had no tactical reply.
+    # Cap check extensions by absolute ply so checking sequences cannot keep
+    # depth alive indefinitely. At most one extension is granted per node.
+    global _last_check_extensions, _last_mobility_extensions
+    check_probe = (depth >= 2 and ply_from_root <= _CHECK_EXTENSION_MAX_PLY) or depth == 1 or (depth >= 3 and ply_from_root >= 2)
+    in_check = _is_in_check(board) if check_probe else False
+    if (_ENABLE_CHECK_EXTENSION and in_check and depth >= 1
+            and ply_from_root < _CHECK_EXTENSION_MAX_PLY):
         depth += 1
+        _last_check_extensions += 1
+    elif len(moves) == 1 and ply_from_root < 14:
+        depth += 1
+        _last_mobility_extensions += 1
+    elif len(moves) == 2 and depth >= 3 and ply_from_root < 8:
+        depth += 1
+        _last_mobility_extensions += 1
 
     ordered = _order_moves(moves, board, ply_from_root, tt_best_move)
+    # Precompute enemy king and occupancy where checking moves can be protected
+    # from LMR/futility pruning. The prefilter is only a tactical ordering hint.
+    check_data = (_check_prefilter_data(board)
+                  if (depth == 1 or (depth >= 3 and ply_from_root >= 2)) else None)
 
     # ── Futility Pruning (depth 1 only) ───────────────────────────────────
     # If static eval + margin can't reach α, skip non-tactical moves.
+    # Check status matters here: never prune a legal evasion just because a
+    # static score is below alpha. The already-computed in_check is reused.
     futile = False
-    if depth == 1 and abs(alpha) < 90000:
+    if _frontier_futility_allowed(depth, in_check, alpha, len(moves)):
         static_eval = colour * evaluate_for_white(board)
         if static_eval + 200 <= alpha:
             futile = True
@@ -1163,24 +1737,37 @@ def _negamax(board, depth, alpha, beta, colour, ply_from_root):
     moves_searched = 0
 
     for i, (piece, move) in enumerate(ordered):
+        if time.perf_counter() >= _deadline:
+            raise TimeoutError
         # Determine if this move is tactical (capture or near-promotion)
         caps = getattr(move, "captures", set())
-        is_tactical = bool(caps) or (_piece_name(piece) == "pawn" and
+        is_tactical = (bool(caps) or (_piece_name(piece) == "pawn" and
             ((piece.player.name == "white" and move.position.y <= 1) or
-             (piece.player.name == "black" and move.position.y >= 3)))
+             (piece.player.name == "black" and move.position.y >= 3))) or
+            (check_data is not None and _move_might_give_check(board, piece, move, check_data)))
 
         # Skip non-tactical moves under futility pruning
         if futile and moves_searched > 0 and not is_tactical:
             continue
 
         child = _make_move_on_clone(board, piece, move)
+        if time.perf_counter() >= _deadline:
+            raise TimeoutError
         if child is None:
             continue
 
-        # Late Move Reduction: reduce non-tactical late moves by 1 ply
-        reduction = 0
-        if moves_searched >= 3 and depth >= 3 and not is_tactical and ply_from_root >= 2:
-            reduction = 1
+        # Dynamic, conservative LMR. The common case remains a one-ply
+        # reduction; a second ply is reserved for very late quiet moves at depth
+        # 8+, while forcing/tactical, checked, killer and strong-history moves
+        # remain full depth.
+        reduction = _lmr_reduction(
+            depth, moves_searched, piece, move, is_tactical, in_check,
+            ply_from_root,
+        )
+        if reduction == 1:
+            _last_lmr_one_ply += 1
+        elif reduction == 2:
+            _last_lmr_two_ply += 1
 
         # ── PVS (Principal Variation Search) ──────────────────────────
         if moves_searched == 0:
@@ -1224,9 +1811,8 @@ def _negamax(board, depth, alpha, beta, colour, ply_from_root):
     else:
         tt_flag = TT_EXACT
 
-    if board_hash not in _tt or depth >= _tt[board_hash][0]:
-        if board_hash in _tt or len(_tt) < _TT_MAX_SIZE:
-            _tt[board_hash] = (depth, tt_flag, _score_to_tt(best_val, ply_from_root), best_move_key)
+    _store_tt_entry(board_hash, depth, tt_flag, best_val, best_move_key,
+                    ply_from_root)
 
     return best_val
 
@@ -1236,7 +1822,88 @@ def _negamax(board, depth, alpha, beta, colour, ply_from_root):
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
-_last_root_evals = []   # (eval, piece, move) list from last completed depth
+_last_root_evals = []   # (bound/exact score, piece, move) for legacy safeguards
+_last_root_exact_evals = []  # only fully resolved root scores, for safe random tie-breaking
+_last_tb_root_solved = False
+
+
+
+def _solve_root_from_tablebase(board, root_moves, colour, deadline):
+    """Select an exact-WDL best move, preferring less-repeated equal-WDL children.
+
+    WDL score always dominates repetition history. Among children with exactly
+    equal tablebase scores (especially DRAW=0), prefer the child reached fewer
+    times in the current game. If the history data is unavailable, stable move
+    order is retained. Any unsupported child or deadline expiry falls back to
+    ordinary iterative deepening.
+    """
+    global _last_root_evals, _last_root_exact_evals, _last_tb_root_solved
+    global _last_tb_repeat_avoided
+    if time.perf_counter() >= deadline:
+        return None
+    root_score = _tablebase_score(board, colour, 0)
+    if root_score is None:
+        return None
+
+    ordered = _order_moves(root_moves, board, 0, None)
+    solved = []
+    for order_index, (piece, move) in enumerate(ordered):
+        if time.perf_counter() >= deadline:
+            return None
+        child = _make_move_on_clone(board, piece, move)
+        if child is None:
+            return None
+        terminal, terminal_score = _check_terminal(child, 1)
+        if terminal:
+            value = -terminal_score
+        else:
+            child_score = _tablebase_score(child, -colour, 1)
+            if child_score is None:
+                return None
+            value = -child_score
+        try:
+            repetition_count = int(_position_history.get(_board_signature(child), 0))
+        except Exception:
+            repetition_count = 0
+        solved.append((int(value), piece, move, repetition_count, order_index))
+
+    if not solved:
+        return None
+    # Primary ordering is the exact tablebase score. Repetition is only a
+    # secondary tie-break and can never trade a win for a draw or a draw for loss.
+    solved.sort(key=lambda row: (-row[0], row[3], row[4]))
+    best_wdl = solved[0][0]
+    root_best_wdl = max(row[0] for row in solved)
+    same_best = [row for row in solved if row[0] == root_best_wdl]
+    if same_best:
+        min_repeat = min(row[3] for row in same_best)
+        original_best = min(same_best, key=lambda row: row[4])
+        chosen_best = solved[0]
+        _last_tb_repeat_avoided = (
+            chosen_best[4] != original_best[4]
+            and chosen_best[3] < original_best[3]
+        )
+
+    # Cross-check root WDL against the best legal child. A disagreement means
+    # the adapter/index/position is inconsistent; fall back instead of trusting it.
+    # Note: with draw-contempt active, draws return -DRAW_CONTEMPT (not 0).
+    # A root "draw" score is any value not in the win/loss mate ranges.
+    root_is_win  = root_score >= 90000
+    root_is_loss = root_score <= -90000
+    root_is_draw = not root_is_win and not root_is_loss
+    best_is_win  = best_wdl >= 90000
+    best_is_loss = best_wdl <= -90000
+    best_is_draw = not best_is_win and not best_is_loss
+    if root_is_win and not best_is_win:
+        return None
+    if root_is_loss and not best_is_loss:
+        return None
+    if root_is_draw and (best_is_win or best_is_loss):
+        return None
+    _last_root_evals = [(v, p, m) for v, p, m, _rep, _idx in solved]
+    _last_root_exact_evals = list(_last_root_evals)
+    _last_tb_root_solved = True
+    return solved[0][1], solved[0][2]
 
 
 def _iterative_deepening(board, my_player_name, deadline):
@@ -1258,11 +1925,30 @@ def _iterative_deepening(board, my_player_name, deadline):
     """
     global _nodes_searched, _tt, _deadline, _killer_moves, _history
     global _last_depth_reached, _last_nodes_searched, _last_branching_factor, _last_root_evals
+    global _last_iteration_trace, _last_aborted_depth, _last_aborted_nodes
+    global _last_check_extensions, _last_mobility_extensions
+    global _last_root_exact_evals
+    global _last_tt_hits, _last_tt_cutoffs, _last_lmr_one_ply, _last_lmr_two_ply
+    global _last_aspiration_fail_low, _last_aspiration_fail_high
+    global _last_tb_root_solved
 
     _deadline = deadline
     _killer_moves = {}
-    _history = {}
     _last_root_evals = []
+    _last_root_exact_evals = []
+    _last_tb_root_solved = False
+    _last_tb_repeat_avoided = False
+    _last_iteration_trace = []
+    _last_aborted_depth = 0
+    _last_aborted_nodes = 0
+    _last_check_extensions = 0
+    _last_mobility_extensions = 0
+    _last_tt_hits = 0
+    _last_tt_cutoffs = 0
+    _last_lmr_one_ply = 0
+    _last_lmr_two_ply = 0
+    _last_aspiration_fail_low = 0
+    _last_aspiration_fail_high = 0
 
     my_player = next((p for p in board.players if p.name == my_player_name), None)
     if my_player is None:
@@ -1279,6 +1965,15 @@ def _iterative_deepening(board, my_player_name, deadline):
         _last_branching_factor = 1.0
         return moves[0]
 
+    # On a covered endgame root, use the database to compare every legal child
+    # and choose the exact WDL-best move. Unsupported children fall back safely.
+    tb_root_move = _solve_root_from_tablebase(board, moves, colour, deadline)
+    if tb_root_move is not None:
+        _last_depth_reached = 0  # exact WDL solve, not a searched ply depth
+        _last_nodes_searched = 0
+        _last_branching_factor = 1.0
+        return tb_root_move
+
     best_piece, best_move = moves[0]
     prev_score = 0          # Seed for aspiration window
     total_nodes_this_move = 0
@@ -1286,39 +1981,52 @@ def _iterative_deepening(board, my_player_name, deadline):
     prev_depth_nodes = 0
 
     for depth in range(1, 50):
+        depth_started = time.perf_counter()
         _nodes_searched = 0
         try:
+            if time.perf_counter() >= deadline:
+                raise TimeoutError
             root_moves = list_legal_moves_for(board, my_player)
+            if time.perf_counter() >= deadline:
+                raise TimeoutError
             if not root_moves:
                 break
 
-            # TT best move for root ordering
+            # The root itself is searched by this driver rather than _negamax,
+            # so it often has no TT entry. Carry the previous completed iteration's
+            # principal-variation move forward when that happens.
             board_hash = _hash_board(board)
             tt_entry = _tt.get(board_hash)
+            if tt_entry is not None:
+                _tt.move_to_end(board_hash)
             tt_best_move = tt_entry[3] if tt_entry is not None else None
+            if tt_best_move is None and best_piece is not None and best_move is not None:
+                tt_best_move = _move_key(best_piece, best_move)
 
             ordered = _order_moves(root_moves, board, 0, tt_best_move)
+            if time.perf_counter() >= deadline:
+                raise TimeoutError
 
             current_best_score = -float('inf')
             current_best_piece = ordered[0][0]
             current_best_move = ordered[0][1]
 
             # ── Aspiration Windows (depth ≥ 3) ────────────────────────
+            delta = _ASPIRATION_DELTA
             if depth >= 3:
-                delta = _ASPIRATION_DELTA
-                alpha = prev_score - delta
-                beta = prev_score + delta
+                aspiration_alpha = prev_score - delta
+                aspiration_beta = prev_score + delta
             else:
-                alpha = -float('inf')
-                beta = float('inf')
+                aspiration_alpha = -float('inf')
+                aspiration_beta = float('inf')
 
             while True:
-                if depth >= 3:
-                    alpha = prev_score - delta
-                    beta = prev_score + delta
-                else:
-                    alpha = -float('inf')
-                    beta = float('inf')
+                if time.perf_counter() >= deadline:
+                    raise TimeoutError
+                # Reset the live alpha/beta window on every retry. Only the
+                # failed side is widened; the search's mutated alpha is never
+                # carried into the next aspiration attempt.
+                alpha, beta = aspiration_alpha, aspiration_beta
                 window_alpha, window_beta = alpha, beta
 
                 current_best_score = -float('inf')
@@ -1327,23 +2035,35 @@ def _iterative_deepening(board, my_player_name, deadline):
                 moves_searched_root = 0
 
                 depth_evals = []
+                exact_depth_evals = []
                 for piece, move in ordered:
+                    if time.perf_counter() >= deadline:
+                        raise TimeoutError
                     child = _make_move_on_clone(board, piece, move)
+                    if time.perf_counter() >= deadline:
+                        raise TimeoutError
                     if child is None:
                         continue
 
+                    exact_score = False
                     if moves_searched_root == 0:
                         val = -_negamax(child, depth - 1, -beta, -alpha,
                                         -colour, 1)
+                        exact_score = (depth < 3 or
+                                       (window_alpha < val < window_beta))
                     else:
-                        # PVS at root
+                        # PVS at root. A zero-window fail-low is only an upper
+                        # bound, not an exact score; never use it for random ties.
                         val = -_negamax(child, depth - 1, -alpha - 1, -alpha,
                                         -colour, 1)
                         if alpha < val < beta:
                             val = -_negamax(child, depth - 1, -beta, -alpha,
                                             -colour, 1)
+                            exact_score = True
 
                     depth_evals.append((val, piece, move))
+                    if exact_score:
+                        exact_depth_evals.append((val, piece, move))
                     if val > current_best_score:
                         current_best_score = val
                         current_best_piece = piece
@@ -1352,13 +2072,22 @@ def _iterative_deepening(board, my_player_name, deadline):
                     alpha = max(alpha, val)
                     moves_searched_root += 1
 
+                    # A root fail-high cannot be improved inside this window.
+                    # Stop the scan and let aspiration logic widen and re-search.
+                    if alpha >= beta:
+                        break
+
                 # Check aspiration window outcome
                 if depth < 3:
                     break    # No aspiration for shallow depths
                 if current_best_score <= window_alpha:
-                    delta = min(delta * 4, 200_000)  # Fail-low → widen symmetrically
+                    _last_aspiration_fail_low += 1
+                    delta = min(delta * 4, 400_000)
+                    aspiration_alpha = prev_score - delta  # widen low side only
                 elif current_best_score >= window_beta:
-                    delta = min(delta * 4, 200_000)  # Fail-high → widen symmetrically
+                    _last_aspiration_fail_high += 1
+                    delta = min(delta * 4, 400_000)
+                    aspiration_beta = prev_score + delta   # widen high side only
                 else:
                     break    # Result inside window — done
 
@@ -1369,12 +2098,20 @@ def _iterative_deepening(board, my_player_name, deadline):
             total_nodes_this_move += _nodes_searched
             if depth_evals:
                 _last_root_evals = sorted(depth_evals, key=lambda x: -x[0])
+                _last_root_exact_evals = sorted(exact_depth_evals, key=lambda x: -x[0])
 
             # Effective branching factor
             if prev_depth_nodes > 0 and _nodes_searched > 0:
                 _last_branching_factor = _nodes_searched / max(prev_depth_nodes, 1)
             prev_depth_nodes = _nodes_searched
             completed_depth = depth
+            _last_iteration_trace.append({
+                "depth": depth,
+                "nodes": _nodes_searched,
+                "elapsed_s": round(max(0.0, time.perf_counter() - depth_started), 4),
+                "score": int(current_best_score) if abs(current_best_score) < 1e12 else str(current_best_score),
+                "root_moves": len(root_moves),
+            })
 
             # Early exit on forced mate
             if current_best_score > 90000:
@@ -1382,13 +2119,811 @@ def _iterative_deepening(board, my_player_name, deadline):
 
         except TimeoutError:
             total_nodes_this_move += _nodes_searched
+            _last_aborted_depth = depth
+            _last_aborted_nodes = _nodes_searched
             break
 
     # Record instrumentation
     _last_depth_reached = completed_depth
     _last_nodes_searched = total_nodes_this_move
+    best_piece, best_move = _apply_root_tiebreak(
+        board, best_piece, best_move, len(_move_stats_log)
+    )
 
     return best_piece, best_move
+
+
+def _normalised_root_entropy(root_evals, temperature=180.0):
+    """Shannon entropy of a softened root-score distribution, in [0, 1].
+
+    The value is not an evaluation score. It estimates how ambiguous the root
+    choice is: many similar moves yield high entropy; one clear move yields low.
+    """
+    scores = [float(item[0]) for item in root_evals if item and item[0] is not None]
+    if len(scores) <= 1:
+        return 0.0
+    top = max(scores)
+    weights = [math.exp(max(-40.0, (score - top) / temperature)) for score in scores]
+    total = sum(weights)
+    if total <= 0:
+        return 0.0
+    probs = [w / total for w in weights]
+    entropy = -sum(p * math.log(p) for p in probs if p > 0)
+    return max(0.0, min(1.0, entropy / math.log(len(probs))))
+
+
+def _opponent_has_immediate_terminal_win(child_board, our_player_name, deadline):
+    """Prove whether one opponent reply leaves our side with no legal move.
+
+    In Chess Fragments, no legal moves is a loss. The check is now enabled for
+    high-material non-king moves as well as low-material and king moves: the
+    v7.6 Strong-tier losses demonstrate that the previous high-material fast
+    path left a real blind spot. Return None when the reserved safety budget is
+    exhausted; never treat an unverified move as proven safe.
+    """
+    global _last_stalemate_guard_calls, _last_stalemate_guard_threats
+    global _last_stalemate_guard_inconclusive
+    _last_stalemate_guard_calls += 1
+    try:
+        if time.perf_counter() >= deadline:
+            _last_stalemate_guard_inconclusive += 1
+            return None
+        enemy_moves = list_legal_moves_for(child_board, child_board.current_player)
+        if not enemy_moves:
+            return False  # Our move already wins by immobilising the opponent.
+        for enemy_piece, enemy_move in enemy_moves:
+            if time.perf_counter() >= deadline:
+                return None
+            after = _make_move_on_clone(child_board, enemy_piece, enemy_move)
+            if after is None:
+                continue
+            if after.current_player.name != our_player_name:
+                return None
+            terminal, score = _check_terminal(after, 2)
+            if terminal:
+                if score <= -MATE_THRESHOLD:
+                    _last_stalemate_guard_threats += 1
+                    return True
+                continue
+            if not list_legal_moves_for(after, after.current_player):
+                _last_stalemate_guard_threats += 1
+                return True
+        return False
+    except Exception:
+        _last_stalemate_guard_inconclusive += 1
+        return None
+
+
+def _we_are_immediately_stalemated(child_board, our_player_name, deadline):
+    """Check if after OUR move, the opponent can immediately stalemate US.
+
+    v8.0: Prevents the case where we play a move that looks good but allows
+    the opponent to reply with a move that leaves us (our_player_name) with
+    zero legal moves on our next turn — i.e., we get stalemated.
+
+    Returns True  → opponent CAN stalemate us in one reply (dangerous move)
+    Returns False → opponent cannot stalemate us in one reply (safe)
+    Returns None  → deadline exceeded, inconclusive
+    """
+    try:
+        if time.perf_counter() >= deadline:
+            return None
+        # child_board is the position AFTER we made our move.
+        # Now it's the opponent's turn.
+        enemy_moves = list_legal_moves_for(child_board, child_board.current_player)
+        if not enemy_moves:
+            # Opponent has no moves — we already won.
+            return False
+        for enemy_piece, enemy_move in enemy_moves:
+            if time.perf_counter() >= deadline:
+                return None
+            after = _make_move_on_clone(child_board, enemy_piece, enemy_move)
+            if after is None:
+                continue
+            # Now it's our turn again — check if we have any legal moves.
+            if after.current_player.name != our_player_name:
+                continue
+            our_moves = list_legal_moves_for(after, after.current_player)
+            if not our_moves:
+                # Opponent found a reply that leaves us with 0 moves — stalemate!
+                return True
+        return False
+    except Exception:
+        return None
+
+
+
+def _same_square(a, b):
+    """Compare ChessMaker Position-like objects without relying on hashability."""
+    try:
+        return a.x == b.x and a.y == b.y
+    except Exception:
+        return a == b
+
+
+_MATERIAL_GUARD_THRESHOLD_CP = 280
+_MATERIAL_GUARD_MAX_SCORE_LOSS_CP = 150
+_MATERIAL_GUARD_MAX_ALTERNATIVES = 4
+
+
+def _captured_material_value(board, move, victim_side):
+    """Return material value captured by move from victim_side on board."""
+    total = 0
+    for square_pos in (getattr(move, "captures", set()) or set()):
+        try:
+            victim = board[square_pos].piece
+        except Exception:
+            victim = None
+        if victim is not None and victim.player.name == victim_side:
+            total += PIECE_VALUES.get(_piece_name(victim), 0)
+    return total
+
+
+def _opponent_has_unrecapturable_major_capture(child_board, our_player_name, deadline,
+                                               threshold_cp=_MATERIAL_GUARD_THRESHOLD_CP):
+    """Detect a major-piece loss after one capture/reply/exchange verification.
+
+    For each legal opponent capture of a major piece, examine our legal replies.
+    A reply is credited for material it actually captures (including recapturing
+    the attacker); if the opponent can immediately take the replying piece, that
+    loss is charged back. A checking move by itself is NOT treated as proof that
+    the material loss is harmless. This remains a bounded tactical alarm, not a
+    general static-exchange evaluator.
+
+    Returns (unsafe, estimated_net_loss_cp). None means the deadline/API made the
+    result inconclusive.
+    """
+    try:
+        if time.perf_counter() >= deadline:
+            return None, 0
+        enemy = child_board.current_player
+        if enemy.name == our_player_name:
+            return None, 0
+        enemy_moves = list_legal_moves_for(child_board, enemy)
+        for enemy_piece, enemy_move in enemy_moves:
+            if time.perf_counter() >= deadline:
+                return None, 0
+            captured_value = _captured_material_value(
+                child_board, enemy_move, our_player_name)
+            if captured_value < threshold_cp:
+                continue
+
+            after_capture = _make_move_on_clone(child_board, enemy_piece, enemy_move)
+            if after_capture is None or after_capture.current_player.name != our_player_name:
+                return None, 0
+            our_replies = list_legal_moves_for(after_capture, after_capture.current_player)
+            if not our_replies:
+                # No legal reply means the side to move loses in this variant.
+                return True, MATE_SCORE
+
+            best_reply_net_loss = float("inf")
+            examined_reply = False
+            for reply_piece, reply_move in our_replies:
+                if time.perf_counter() >= deadline:
+                    return None, 0
+                recovered_value = _captured_material_value(
+                    after_capture, reply_move, enemy.name)
+                after_reply = _make_move_on_clone(after_capture, reply_piece, reply_move)
+                if after_reply is None or after_reply.current_player.name != enemy.name:
+                    continue
+                examined_reply = True
+                enemy_replies = list_legal_moves_for(after_reply, after_reply.current_player)
+                if not enemy_replies:
+                    # Our reply wins by leaving the opponent without a legal move.
+                    best_reply_net_loss = -MATE_SCORE
+                    break
+
+                # If the opponent can immediately capture the piece that just
+                # replied, charge its current value. Other tactical consequences
+                # remain for the main search to judge.
+                reply_square = getattr(reply_move, "position", None)
+                reply_piece_after = None
+                try:
+                    reply_piece_after = after_reply[reply_square].piece
+                except Exception:
+                    pass
+                exposed_reply_value = 0
+                if reply_piece_after is not None and reply_piece_after.player.name == our_player_name:
+                    for enemy_reply_piece, enemy_reply_move in enemy_replies:
+                        caps = getattr(enemy_reply_move, "captures", set()) or set()
+                        if reply_square is not None and any(
+                            _same_square(pos, reply_square) for pos in caps
+                        ):
+                            exposed_reply_value = max(
+                                exposed_reply_value,
+                                PIECE_VALUES.get(_piece_name(reply_piece_after), 0),
+                            )
+
+                net_loss = max(0, captured_value + exposed_reply_value - recovered_value)
+                best_reply_net_loss = min(best_reply_net_loss, net_loss)
+
+            if not examined_reply:
+                return None, 0
+            if best_reply_net_loss >= threshold_cp:
+                return True, int(best_reply_net_loss)
+        return False, 0
+    except Exception:
+        return None, 0
+
+
+def _opponent_has_immediate_promotion(child_board, our_player_name, deadline):
+    """Check for an opponent promotion next move that cannot be immediately taken.
+
+    A promotion is treated as a tactical emergency only if, after promoting, our
+    side has no legal capture of the newly promoted piece on its promotion square.
+    """
+    try:
+        if time.perf_counter() >= deadline:
+            return None
+        enemy = child_board.current_player
+        if enemy.name == our_player_name:
+            return None
+        promotion_rank = 0 if enemy.name == "white" else 4
+        for piece, move in list_legal_moves_for(child_board, enemy):
+            if time.perf_counter() >= deadline:
+                return None
+            if (_piece_name(piece) != "pawn"
+                    or getattr(getattr(move, "position", None), "y", None) != promotion_rank):
+                continue
+            promotion_square = getattr(move, "position", None)
+            promoted_board = _make_move_on_clone(child_board, piece, move)
+            if promoted_board is None or promoted_board.current_player.name != our_player_name:
+                return None
+            promoted_piece = None
+            try:
+                promoted_piece = promoted_board[promotion_square].piece
+            except Exception:
+                pass
+            if promoted_piece is None or promoted_piece.player.name != enemy.name:
+                return None
+            replies = list_legal_moves_for(promoted_board, promoted_board.current_player)
+            if not replies:
+                return True
+            can_capture_promotion = False
+            for reply_piece, reply_move in replies:
+                if time.perf_counter() >= deadline:
+                    return None
+                captures = getattr(reply_move, "captures", set()) or set()
+                if any(_same_square(pos, promotion_square) for pos in captures):
+                    can_capture_promotion = True
+                    break
+            if not can_capture_promotion:
+                return True
+        return False
+    except Exception:
+        return None
+
+
+def _tactical_guard_status(child_board, our_player_name, deadline):
+    """Return (material_loss_cp, immediate_promotion_threat) or (None, None)."""
+    unsafe, loss_cp = _opponent_has_unrecapturable_major_capture(
+        child_board, our_player_name, deadline)
+    if unsafe is None:
+        return None, None
+    promotion = _opponent_has_immediate_promotion(
+        child_board, our_player_name, deadline)
+    if promotion is None:
+        return None, None
+    return (int(loss_cp) if unsafe else 0), bool(promotion)
+
+
+def _material_blunder_guard(board, player, selected_piece, selected_move, deadline):
+    """Avoid immediate major-piece hangs or next-move promotions conservatively.
+
+    The selected move must have a fully resolved root score. A replacement must
+    also have a fully resolved score no more than 150 cp below the selected move,
+    and must pass both tactical checks. PVS bounds are never used as scores.
+    """
+    global _last_material_guard_triggered, _last_material_guard_loss
+    global _last_material_guard_replacement, _last_promotion_guard_triggered
+    global _last_promotion_guard_replacement
+    if (selected_piece is None or selected_move is None
+            or time.perf_counter() >= deadline):
+        return selected_piece, selected_move
+    child = _make_move_on_clone(board, selected_piece, selected_move)
+    if child is None:
+        return selected_piece, selected_move
+    loss_cp, promotion_threat = _tactical_guard_status(
+        child, player.name, deadline)
+    if loss_cp is None or promotion_threat is None:
+        return selected_piece, selected_move
+    if loss_cp <= 0 and not promotion_threat:
+        return selected_piece, selected_move
+
+    _last_material_guard_triggered = loss_cp > 0
+    _last_material_guard_loss = int(loss_cp)
+    _last_promotion_guard_triggered = bool(promotion_threat)
+
+    selected_key = _move_key(selected_piece, selected_move)
+    selected_score = next((score for score, p, m in _last_root_exact_evals
+                           if _move_key(p, m) == selected_key), None)
+    # Do not guess when the chosen move has only a PVS bound or no completed
+    # exact root score. The main search must retain authority in that case.
+    if selected_score is None or abs(selected_score) >= MATE_THRESHOLD:
+        return selected_piece, selected_move
+
+    exact = sorted(_last_root_exact_evals, key=lambda item: -item[0])
+    checked = 0
+    for score, alt_piece, alt_move in exact:
+        if time.perf_counter() >= deadline or checked >= _MATERIAL_GUARD_MAX_ALTERNATIVES:
+            break
+        if _move_key(alt_piece, alt_move) == selected_key:
+            continue
+        if score < selected_score - _MATERIAL_GUARD_MAX_SCORE_LOSS_CP:
+            break
+        checked += 1
+        alt_child = _make_move_on_clone(board, alt_piece, alt_move)
+        if alt_child is None:
+            continue
+        alt_loss, alt_promotion = _tactical_guard_status(
+            alt_child, player.name, deadline)
+        if alt_loss == 0 and alt_promotion is False:
+            if loss_cp > 0:
+                _last_material_guard_replacement = True
+            if promotion_threat:
+                _last_promotion_guard_replacement = True
+            return alt_piece, alt_move
+    return selected_piece, selected_move
+
+def _entropy_guided_anti_loss(board, player, selected_piece, selected_move,
+                              legal_moves, deadline):
+    """One-reply terminal-safety veto: check tactical hangs/promotions, then
+    verify the chosen move does not immediately hand the opponent a terminal win
+    (stalemate, checkmate-in-1, or unanswerable promotion).
+
+    Scope: this guard looks exactly one opponent reply deep. It does NOT
+    recursively guarantee stalemate-free play beyond that horizon. In practice
+    it is sufficient because the search already avoids multi-move stalemate
+    traps; this guard catches only the one case the search missed when the
+    tablebase was driving root move selection (v7.8 regression, fixed v7.9).
+    """
+    global _last_stalemate_guard_replacements
+    selected_piece, selected_move = _material_blunder_guard(
+        board, player, selected_piece, selected_move, deadline)
+    if selected_piece is None or selected_move is None or time.perf_counter() >= deadline:
+        return selected_piece, selected_move
+    # v7.6 skipped high-material non-king moves here. Two fresh Strong-tier
+    # losses ended in Black stalemate with 15 pieces still on the board. The
+    # skip meant those candidate moves never received the one-reply terminal
+    # safety check. v7.7 applies the check to every selected move; alternatives
+    # remain capped in crowded positions to protect the clock.
+    try:
+        piece_count = len(board.get_pieces())
+    except Exception:
+        return selected_piece, selected_move
+    high_material = piece_count > 10
+
+    child = _make_move_on_clone(board, selected_piece, selected_move)
+    if child is None:
+        return selected_piece, selected_move
+
+    # Check A (existing): does our move give opponent an immediate terminal win?
+    unsafe = _opponent_has_immediate_terminal_win(child, player.name, deadline)
+    # Check B (v8.0): does our move let opponent immediately stalemate US?
+    we_get_stalemated = False
+    if unsafe is not True and time.perf_counter() < deadline:
+        we_get_stalemated = _we_are_immediately_stalemated(child, player.name, deadline)
+
+    if unsafe is not True and we_get_stalemated is not True:
+        return selected_piece, selected_move
+
+    entropy = _normalised_root_entropy(_last_root_evals)
+    candidate_limit = min(6, 3 + int(round(3 * entropy)))
+    # High-material king safety is an opportunistic guard. Keep alternative
+    # verification bounded so the last-resort safety pass cannot dominate search.
+    if high_material:
+        candidate_limit = min(candidate_limit, 4)
+    candidates = []
+    seen = set()
+    selected_key = _move_key(selected_piece, selected_move)
+    seen.add(selected_key)
+    for score, piece, move in _last_root_evals:
+        key = _move_key(piece, move)
+        if key not in seen:
+            candidates.append((score, piece, move))
+            seen.add(key)
+    # Use the existing tactical order as a fallback if a completed iteration
+    # has too few alternatives (for example, if the last iteration timed out).
+    for piece, move in _order_moves(legal_moves, board, 0, None):
+        key = _move_key(piece, move)
+        if key not in seen:
+            candidates.append((None, piece, move))
+            seen.add(key)
+
+    checked = 0
+    first_unresolved = None
+    for score, piece, move in candidates:
+        if checked >= candidate_limit or time.perf_counter() >= deadline:
+            if first_unresolved is None:
+                first_unresolved = (piece, move)
+            break
+        checked += 1
+        alt_child = _make_move_on_clone(board, piece, move)
+        if alt_child is None:
+            continue
+        # Both checks must pass: we don't give opponent a win AND they can't stalemate us.
+        result_a = _opponent_has_immediate_terminal_win(alt_child, player.name, deadline)
+        result_b = _we_are_immediately_stalemated(alt_child, player.name, deadline) if result_a is False else True
+        if result_a is False and result_b is False:
+            _last_stalemate_guard_replacements += 1
+            return piece, move
+        if (result_a is None or result_b is None) and first_unresolved is None:
+            first_unresolved = (piece, move)
+
+    # The selected move is known to lose immediately. If we cannot prove a safe
+    # option before the small deadline, prefer an unverified alternative over a
+    # move with a demonstrated one-reply loss. If every tested alternative also
+    # loses immediately, keep the original search choice rather than inventing.
+    return first_unresolved if first_unresolved is not None else (selected_piece, selected_move)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                 BOUNDED ROOT PUCT / MCTS TIE-BREAK PROBE
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class _PUCTNode:
+    """Small per-move MCTS node; all values are from this node's side-to-move."""
+    __slots__ = ("board", "depth", "to_play", "prior", "parent_move", "visits",
+                 "value_sum", "children", "moves", "next_move", "terminal", "is_root",
+                 "policy_mode")
+
+    def __init__(self, board, depth, prior=1.0, parent_move=None, is_root=False,
+                 policy_mode="balanced"):
+        self.board = board
+        self.depth = depth
+        self.to_play = board.current_player.name
+        self.prior = float(prior)
+        self.parent_move = parent_move
+        self.visits = 0
+        self.value_sum = 0.0
+        self.children = []
+        self.moves = None
+        self.next_move = 0
+        self.terminal = None
+        self.is_root = is_root
+        self.policy_mode = policy_mode
+
+    @property
+    def mean_value(self):
+        return self.value_sum / self.visits if self.visits else 0.0
+
+
+def _puct_softmax(items):
+    """Convert (logit, payload) pairs into stable priors summing to one."""
+    if not items:
+        return []
+    top = max(item[0] for item in items)
+    weights = [math.exp(max(-24.0, min(0.0, item[0] - top))) for item in items]
+    total = sum(weights) or 1.0
+    return [(weight / total, item[1]) for weight, item in zip(weights, items)]
+
+
+def _puct_move_logit(board, piece, move, root_score=None, best_root_score=None,
+                     policy_mode="balanced"):
+    """Cheap handcrafted policy prior with position-dependent risk appetite.
+
+    ``complicate`` is used when the classical root evaluation says we are behind:
+    forcing checks, promotions and meaningful captures receive stronger priors.
+    ``convert`` is used when ahead: sound exchanges are favoured over speculative
+    captures. ``balanced`` stays between those policies. These are priors only;
+    PUCT's adversarial backups and the classical search still evaluate outcomes.
+    """
+    logit = 0.0
+    if root_score is not None and best_root_score is not None:
+        gap_scale = 230.0 if policy_mode == "complicate" else 180.0
+        logit += max(-3.0, min(0.0,
+                               (float(root_score) - float(best_root_score)) / gap_scale))
+
+    caps = getattr(move, "captures", set())
+    victim_total = 0
+    if caps:
+        for cap_pos in caps:
+            try:
+                victim = board[cap_pos].piece
+                if victim is not None:
+                    victim_total += PIECE_VALUES.get(_piece_name(victim), 0)
+            except Exception:
+                victim_total += 300
+        attacker_value = PIECE_VALUES.get(_piece_name(piece), 0)
+        if policy_mode == "convert":
+            logit += (0.48 if victim_total >= attacker_value else -0.30)
+        elif policy_mode == "complicate":
+            logit += 0.62 + min(0.95, victim_total / 900.0)
+        else:
+            logit += 0.45 + min(0.85, victim_total / 1000.0)
+
+    if _piece_name(piece) == "pawn":
+        if ((piece.player.name == "white" and move.position.y == 0) or
+                (piece.player.name == "black" and move.position.y == 4)):
+            logit += 1.35 if policy_mode == "complicate" else 1.15
+
+    try:
+        gives_check = _move_might_give_check(board, piece, move)
+    except Exception:
+        gives_check = False
+    if gives_check:
+        if policy_mode == "complicate":
+            logit += 0.90
+        elif policy_mode == "convert":
+            logit += 0.12
+        else:
+            logit += 0.55
+
+    tx, ty = move.position.x, move.position.y
+    logit += max(0, 4 - abs(tx - 2) - abs(ty - 2)) * 0.035
+    return max(-5.0, min(3.5, logit))
+
+
+def _puct_terminal_value(score):
+    """Map terminal centipawn/mate scores to a bounded side-to-move value."""
+    if score > MATE_THRESHOLD:
+        return 1.0
+    if score < -MATE_THRESHOLD:
+        return -1.0
+    return 0.0 if score == 0 else (1.0 if score > 0 else -1.0)
+
+
+def _puct_static_value(board):
+    """Cheap leaf value from the current side-to-move's perspective."""
+    terminal, score = _check_terminal(board, 0)
+    if terminal:
+        return _puct_terminal_value(score)
+    moves = list_legal_moves_for(board, board.current_player)
+    if not moves:
+        return -1.0  # No legal move is a loss, even when not in check.
+    score_white = evaluate_for_white(board)
+    score_stm = score_white if board.current_player.name == "white" else -score_white
+    return math.tanh(score_stm / 1050.0)
+
+
+def _puct_prepare_node(node):
+    """Generate and policy-order a node's legal moves once."""
+    terminal, score = _check_terminal(node.board, node.depth)
+    if terminal:
+        node.terminal = _puct_terminal_value(score)
+        node.moves = []
+        return
+
+    legal = list_legal_moves_for(node.board, node.board.current_player)
+    if not legal:
+        node.terminal = -1.0
+        node.moves = []
+        return
+
+    ranked = []
+    for index, (piece, move) in enumerate(legal):
+        logit = _puct_move_logit(node.board, piece, move,
+                                 policy_mode=node.policy_mode)
+        ranked.append((logit, index, piece, move))
+    ranked.sort(key=lambda item: (-item[0], item[1]))
+    priors = _puct_softmax([(item[0], (item[2], item[3])) for item in ranked])
+    node.moves = [(prior, payload[0], payload[1]) for prior, payload in priors]
+
+
+def _puct_select_child(node):
+    """Select a child with adversarial PUCT; negate child Q at alternating turns."""
+    root_scale = math.sqrt(max(1, node.visits))
+    best_child = None
+    best_score = -float("inf")
+    for child in node.children:
+        exploitation = -child.mean_value
+        exploration = _PUCT_C * child.prior * root_scale / (1 + child.visits)
+        score = exploitation + exploration
+        if score > best_score:
+            best_score = score
+            best_child = child
+    return best_child
+
+
+def _puct_expand_one(node):
+    """Expand the next policy-prior move. Returns child or None if exhausted."""
+    if node.moves is None:
+        _puct_prepare_node(node)
+    if node.terminal is not None or node.next_move >= len(node.moves):
+        return None
+    prior, piece, move = node.moves[node.next_move]
+    node.next_move += 1
+    child_board = _make_move_on_clone(node.board, piece, move)
+    if child_board is None:
+        return None
+    child = _PUCTNode(child_board, node.depth + 1, prior, (piece, move),
+                      policy_mode=node.policy_mode)
+    node.children.append(child)
+    return child
+
+
+def _puct_simulate(root, deadline, max_depth):
+    """Run one deterministic-selection MCTS simulation with progressive widening."""
+    path = [root]
+    node = root
+
+    while True:
+        if time.perf_counter() >= deadline:
+            return False
+
+        terminal, terminal_score = _check_terminal(node.board, node.depth)
+        if terminal:
+            value = _puct_terminal_value(terminal_score)
+            node.terminal = value
+            break
+
+        if node.depth >= max_depth:
+            value = _puct_static_value(node.board)
+            break
+
+        if node.is_root:
+            child = _puct_select_child(node)
+            if child is None:
+                value = _puct_static_value(node.board)
+                break
+            node = child
+            path.append(node)
+            continue
+
+        if node.moves is None:
+            _puct_prepare_node(node)
+        if node.terminal is not None:
+            value = node.terminal
+            break
+
+        # Progressive widening prevents a broad 5x5 node from cloning every
+        # legal move up front. More alternatives become available as evidence grows.
+        widening_limit = max(1, int(1.0 + 1.35 * math.sqrt(max(0, node.visits))))
+        if len(node.children) < widening_limit and node.next_move < len(node.moves):
+            child = _puct_expand_one(node)
+            if child is None:
+                continue
+            node = child
+            path.append(node)
+            continue
+
+        child = _puct_select_child(node)
+        if child is None:
+            value = _puct_static_value(node.board)
+            break
+        node = child
+        path.append(node)
+
+    # Value is stored from each node's own side-to-move perspective.
+    for visited in reversed(path):
+        visited.visits += 1
+        visited.value_sum += value
+        value = -value
+    return True
+
+
+def _puct_refine_root(board, player, selected_piece, selected_move, deadline,
+                      budget_s=None):
+    """Use a tiny PUCT tree only to adjudicate an ambiguous classical root.
+
+    The PUCT probe is skipped for decisive or low-entropy positions. It sees only
+    root moves already scored by a completed alpha-beta iteration, and it may only
+    select among moves within a narrow centipawn window. The final one-reply
+    terminal-loss verifier still runs after this function in ``agent()``.
+    """
+    global _last_puct_stats
+    started = time.perf_counter()
+    stats = {"used": False, "simulations": 0, "elapsed_s": 0.0,
+             "entropy": 0.0, "candidate_count": 0, "overrode": False}
+    _last_puct_stats = stats
+
+    if (not _ENABLE_ROOT_PUCT or selected_piece is None or selected_move is None
+            or len(_last_root_evals) < 2):
+        return selected_piece, selected_move
+
+    ordered_evals = sorted(_last_root_evals, key=lambda item: item[0], reverse=True)
+    best_score = float(ordered_evals[0][0])
+    if abs(best_score) >= MATE_THRESHOLD:
+        return selected_piece, selected_move
+
+    entropy = _normalised_root_entropy(ordered_evals)
+    stats["entropy"] = round(entropy, 4)
+    policy_mode = ("complicate" if best_score <= -180 else
+                   "convert" if best_score >= 180 else "balanced")
+    stats["policy_mode"] = policy_mode
+    if entropy < _PUCT_MIN_ENTROPY:
+        return selected_piece, selected_move
+
+    selected_key = _move_key(selected_piece, selected_move)
+    legal_by_key = {_move_key(p, m): (p, m) for p, m in
+                    list_legal_moves_for(board, player)}
+    candidates = []
+    seen = set()
+    for score, piece, move in ordered_evals:
+        key = _move_key(piece, move)
+        if key in seen or key not in legal_by_key:
+            continue
+        if best_score - float(score) > _PUCT_SCORE_WINDOW:
+            continue
+        # Use live root move objects, not move references from any cloned board.
+        live_piece, live_move = legal_by_key[key]
+        candidates.append((float(score), live_piece, live_move))
+        seen.add(key)
+        if len(candidates) >= _PUCT_MAX_CANDIDATES:
+            break
+
+    if len(candidates) < 2 or selected_key not in seen:
+        return selected_piece, selected_move
+
+    now = time.perf_counter()
+    remaining = deadline - now
+    if budget_s is None:
+        budget_s = _PUCT_MAX_TIME
+    allowance = min(_PUCT_MAX_TIME, max(0.0, float(budget_s)), max(0.0, remaining))
+    if allowance < 0.035:
+        return selected_piece, selected_move
+    puct_deadline = now + allowance
+
+    # A root node's children correspond exactly to the candidate moves from the
+    # completed alpha-beta iteration. Root policy priors blend score proximity
+    # with cheap tactical motifs.
+    root = _PUCTNode(board, 0, 1.0, is_root=True, policy_mode=policy_mode)
+    root_logits = []
+    for score, piece, move in candidates:
+        child_board = _make_move_on_clone(board, piece, move)
+        if child_board is None:
+            continue
+        logit = _puct_move_logit(board, piece, move, score, best_score,
+                                 policy_mode=policy_mode)
+        root_logits.append((logit, (score, piece, move, child_board)))
+    if len(root_logits) < 2:
+        return selected_piece, selected_move
+
+    root_priors = _puct_softmax(root_logits)
+    for prior, payload in root_priors:
+        score, piece, move, child_board = payload
+        root.children.append(_PUCTNode(child_board, 1, prior, (piece, move),
+                                       policy_mode=policy_mode))
+    if len(root.children) < 2:
+        return selected_piece, selected_move
+
+    stats["used"] = True
+    stats["candidate_count"] = len(root.children)
+    for _ in range(_PUCT_MAX_SIMULATIONS):
+        if time.perf_counter() >= puct_deadline:
+            break
+        if not _puct_simulate(root, puct_deadline, _PUCT_MAX_DEPTH):
+            break
+        stats["simulations"] += 1
+
+    elapsed = max(0.0, time.perf_counter() - started)
+    stats["elapsed_s"] = round(elapsed, 4)
+    if not root.children or stats["simulations"] == 0:
+        stats["used"] = False
+        return selected_piece, selected_move
+
+    chosen = max(root.children,
+                 key=lambda child: (child.visits, -child.mean_value, child.prior))
+    chosen_key = _move_key(*chosen.parent_move)
+    baseline = next((child for child in root.children
+                     if _move_key(*child.parent_move) == selected_key), None)
+    stats["root_visits"] = [
+        {"move": list(_move_key(*child.parent_move)),
+         "visits": child.visits,
+         "root_mean": round(-child.mean_value, 4),
+         "prior": round(child.prior, 4)}
+        for child in root.children
+    ]
+
+    # Avoid overturning a clear classical preference. A challenger must receive
+    # at least two additional visits and its backed-up value must not be materially
+    # worse than the classical move's value estimate.
+    if baseline is not None and chosen is not baseline:
+        visit_gain = chosen.visits - baseline.visits
+        value_gap = (-chosen.mean_value) - (-baseline.mean_value)
+        if visit_gain >= 2 and value_gap >= -0.06:
+            stats["overrode"] = True
+            return chosen.parent_move
+    return selected_piece, selected_move
+
+
+def _deterministic_fallback(legal_moves, board):
+    """Return a stable tactical-order fallback; never inject random move noise."""
+    if not legal_moves:
+        return None, None
+    ordered = _order_moves(legal_moves, board, 0, None)
+    return ordered[0]
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1410,7 +2945,7 @@ def _charge_own_clock(started_at):
 
 def agent(board, player, var):
     """
-    AI Agent for the 5×5 Chess Fragments game — Version 6.0.
+    AI Agent for the 5×5 Chess Fragments game — Version 7.5 Endgame Depth candidate.
 
     Called once per turn by the game runner.  Must return a (piece, move)
     pair within the allotted thinking time.
@@ -1433,10 +2968,53 @@ def agent(board, player, var):
     global _last_depth_reached, _last_nodes_searched, _last_branching_factor
     global _move_stats_log, _game_start_time, _last_seen_ply
     global _own_clock_used, _own_moves_seen
-    global _killer_moves, _history
+    global _killer_moves, _history, _last_puct_stats, _last_root_evals
+    global _last_iteration_trace, _last_aborted_depth, _last_aborted_nodes
+    global _last_check_extensions, _last_mobility_extensions
+    global _last_material_guard_triggered, _last_material_guard_loss
+    global _last_material_guard_replacement
+    global _last_promotion_guard_triggered, _last_promotion_guard_replacement
+    global _last_tb_probes, _last_tb_hits, _last_tb_wins, _last_tb_losses, _last_tb_draws
+    global _last_tb_root_solved, _last_tb_repeat_avoided
+    global _last_stalemate_guard_calls, _last_stalemate_guard_threats
+    global _last_stalemate_guard_inconclusive, _last_stalemate_guard_replacements
 
     try:
         call_started = time.perf_counter()
+        _last_depth_reached = 0
+        _last_nodes_searched = 0
+        _last_branching_factor = 1.0
+        _last_root_evals = []
+        _last_root_exact_evals = []
+        _last_iteration_trace = []
+        _last_aborted_depth = 0
+        _last_aborted_nodes = 0
+        _last_check_extensions = 0
+        _last_mobility_extensions = 0
+        _last_tt_hits = 0
+        _last_tt_cutoffs = 0
+        _last_lmr_one_ply = 0
+        _last_lmr_two_ply = 0
+        _last_aspiration_fail_low = 0
+        _last_aspiration_fail_high = 0
+        _last_random_tiebreak = False
+        _last_material_guard_triggered = False
+        _last_material_guard_loss = 0
+        _last_material_guard_replacement = False
+        _last_promotion_guard_triggered = False
+        _last_promotion_guard_replacement = False
+        _last_tb_probes = 0
+        _last_tb_hits = 0
+        _last_tb_wins = 0
+        _last_tb_losses = 0
+        _last_tb_draws = 0
+        _last_tb_root_solved = False
+        _last_tb_repeat_avoided = False
+        _last_stalemate_guard_calls = 0
+        _last_stalemate_guard_threats = 0
+        _last_stalemate_guard_inconclusive = 0
+        _last_stalemate_guard_replacements = 0
+        _last_puct_stats = {"used": False, "simulations": 0, "elapsed_s": 0.0}
         ply = var[0]
         time_budget = var[1]
         now = call_started
@@ -1457,12 +3035,14 @@ def agent(board, player, var):
             _game_start_time = now
             _own_clock_used = 0.0
             _own_moves_seen = 0
-            _tt = {}
+            _tt = OrderedDict()
             _position_history = {}
             _killer_moves = {}
             _history = {}
 
         _last_seen_ply = ply
+        if not is_new_game:
+            _age_history()
 
         # Each player owns a 300-second clock. Opponent thinking time must not
         # consume our clock, so budget from *our accumulated search time*, not
@@ -1490,10 +3070,21 @@ def agent(board, player, var):
             return legal_moves[0]
 
         deadline = time.perf_counter() + effective_budget
+        # Keep a small bounded slice for terminal-threat verification. The search
+        # remains the priority; this reserve is capped to avoid sacrificing depth.
+        try:
+            low_material = len(board.get_pieces()) <= 10
+        except Exception:
+            low_material = False
+        # Keep a small tail of the budget for one-reply terminal safety checks.
+        # Low material retains the original reserve; crowded positions now also
+        # reserve a bounded slice for the rare selected-king-move stalemate check.
+        safety_reserve = (min(0.35, max(0.04, effective_budget * 0.04))
+                          if low_material else
+                          min(0.70, max(0.10, effective_budget * 0.06)))
+        search_deadline = deadline - safety_reserve
 
-        # ── Transposition Table Size Guard ────────────────────────────────────
-        if len(_tt) > _TT_MAX_SIZE * 0.9:
-            _tt = {}
+        # TT capacity is maintained by bounded LRU replacement on insertion.
 
         # Track position for repetition detection
         current_hash = _hash_board(board)
@@ -1503,6 +3094,16 @@ def agent(board, player, var):
 
         # ── Opening Book (plies 1–2) ──────────────────────────────────────────
         if ply <= 2:
+            # Selective anti-loss opening patch: only the two exact positions
+            # that were demonstrated losses in the 16/18 v6.6 tournament.
+            # Other positions remain governed by the known-good v6.6 search/cache.
+            static_entry = _lookup_static_opening(board, player.name, ply)
+            if static_entry is not None:
+                for bp, bm in legal_moves:
+                    if _move_key(bp, bm) == static_entry:
+                        elapsed = _charge_own_clock(call_started)
+                        _log_move_stats(ply, player.name, elapsed)
+                        return bp, bm
             book_key = (current_hash, player.name, ply)
             book_entry = _opening_book.get(book_key)
             if book_entry is not None:
@@ -1515,37 +3116,46 @@ def agent(board, player, var):
                                 _log_move_stats(ply, player.name, elapsed)
                                 return p, m
             # Unknown position — search and self-learn
-            piece, move_opt = _iterative_deepening(board, player.name, deadline)
+            piece, move_opt = _iterative_deepening(board, player.name, search_deadline)
             if piece is not None and move_opt is not None:
+                piece, move_opt = _entropy_guided_anti_loss(
+                    board, player, piece, move_opt, legal_moves, deadline)
                 _opening_book[book_key] = (
                     piece.position.x, piece.position.y,
                     move_opt.position.x, move_opt.position.y,
                 )
             if piece is None or move_opt is None:
-                if legal_moves:
-                    piece, move_opt = random.choice(legal_moves)
+                piece, move_opt = _deterministic_fallback(legal_moves, board)
             elapsed = _charge_own_clock(call_started)
             _log_move_stats(ply, player.name, elapsed)
             return piece, move_opt
 
         # ── Main Search ───────────────────────────────────────────────────────
-        piece, move_opt = _iterative_deepening(board, player.name, deadline)
+        piece, move_opt = _iterative_deepening(board, player.name, search_deadline)
+
+        # Optional root PUCT probe: run only after a completed classical iteration,
+        # only when several root moves are genuinely close, and leave at least
+        # 45% of the safety reserve for the proof-based terminal-loss verifier.
+        if piece is not None and move_opt is not None and ply > 2:
+            puct_allowance = min(_PUCT_MAX_TIME, max(0.0, safety_reserve * 0.55))
+            piece, move_opt = _puct_refine_root(
+                board, player, piece, move_opt, deadline - safety_reserve * 0.45,
+                budget_s=puct_allowance)
 
         # Fallback if search returned None
         if piece is None or move_opt is None:
-            if legal_moves:
-                piece, move_opt = random.choice(legal_moves)
+            piece, move_opt = _deterministic_fallback(legal_moves, board)
 
-        # ── Repetition Avoidance (Draw Avoidance without Blundering) ──────────
-        # Check if the chosen move leads to a position that has occurred >= 2 times.
-        # If repeating, pick the highest-eval alternative from completed search iterations
-        # that produces a fresh or less-repeated position, provided it stays within a safe margin.
+        # ── Repetition Avoidance (Draw = Loss: aggressively avoid ALL repetitions) ──
+        # Since draws are treated as losses, ANY move leading to a previously seen
+        # position should be avoided if a non-repeated alternative exists.
         if piece is not None and move_opt is not None:
             test_board = _make_move_on_clone(board, piece, move_opt)
             if test_board is not None:
                 future_sig = _board_signature(test_board)
                 future_count = _position_history.get(future_sig, 0)
-                if future_count >= 2 and _last_root_evals:
+                # Avoid even a first repeat (count >= 1 means position was seen before)
+                if future_count >= 1 and _last_root_evals:
                     best_ev = _last_root_evals[0][0]
                     for alt_ev, alt_piece, alt_move in _last_root_evals[1:]:
                         alt_board = _make_move_on_clone(board, alt_piece, alt_move)
@@ -1553,15 +3163,28 @@ def agent(board, player, var):
                             continue
                         alt_sig = _board_signature(alt_board)
                         if _position_history.get(alt_sig, 0) < future_count:
+                            # Accept any non-repeated alternative that isn't a
+                            # catastrophic blunder (give wider margin since draw = loss)
                             if best_ev > MATE_THRESHOLD:
-                                safe_alternative = alt_ev > MATE_THRESHOLD and alt_ev >= best_ev - 250
-                            elif best_ev > 0:
-                                safe_alternative = alt_ev > 0 and alt_ev >= best_ev - 100
+                                safe_alternative = alt_ev > MATE_THRESHOLD and alt_ev >= best_ev - 500
+                            elif best_ev > -DRAW_CONTEMPT + 100:
+                                # Winning position — only swap if alt is decent
+                                safe_alternative = alt_ev > -DRAW_CONTEMPT and alt_ev >= best_ev - 300
                             else:
-                                safe_alternative = alt_ev >= best_ev - 100
+                                # Already in a bad spot — any non-repeating move is better
+                                safe_alternative = alt_ev >= best_ev - 500
                             if safe_alternative:
                                 piece, move_opt = alt_piece, alt_move
                                 break
+
+            # Proof-based anti-loss pass: ALWAYS run the stalemate guard,
+            # even when the tablebase solved the root. The tablebase picks the
+            # best WDL move but does NOT verify that the chosen move avoids an
+            # immediate one-reply terminal loss. Game 12 (v7.8) was exactly
+            # this: tablebase-guided Black walked into a stalemate trap because
+            # the guard was skipped when _last_tb_root_solved was True.
+            piece, move_opt = _entropy_guided_anti_loss(
+                board, player, piece, move_opt, legal_moves, deadline)
 
             # Record the chosen child position in history
             final_board = _make_move_on_clone(board, piece, move_opt)
@@ -1578,8 +3201,11 @@ def agent(board, player, var):
         try:
             legal = list_legal_moves_for(board, player)
             if legal:
+                fallback_piece, fallback_move = _deterministic_fallback(legal, board)
                 elapsed = _charge_own_clock(call_started if 'call_started' in locals() else time.perf_counter())
-                return random.choice(legal)
+                _log_move_stats(var[0] if isinstance(var, (list, tuple)) and var else -1,
+                                getattr(player, "name", "?"), elapsed)
+                return fallback_piece, fallback_move
         except Exception:
             pass
         return None, None
@@ -1589,22 +3215,75 @@ def agent(board, player, var):
 
 def _log_move_stats(ply, player_name, elapsed):
     """Record and print per-move search metrics to stderr."""
-    global _move_stats_log
+    global _move_stats_log, _last_puct_stats
+    global _last_iteration_trace, _last_aborted_depth, _last_aborted_nodes
+    global _last_tt_hits, _last_tt_cutoffs, _last_lmr_one_ply, _last_lmr_two_ply
+    global _last_aspiration_fail_low, _last_aspiration_fail_high, _last_random_tiebreak
     stats = {
+        "engine_build": ENGINE_BUILD,
         "ply":    ply,
         "player": player_name,
         "depth":  _last_depth_reached,
         "nodes":  _last_nodes_searched,
         "ebf":    round(_last_branching_factor, 2),
         "time_s": round(elapsed, 2),
+        "puct":   dict(_last_puct_stats),
+        "iterations": list(_last_iteration_trace),
+        "aborted_depth": _last_aborted_depth,
+        "aborted_nodes": _last_aborted_nodes,
+        "check_extensions": _last_check_extensions,
+        "mobility_extensions": _last_mobility_extensions,
+        "tt_hits": _last_tt_hits,
+        "tt_cutoffs": _last_tt_cutoffs,
+        "lmr_one_ply": _last_lmr_one_ply,
+        "lmr_two_ply": _last_lmr_two_ply,
+        "aspiration_fail_low": _last_aspiration_fail_low,
+        "aspiration_fail_high": _last_aspiration_fail_high,
+        "random_tiebreak": _last_random_tiebreak,
+        "material_guard": _last_material_guard_triggered,
+        "material_guard_loss_cp": _last_material_guard_loss,
+        "material_guard_replacement": _last_material_guard_replacement,
+        "promotion_guard": _last_promotion_guard_triggered,
+        "promotion_guard_replacement": _last_promotion_guard_replacement,
+        "tablebase_ready": _TABLEBASE_READY,
+        "tablebase_root_solved": _last_tb_root_solved,
+        "tablebase_probes": _last_tb_probes,
+        "tablebase_hits": _last_tb_hits,
+        "tablebase_wins": _last_tb_wins,
+        "tablebase_losses": _last_tb_losses,
+        "tablebase_draws": _last_tb_draws,
+        "tablebase_repeat_avoided": _last_tb_repeat_avoided,
+        "stalemate_guard_calls": _last_stalemate_guard_calls,
+        "stalemate_guard_threats": _last_stalemate_guard_threats,
+        "stalemate_guard_inconclusive": _last_stalemate_guard_inconclusive,
+        "stalemate_guard_replacements": _last_stalemate_guard_replacements,
     }
     _move_stats_log.append(stats)
     if _ENABLE_STDERR_LOG:
         nps = int(_last_nodes_searched / elapsed) if elapsed > 0.01 else 0
+        trace = ",".join(f"{item['depth']}:{item['nodes']}"
+                          for item in _last_iteration_trace) or "-"
+        partial = (f" partial={_last_aborted_depth}:{_last_aborted_nodes}"
+                   if _last_aborted_depth else "")
         print(
-            f"[agent v6.0] ply={ply:>3d}  {player_name:>5s}  "
+            f"[agent v7.7-final] ply={ply:>3d}  {player_name:>5s}  "
             f"depth={_last_depth_reached}  nodes={_last_nodes_searched:>7d}  "
             f"ebf={_last_branching_factor:.2f}  nps={nps:>6d}  "
-            f"time={elapsed:.2f}s",
+            f"iter={trace}{partial}  "
+            f"ext=check:{_last_check_extensions}/mob:{_last_mobility_extensions}  "
+            f"tt={_last_tt_hits}/{_last_tt_cutoffs}  "
+            f"lmr={_last_lmr_one_ply}/{_last_lmr_two_ply}  "
+            f"asp={_last_aspiration_fail_low}/{_last_aspiration_fail_high}  "
+            f"rnd={int(_last_random_tiebreak)}  guard={int(_last_material_guard_triggered)}:"
+            f"{_last_material_guard_loss}→{int(_last_material_guard_replacement)}  "
+            f"promo={int(_last_promotion_guard_triggered)}→{int(_last_promotion_guard_replacement)}  "
+            f"tb={_last_tb_hits}/{_last_tb_probes}  "
+            f"tb_root={int(_last_tb_root_solved)}  "
+            f"tb_repeat={int(_last_tb_repeat_avoided)}  "
+            f"stale_guard={_last_stalemate_guard_calls}/"
+            f"{_last_stalemate_guard_threats}/"
+            f"{_last_stalemate_guard_replacements}/"
+            f"{_last_stalemate_guard_inconclusive}  "
+            f"puct=off  time={elapsed:.2f}s",
             file=sys.stderr,
         )
