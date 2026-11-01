@@ -1,0 +1,17 @@
+{
+  "source": "v7.4 600-unique-opening self-play moves.jsonl",
+  "observed_tablebase_eligible_occurrences": 618,
+  "occurrence_wdl": {
+    "WIN": 258,
+    "LOSS": 242,
+    "DRAW": 118
+  },
+  "unique_board_and_side_to_move_states": 555,
+  "unique_wdl": {
+    "WIN": 240,
+    "LOSS": 227,
+    "DRAW": 88
+  },
+  "corpus_file": "historical_tablebase_regression_600run.jsonl",
+  "note": "Occurrences include repeated states; regression rows are deduplicated by board placement plus side-to-move."
+}

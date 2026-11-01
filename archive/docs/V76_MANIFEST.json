@@ -1,0 +1,138 @@
+{
+  "build_id": "v7.6-exact-tablebase",
+  "release_name": "V76_EXACT_TABLEBASE_PACKAGE",
+  "release_scope": "Nomenclature and packaging update only; engine logic unchanged from v7.5 R2 candidate.",
+  "file_count_excluding_manifest": 26,
+  "files": [
+    {
+      "path": "HISTORICAL_V75_R2_IMPLEMENTATION_DIFF_FROM_V74.patch",
+      "size_bytes": 21053,
+      "sha256": "abed7d26696595cb00d7a2bfaec55f7abfbd0c3a133cce821847cf0a46b12645"
+    },
+    {
+      "path": "V76_ENGINEERING_NOTES.md",
+      "size_bytes": 4871,
+      "sha256": "cf2609d0927257db8dbde86a9ac65fad4cfa90646fc7283e76f3655a499b5979"
+    },
+    {
+      "path": "V76_README.md",
+      "size_bytes": 4026,
+      "sha256": "4b32e64c5c5dffa2d218b82e538a060125d7f108fef36971416d19159a168f7e"
+    },
+    {
+      "path": "V76_RELEASE_NOTES.md",
+      "size_bytes": 1297,
+      "sha256": "acdcf322b6d655e888371e1bd2822d18ed48c99715259d1e4fc0738f74e04c30"
+    },
+    {
+      "path": "V76_TT_HASH_MICROBENCH.json",
+      "size_bytes": 391,
+      "sha256": "2d9a6e0f96d1c81985d3a4ad342c7e56228ff64ec5b49f2450454bc57ffe3ea9"
+    },
+    {
+      "path": "V76_VALIDATION_REPORT.md",
+      "size_bytes": 2651,
+      "sha256": "6acd6a32f66fd773f3faadc52ddcced85d8e23fe68af3be271cb5f9852c795db"
+    },
+    {
+      "path": "agent_v74_tactical_guard.py",
+      "size_bytes": 128048,
+      "sha256": "f071799b7ac06d30a3f912adc541313942e536cf0c1285d5cff294e73abd57dd"
+    },
+    {
+      "path": "agent_v76_exact_tablebase.py",
+      "size_bytes": 137127,
+      "sha256": "85fc918fc983c1eb9784131d9ea8ad785346953efe68b9ffdd328ea95a8f4fa1"
+    },
+    {
+      "path": "benchmark_v76_tt_hash.py",
+      "size_bytes": 2825,
+      "sha256": "7a4b7e0907b5e8f77a9de915068ce336cdd7db5871283b7bf84a0173a2885453"
+    },
+    {
+      "path": "endgame_tablebase.py",
+      "size_bytes": 3698,
+      "sha256": "fafa9cf920a1a9b767801e1f8b4cb09512f009c7d2d5faa64e5d015e68fdb75d"
+    },
+    {
+      "path": "endgame_tb_snippet.py",
+      "size_bytes": 4709674,
+      "sha256": "242855c997ac3aaad1f5f1bdc5842b443687b4e7ed01a36bbeb867984aa7aa0a"
+    },
+    {
+      "path": "extension/board_rules.py",
+      "size_bytes": 2598,
+      "sha256": "f405aa6937d7ef5118241ce8450f7cf587adfe36906f220815f26731c3a1bead"
+    },
+    {
+      "path": "extension/board_utils.py",
+      "size_bytes": 3872,
+      "sha256": "1cbb5c4f0f2faf6fadcd3ee94020185abc3e793cc73bde9ffe070582ae413ce8"
+    },
+    {
+      "path": "extension/piece_pawn.py",
+      "size_bytes": 269,
+      "sha256": "cf51f355767515d40a9f81d3e887a3b8a17e9dfb6f277eaa0f46a14e01715d42"
+    },
+    {
+      "path": "extension/piece_right.py",
+      "size_bytes": 940,
+      "sha256": "b688058ffc24bbd19837eca1ca222639f660f5b3be9383933db0b18e26451298"
+    },
+    {
+      "path": "historical_tablebase_regression_600run.jsonl",
+      "size_bytes": 192773,
+      "sha256": "6d94eda8bfed2b027b764f3a2dc378e3526ade17889fa481367cdf5ce780359e"
+    },
+    {
+      "path": "historical_tablebase_regression_600run_summary.json",
+      "size_bytes": 493,
+      "sha256": "9b4924fe70a5f2a83131bd3d28e2b150f424a5234d198efb253aa684efc6fa7c"
+    },
+    {
+      "path": "install_v76.ps1",
+      "size_bytes": 2478,
+      "sha256": "d6fcc3e9eed0a8161b4beb5659e6803bf58e00ac0f251eb0656deaff75053b24"
+    },
+    {
+      "path": "play_v76.py",
+      "size_bytes": 7527,
+      "sha256": "c5ccbf8674a845fde20c9b83de40dd9a0556f29b2811adf611c4469a2546f341"
+    },
+    {
+      "path": "run_v74_v76_head_to_head.py",
+      "size_bytes": 9497,
+      "sha256": "4699ce260f31d79e9b89327766c1a2d6b4ce563792cf85fc40c6576e290f88e4"
+    },
+    {
+      "path": "run_v76_18_tournament.py",
+      "size_bytes": 15801,
+      "sha256": "b39a87ce1c5e41de5c144be6fb198d2d4584b6f7a8107599612e9fb4dec4a2cc"
+    },
+    {
+      "path": "smoke_test_v76.py",
+      "size_bytes": 1493,
+      "sha256": "77b920a6002c02b8369610d8e688a58c2ceea076905fe7fdb55fc450e4d62878"
+    },
+    {
+      "path": "test_v76_engineering_controls.py",
+      "size_bytes": 4934,
+      "sha256": "a00bea45abff41fe481770b00edeb3396c7ca3ac56aa713edcca4442820e948e"
+    },
+    {
+      "path": "test_v76_historical_tablebase_corpus.py",
+      "size_bytes": 4507,
+      "sha256": "a2688052eed8823936d5971bc183360c2ab71a0e6b16d33cfef600bc0b1334d1"
+    },
+    {
+      "path": "test_v76_tablebase.py",
+      "size_bytes": 1938,
+      "sha256": "38422ff00f4785a50d04df04ade305f3d391822b1e2f3c5070a80a8404a98bde"
+    },
+    {
+      "path": "validate_v76.ps1",
+      "size_bytes": 1644,
+      "sha256": "e89e23fe04dec12d8a5a421408e8dc7dee9da1bfd7769ecafcf39ce3c5a7506d"
+    }
+  ]
+}
