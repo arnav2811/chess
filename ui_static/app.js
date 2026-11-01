@@ -363,6 +363,26 @@ if (boardThemeSelect) boardThemeSelect.value = currentBoardTheme;
 if (pieceSetSelect)   pieceSetSelect.value   = currentPieceSet;
 if (rightStyleSelect) rightStyleSelect.value = rightPieceStyle;
 
+// ── Apple Segmented Control Tab Switcher ──────────────────────────
+function switchDeckTab(tabName) {
+  const segmentBtns = document.querySelectorAll(".segment-btn");
+  const tabPanes = document.querySelectorAll(".deck-tab-pane");
+
+  segmentBtns.forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.tab === tabName);
+  });
+
+  tabPanes.forEach((pane) => {
+    pane.classList.toggle("active", pane.id === `pane-${tabName}`);
+  });
+}
+
+document.querySelectorAll(".segment-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    switchDeckTab(btn.dataset.tab);
+  });
+});
+
 // ── Toast Banner Notification ─────────────────────────────────────
 function showToast(msg, duration = 2800) {
   let toast = document.getElementById("toast");
@@ -1247,6 +1267,9 @@ btnNewGame.addEventListener("click", () => {
     watch_delay: parseFloat(speedRange.value),
     time_control: parseFloat(tcSelect.value),
   });
+
+  // Seamlessly transition right deck to Move Ledger during gameplay
+  switchDeckTab("moves");
 
   addLog(
     `Initiating match: Variant=${boardSelect.value} | Mode=${myChoice} | Clock=${tcSelect.options[tcSelect.selectedIndex].text}`,
