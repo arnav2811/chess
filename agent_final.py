@@ -1,16 +1,17 @@
 # ═══════════════════════════════════════════════════════════════════════════════
-# agent.py — Chess Fragments AI Agent (v8.0 — Final Submission)
+# agent.py — Chess Fragments AI Agent (v8.4 — Tactical Kings)
 # COMP2321 Coursework — 5×5 Chess Variant with Custom Pieces
 #
 # Architecture at a Glance:
 #   • Iterative Deepening Negamax with Alpha-Beta Pruning
 #   • Principal Variation Search (PVS) with zero-window re-search
 #   • Aspiration Windows (±250 cp, auto-widens on fail)
-#   • Transposition Table (200 k entries, frozenset position keys)
+#   • Transposition Table (200 k entries, Zobrist XOR position keys)
 #   • Tactical move ordering: PV > MVV-LVA > Promotion > Quiet Check > Killers > History
 #   • Side- and piece-aware killer/history keys (no cross-colour heuristic aliasing)
 #   • Late Move Reductions (LMR): 0/1/2-ply dynamic, tactical/killer/history-guarded
 #   • Quiescence Search (captures/promotions + bounded check evasions)
+#   • Reverse Futility Pruning at depth ≥ 2 (100 cp/ply, in-check guarded)
 #   • Frontier Futility Pruning at depth 1
 #   • Check Extensions: enabled — critical for seeing mate threats as Black
 #   • Low-mobility Extensions: forced/near-forced positions searched deeper
@@ -42,7 +43,7 @@ import math
 import random
 from collections import OrderedDict
 
-ENGINE_BUILD = "v8.0-final-submission"
+ENGINE_BUILD = "v8.4-tactical-kings"
 from extension.board_utils import list_legal_moves_for
 
 # The retrograde data is a companion module (≈4.7 MB source).  Keep the agent
@@ -228,7 +229,7 @@ _TT_MAX_SIZE = 200_000
 # v6.6 carried a self-learning in-memory cache but never consulted the supplied
 # opening_book.py table. That left known black-side bait-pawn traps unprotected.
 # Embed only the two defensive replies that correspond to the measured v6.6 losses. Do not override other openings.
-_SELECTIVE_OPENING_RAW = {'nqkbrppppp....PPPPP.RBKQN_black_2': (3, 1, 3, 2), 'rbkqnpppppP.....PPPPNQKBR_black_2': (1, 1, 1, 2)}
+_SELECTIVE_OPENING_RAW = {'nqkbrppppp..P..PP.PPRBKQN_black_2': (3, 1, 2, 2), 'nqkbrppppp....PPPPP.RBKQN_black_2': (3, 1, 3, 2), 'rbkqnpppppP.....PPPPNQKBR_black_2': (1, 1, 1, 2)}
 _OPENING_SYMBOL_TO_NAME = {"p": "pawn", "n": "knight", "b": "bishop",
                           "r": "right", "q": "queen", "k": "king"}
 
@@ -372,19 +373,44 @@ _PAWN_ADVANCE_BONUS_BLACK = [0, 10, 30, 60, 0]   # row y for Black
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
-def _hash_board(board):
-    """Order-independent transposition key without sorting the piece list.
+_ZOBRIST_TABLE = {}
+_ZOBRIST_SIDE = 0
 
-    Legal ChessMaker boards cannot contain two pieces on the same square, so a
-    frozenset of (type, side, x, y) records is a lossless position description.
-    This avoids the temporary list sort used by the previous implementation.
-    Side-to-move remains part of the key.
+def _init_zobrist():
+    """Build deterministic Zobrist keys: 6 piece types × 2 colours × 25 squares."""
+    global _ZOBRIST_TABLE, _ZOBRIST_SIDE
+    rng = random.Random(0x5F3759DF)
+    for piece_type in ("pawn", "knight", "bishop", "right", "queen", "king"):
+        for colour in ("white", "black"):
+            for sq in range(25):
+                _ZOBRIST_TABLE[(piece_type, colour, sq)] = rng.getrandbits(64)
+    _ZOBRIST_SIDE = rng.getrandbits(64)
+
+_init_zobrist()
+
+
+def _hash_board(board):
+    """Zobrist XOR hash for fast, collision-resistant transposition keys.
+
+    Each (piece_type, colour, square) triple has a precomputed random 64-bit key.
+    XOR is order-independent and incremental-friendly. Side-to-move is folded in.
+    Falls back to frozenset hashing for any unrecognised piece type (safety net).
     """
-    pieces = frozenset(
-        (_piece_name(p), p.player.name, p.position.x, p.position.y)
-        for p in board.get_pieces()
-    )
-    return hash((pieces, board.current_player.name))
+    h = 0
+    for p in board.get_pieces():
+        key = (_piece_name(p), p.player.name, p.position.y * 5 + p.position.x)
+        z = _ZOBRIST_TABLE.get(key)
+        if z is None:
+            # Unrecognised piece — fall back to frozenset for this position
+            pieces = frozenset(
+                (_piece_name(pp), pp.player.name, pp.position.x, pp.position.y)
+                for pp in board.get_pieces()
+            )
+            return hash((pieces, board.current_player.name))
+        h ^= z
+    if board.current_player.name == "black":
+        h ^= _ZOBRIST_SIDE
+    return h
 
 
 def _check_terminal(board, ply_from_root=0):
@@ -722,6 +748,25 @@ def evaluate_for_white(board):
             weight = heavy_tropism if name in ("queen", "right") else minor_tropism
             score -= max(0, 4 - distance) * weight
 
+    # ── King forward exposure: 5×5-specific middlegame penalty ──────────────
+    # A king advanced into the board during the middlegame is catastrophically
+    # exposed on a 5×5 board: pieces are never far away, there are no safe
+    # files to hide behind, and every rank of advancement shrinks the escape
+    # square cone.  PSTs alone give only ≈-10 cp for a one-rank march, which
+    # the +100 cp capture incentive easily overwhelms.  This term adds a
+    # significant, phase-gated penalty so the engine refuses early king walks.
+    if phase > 5:
+        for side, king_pos, home_rank in ((1, white_king, 4), (-1, black_king, 0)):
+            if king_pos is None:
+                continue
+            kx, ky = king_pos
+            rows_forward = abs(ky - home_rank)
+            if rows_forward >= 1:
+                penalty = (45 if rows_forward == 1 else
+                           85 if rows_forward == 2 else
+                           140 if rows_forward == 3 else 200)
+                score -= side * penalty
+
     # ── Pawn structure, passed pawns and promotion race ────────────────────
     # A passed pawn has no opposing pawn on its file or adjacent files ahead
     # of it. Promotion is disproportionately important on a five-rank board.
@@ -892,11 +937,11 @@ def evaluate_for_white(board):
                         break
         # One open line on a 5x5 board can turn into a forcing attack quickly.
         # Exposed checks and the lack of safe exits need nonlinear penalties.
-        danger = min(10, zone_pressure) * (10 if phase > 5 else 8)
+        danger = min(10, zone_pressure) * (13 if phase > 5 else 10)
         if checkers:
-            danger += 135 + min(3, checkers - 1) * 32
+            danger += 155 + min(3, checkers - 1) * 32
         if safe_escapes == 0:
-            danger += 78  # tactical cage; exact terminal loss is handled by search
+            danger += 88  # tactical cage; exact terminal loss is handled by search
         elif safe_escapes == 1:
             danger += 38
         elif safe_escapes == 2:
@@ -946,6 +991,48 @@ def evaluate_for_white(board):
     material_reduced = (_EVAL_PHASE_MAX - phase) / _EVAL_PHASE_MAX
     conversion = int(max(-85, min(85, material_diff * 0.07 * material_reduced)))
     score += conversion
+
+    # ── Open-file battery: Right/Queen with clear path to enemy king ────────
+    # On a 5×5 board, an open file or rank leading directly to the enemy king
+    # is a decisive strategic asset.  A Right or Queen lined up this way can
+    # deliver check, pin the king, or invade the back rank in one move.  The
+    # bonus scales inversely with distance so that close batteries are valued
+    # higher. This addresses the root cause of Game 2 (human's Right on e-file
+    # invaded from (4,0)→(4,4) with nothing stopping it).
+    for name, px, py, pside, _ in pieces:
+        if name not in ('right', 'queen'):
+            continue
+        enemy_king = black_king if pside == 1 else white_king
+        if enemy_king is None:
+            continue
+        ekx, eky = enemy_king
+        # Same file (column) attack
+        if px == ekx:
+            min_y, max_y = min(py, eky), max(py, eky)
+            if max_y > min_y + 1:
+                path_clear = all(occupancy[ry][px] is None
+                                 for ry in range(min_y + 1, max_y))
+                if path_clear:
+                    score += pside * max(18, 55 - (max_y - min_y) * 10)
+        # Same rank (row) attack
+        if py == eky:
+            min_x, max_x = min(px, ekx), max(px, ekx)
+            if max_x > min_x + 1:
+                path_clear = all(occupancy[py][cx] is None
+                                 for cx in range(min_x + 1, max_x))
+                if path_clear:
+                    score += pside * max(18, 55 - (max_x - min_x) * 10)
+
+    # ── Right on open file (no pawns on column) ─────────────────────────────
+    # An open file gives a Right immediate invasion potential.  Even without a
+    # direct line to the enemy king, the strategic control is significant.
+    for name, px, py, pside, _ in pieces:
+        if name != 'right':
+            continue
+        col_has_pawn = any(n == 'pawn' and cx == px
+                           for n, cx, cy, cs, cv in pieces)
+        if not col_has_pawn:
+            score += pside * 20
 
     # Small side-to-move initiative bonus. Static evaluations are still
     # colour-symmetric; mate/stalemate results are determined by the search.
@@ -1622,6 +1709,20 @@ def _negamax(board, depth, alpha, beta, colour, ply_from_root):
                 _last_tt_cutoffs += 1
                 return tt_val
         tt_best_move = tt_mv     # Always use TT move for ordering
+
+    # ── Reverse Futility Pruning (RFP) ───────────────────────────────────
+    # At depth >= 2, if static eval already exceeds beta by a wide margin,
+    # the opponent's refutation is unlikely. Safe to prune. Guards:
+    #  • NOT near mate scores (could mask forced wins/losses)
+    #  • NOT when in check (static eval unreliable under attack)
+    #  • Conservative 100 cp/ply margin (slightly wider than standard 90)
+    if (depth >= 2
+            and abs(beta) < MATE_THRESHOLD and abs(alpha) < MATE_THRESHOLD
+            and not _is_in_check(board)):
+        _rfp_static = colour * evaluate_for_white(board)
+        _rfp_margin = 100 * depth
+        if _rfp_static - _rfp_margin >= beta:
+            return beta
 
     # ── Move Generation & Ordering ────────────────────────────────────────
     current_player = board.current_player
@@ -2886,7 +2987,7 @@ def _charge_own_clock(started_at):
 
 def agent(board, player, var):
     """
-    AI Agent for the 5×5 Chess Fragments game — Version 8.0 Final Submission.
+    AI Agent for the 5×5 Chess Fragments game — Version 8.3 Final Submission.
 
     Called once per turn by the game runner.  Must return a (piece, move)
     pair within the allotted thinking time.
@@ -3207,7 +3308,7 @@ def _log_move_stats(ply, player_name, elapsed):
         partial = (f" partial={_last_aborted_depth}:{_last_aborted_nodes}"
                    if _last_aborted_depth else "")
         print(
-            f"[agent v8.0-final] ply={ply:>3d}  {player_name:>5s}  "
+            f"[agent v8.4-final] ply={ply:>3d}  {player_name:>5s}  "
             f"depth={_last_depth_reached}  nodes={_last_nodes_searched:>7d}  "
             f"ebf={_last_branching_factor:.2f}  nps={nps:>6d}  "
             f"iter={trace}{partial}  "

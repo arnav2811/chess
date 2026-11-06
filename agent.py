@@ -1,52 +1,40 @@
 # ═══════════════════════════════════════════════════════════════════════════════
-# agent.py — Chess Fragments AI Agent (v7.9 — Submission Candidate)
+# agent.py — Chess Fragments AI Agent (v8.4 — Tactical Kings)
 # COMP2321 Coursework — 5×5 Chess Variant with Custom Pieces
-#
-# agent.py — Chess Fragments AI Agent (v8.0 — Submission Candidate)
-# COMP2321 Coursework — 5×5 Chess Variant with Custom Pieces
-#
-# v8.0 over v7.9: (1) check extensions enabled — sees mate threats deeper as
-# Black; (2) self-stalemate guard added — _we_are_immediately_stalemated()
-# ensures we don't play a move that lets the opponent reply by leaving US with
-# zero legal moves; (3) mobility crisis penalty increased (0-moves: 220→420,
-# 1-move: 145→260) to more strongly avoid near-stalemate positions.
-# Tournament baseline: 18W/0D/0L (v7.9). H2H target: beat v6.9 as both colours.
 #
 # Architecture at a Glance:
 #   • Iterative Deepening Negamax with Alpha-Beta Pruning
 #   • Principal Variation Search (PVS) with zero-window re-search
 #   • Aspiration Windows (±250 cp, auto-widens on fail)
-#   • Transposition Table (200 k entries, frozenset piece-position keys — not Zobrist)
+#   • Transposition Table (200 k entries, Zobrist XOR position keys)
 #   • Tactical move ordering: PV > MVV-LVA > Promotion > Quiet Check > Killers > History
 #   • Side- and piece-aware killer/history keys (no cross-colour heuristic aliasing)
-#   • Late Move Reductions (LMR) for non-tactical late moves
+#   • Late Move Reductions (LMR): 0/1/2-ply dynamic, tactical/killer/history-guarded
 #   • Quiescence Search (captures/promotions + bounded check evasions)
+#   • Reverse Futility Pruning at depth ≥ 2 (100 cp/ply, in-check guarded)
 #   • Frontier Futility Pruning at depth 1
-#   • Anti-Stalemate Guard: one-reply terminal-safety veto (always active, v7.9+)
+#   • Check Extensions: enabled — critical for seeing mate threats as Black
+#   • Low-mobility Extensions: forced/near-forced positions searched deeper
+#   • Anti-Stalemate Guard: one-reply terminal-safety veto (give and receive)
 #   • Promotion-race evaluation and safety-weighted piece mobility
 #   • Turn-aware exchange liability and endgame mating drive
 #   • Own-clock budgeting for the 300 s per-player limit
 #   • Self-Learning Opening Book (plies 1–2)
 #   • Repetition Avoidance (prevents fivefold-repetition draws)
-#   • Check extensions disabled by default; existing low-mobility extensions retained
-#   • Root PUCT/MCTS probe retained for experiments but disabled by default
-#   • Dynamic 0/1/2-ply LMR with tactical, killer and history safeguards
+#   • Retrograde WDL probing at every covered <=4-piece search node (65 configs)
+#   • Root PUCT/MCTS probe retained for experiments, disabled by default
 #   • Aged cross-turn history ordering, reset only at new-game boundaries
-#   • Root and node deadline checks with completed-iteration fallback
 #   • Bounded LRU transposition table (no wholesale flush at 90% capacity)
-#   • Directional aspiration-window widening
-#   • Optional reproducible root tie-breaking (disabled by default)
-#   • Tactical quiet-check quiescence alongside captures (strictly bounded)
+#   • Directional aspiration-window widening with completed-iteration fallback
 #   • Deterministic fail-safe move selection
-#   • Retrograde WDL probing at every covered ≤4-piece search node
 #   • Per-move instrumentation logged to stderr
 #
 # Runtime files:
 #   Keep this agent beside endgame_tablebase_v77.py and
-#   endgame_tb_snippet_v77.py. The tablebase is deliberately a separate
-#   companion module so its embedded retrograde data can be loaded once.
+#   endgame_tb_snippet_v77.py. The tablebase is a separate companion module
+#   so its embedded retrograde data is loaded only once.
 # Runtime dependencies: Python built-ins, chessmaker, and the project
-#   extension helpers supplied with the existing coursework repository.
+#   extension helpers supplied with the coursework repository.
 # ═══════════════════════════════════════════════════════════════════════════════
 
 import time
@@ -55,7 +43,7 @@ import math
 import random
 from collections import OrderedDict
 
-ENGINE_BUILD = "v8.1-zobrist-see-rfp"
+ENGINE_BUILD = "v8.4-tactical-kings"
 from extension.board_utils import list_legal_moves_for
 
 # The retrograde data is a companion module (≈4.7 MB source).  Keep the agent
@@ -241,7 +229,7 @@ _TT_MAX_SIZE = 200_000
 # v6.6 carried a self-learning in-memory cache but never consulted the supplied
 # opening_book.py table. That left known black-side bait-pawn traps unprotected.
 # Embed only the two defensive replies that correspond to the measured v6.6 losses. Do not override other openings.
-_SELECTIVE_OPENING_RAW = {'nqkbrppppp....PPPPP.RBKQN_black_2': (3, 1, 3, 2), 'rbkqnpppppP.....PPPPNQKBR_black_2': (1, 1, 1, 2)}
+_SELECTIVE_OPENING_RAW = {'nqkbrppppp..P..PP.PPRBKQN_black_2': (3, 1, 2, 2), 'nqkbrppppp....PPPPP.RBKQN_black_2': (3, 1, 3, 2), 'rbkqnpppppP.....PPPPNQKBR_black_2': (1, 1, 1, 2)}
 _OPENING_SYMBOL_TO_NAME = {"p": "pawn", "n": "knight", "b": "bishop",
                           "r": "right", "q": "queen", "k": "king"}
 
@@ -301,12 +289,12 @@ _nodes_searched = 0
 _deadline = 0.0
 _ASPIRATION_DELTA = 250    # Initial aspiration-window half-width (centipawns)
 
-# PUCT remains available in the source for controlled research, but it is
-# DISABLED in the v7.4 candidate. The 200-game v6.9-v7.1 comparison was run
-# with PUCT off, and the earlier PUCT-on pilot did not justify its cost.
-# Do not enable this in a promotion candidate without a separate ablation.
+# PUCT remains available in the source for controlled research, but is
+# disabled in the submission. PUCT-on experiments did not justify the cost
+# relative to the iterative deepening baseline. Do not enable without a
+# separate ablation study.
 _ENABLE_ROOT_PUCT = False
-_ENABLE_CHECK_EXTENSION = True   # v8.0: enabled — critical for seeing mate threats as Black.
+_ENABLE_CHECK_EXTENSION = True   # Enabled: critical for seeing mate threats as Black.
 _ENABLE_QUIET_CHECK_ORDERING = True
 _CHECK_EXTENSION_MAX_PLY = 10
 # Controlled experiments: deterministic search is the default.
@@ -385,38 +373,41 @@ _PAWN_ADVANCE_BONUS_BLACK = [0, 10, 30, 60, 0]   # row y for Black
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
-# ─── Zobrist Hashing ─────────────────────────────────────────────────────────
-# Replaces frozenset-based key with deterministic 64-bit XOR hash.
-# Still O(n) per call (no incremental updates, since we clone the board),
-# but avoids Python tuple+frozenset allocation and uses fast integer XOR.
-# Deterministic seed ensures reproducibility across runs.
-# 7 piece types × 2 colours × 5×5 squares = 350 table entries + 1 side key.
-import random as _zrng
-_zrng.seed(0x5F3759DF)
-_ZOBRIST_PIECE_TYPES = ("pawn", "knight", "bishop", "right", "queen", "king", "rook")
-_ZOBRIST_COLORS = ("white", "black")
-_ZOBRIST_TABLE = {
-    (pt, col, x, y): _zrng.getrandbits(64)
-    for pt in _ZOBRIST_PIECE_TYPES
-    for col in _ZOBRIST_COLORS
-    for x in range(5)
-    for y in range(5)
-}
-_ZOBRIST_SIDE = _zrng.getrandbits(64)   # XOR in when Black to move
-del _zrng
+_ZOBRIST_TABLE = {}
+_ZOBRIST_SIDE = 0
+
+def _init_zobrist():
+    """Build deterministic Zobrist keys: 6 piece types × 2 colours × 25 squares."""
+    global _ZOBRIST_TABLE, _ZOBRIST_SIDE
+    rng = random.Random(0x5F3759DF)
+    for piece_type in ("pawn", "knight", "bishop", "right", "queen", "king"):
+        for colour in ("white", "black"):
+            for sq in range(25):
+                _ZOBRIST_TABLE[(piece_type, colour, sq)] = rng.getrandbits(64)
+    _ZOBRIST_SIDE = rng.getrandbits(64)
+
+_init_zobrist()
 
 
 def _hash_board(board):
-    """Zobrist-based transposition key.
+    """Zobrist XOR hash for fast, collision-resistant transposition keys.
 
-    XORs per-piece random values from a fixed lookup table; side-to-move is
-    included via a dedicated key.  Produces a 64-bit integer with far fewer
-    Python object allocations than the previous frozenset approach.
+    Each (piece_type, colour, square) triple has a precomputed random 64-bit key.
+    XOR is order-independent and incremental-friendly. Side-to-move is folded in.
+    Falls back to frozenset hashing for any unrecognised piece type (safety net).
     """
     h = 0
     for p in board.get_pieces():
-        key = (_piece_name(p), p.player.name, p.position.x, p.position.y)
-        h ^= _ZOBRIST_TABLE.get(key, 0)
+        key = (_piece_name(p), p.player.name, p.position.y * 5 + p.position.x)
+        z = _ZOBRIST_TABLE.get(key)
+        if z is None:
+            # Unrecognised piece — fall back to frozenset for this position
+            pieces = frozenset(
+                (_piece_name(pp), pp.player.name, pp.position.x, pp.position.y)
+                for pp in board.get_pieces()
+            )
+            return hash((pieces, board.current_player.name))
+        h ^= z
     if board.current_player.name == "black":
         h ^= _ZOBRIST_SIDE
     return h
@@ -660,15 +651,13 @@ def _mobility_crisis_penalty(move_count, is_side_to_move, phase):
 def evaluate_for_white(board):
     """Evaluate a 5×5 Chess Fragments position from White's perspective.
 
-    v7.2 deliberately retains the complete v7.1 evaluation weights and feature
-    terms. The current evaluator is a strong handcrafted baseline, but its
-    pseudo-attack and exchange-liability estimates are not yet empirically
-    calibrated well enough to justify another unmeasured weight rewrite.
+    Strong handcrafted evaluation for the 5×5 Chess Fragments variant.
+    Features: material, piece-square tables (PSTs), tapered king activity,
+    pseudo-attack/mobility scoring, exchange-liability estimates, pawn advance
+    bonuses, promotion race terms, and king-safety/winning-conversion bonuses.
 
-    The design borrows *principles*, not copied engine code: compact, tuned
-    features; tapered king activity; attack/defence awareness; and explicit
-    king-safety / winning-conversion terms.  It remains fast enough to call at
-    search leaves under the coursework's 300-second per-player clock.
+    Called at search leaves; tuned to run within the 300-second per-player
+    clock. Returns score in centipawns from White's perspective.
 
     Terms: material, piece-square placement, phase-aware king activity, pawn
     structure and promotion races, raw/safety-weighted mobility, central control,
@@ -758,6 +747,25 @@ def evaluate_for_white(board):
             distance = abs(x - kx) + abs(y - ky)
             weight = heavy_tropism if name in ("queen", "right") else minor_tropism
             score -= max(0, 4 - distance) * weight
+
+    # ── King forward exposure: 5×5-specific middlegame penalty ──────────────
+    # A king advanced into the board during the middlegame is catastrophically
+    # exposed on a 5×5 board: pieces are never far away, there are no safe
+    # files to hide behind, and every rank of advancement shrinks the escape
+    # square cone.  PSTs alone give only ≈-10 cp for a one-rank march, which
+    # the +100 cp capture incentive easily overwhelms.  This term adds a
+    # significant, phase-gated penalty so the engine refuses early king walks.
+    if phase > 5:
+        for side, king_pos, home_rank in ((1, white_king, 4), (-1, black_king, 0)):
+            if king_pos is None:
+                continue
+            kx, ky = king_pos
+            rows_forward = abs(ky - home_rank)
+            if rows_forward >= 1:
+                penalty = (45 if rows_forward == 1 else
+                           85 if rows_forward == 2 else
+                           140 if rows_forward == 3 else 200)
+                score -= side * penalty
 
     # ── Pawn structure, passed pawns and promotion race ────────────────────
     # A passed pawn has no opposing pawn on its file or adjacent files ahead
@@ -929,11 +937,11 @@ def evaluate_for_white(board):
                         break
         # One open line on a 5x5 board can turn into a forcing attack quickly.
         # Exposed checks and the lack of safe exits need nonlinear penalties.
-        danger = min(10, zone_pressure) * (10 if phase > 5 else 8)
+        danger = min(10, zone_pressure) * (13 if phase > 5 else 10)
         if checkers:
-            danger += 135 + min(3, checkers - 1) * 32
+            danger += 155 + min(3, checkers - 1) * 32
         if safe_escapes == 0:
-            danger += 78  # tactical cage; exact terminal loss is handled by search
+            danger += 88  # tactical cage; exact terminal loss is handled by search
         elif safe_escapes == 1:
             danger += 38
         elif safe_escapes == 2:
@@ -984,6 +992,48 @@ def evaluate_for_white(board):
     conversion = int(max(-85, min(85, material_diff * 0.07 * material_reduced)))
     score += conversion
 
+    # ── Open-file battery: Right/Queen with clear path to enemy king ────────
+    # On a 5×5 board, an open file or rank leading directly to the enemy king
+    # is a decisive strategic asset.  A Right or Queen lined up this way can
+    # deliver check, pin the king, or invade the back rank in one move.  The
+    # bonus scales inversely with distance so that close batteries are valued
+    # higher. This addresses the root cause of Game 2 (human's Right on e-file
+    # invaded from (4,0)→(4,4) with nothing stopping it).
+    for name, px, py, pside, _ in pieces:
+        if name not in ('right', 'queen'):
+            continue
+        enemy_king = black_king if pside == 1 else white_king
+        if enemy_king is None:
+            continue
+        ekx, eky = enemy_king
+        # Same file (column) attack
+        if px == ekx:
+            min_y, max_y = min(py, eky), max(py, eky)
+            if max_y > min_y + 1:
+                path_clear = all(occupancy[ry][px] is None
+                                 for ry in range(min_y + 1, max_y))
+                if path_clear:
+                    score += pside * max(18, 55 - (max_y - min_y) * 10)
+        # Same rank (row) attack
+        if py == eky:
+            min_x, max_x = min(px, ekx), max(px, ekx)
+            if max_x > min_x + 1:
+                path_clear = all(occupancy[py][cx] is None
+                                 for cx in range(min_x + 1, max_x))
+                if path_clear:
+                    score += pside * max(18, 55 - (max_x - min_x) * 10)
+
+    # ── Right on open file (no pawns on column) ─────────────────────────────
+    # An open file gives a Right immediate invasion potential.  Even without a
+    # direct line to the enemy king, the strategic control is significant.
+    for name, px, py, pside, _ in pieces:
+        if name != 'right':
+            continue
+        col_has_pawn = any(n == 'pawn' and cx == px
+                           for n, cx, cy, cs, cv in pieces)
+        if not col_has_pawn:
+            score += pside * 20
+
     # Small side-to-move initiative bonus. Static evaluations are still
     # colour-symmetric; mate/stalemate results are determined by the search.
     score += 10 if board.current_player.name == "white" else -10
@@ -1027,12 +1077,7 @@ def _score_move(piece, move, board, depth, check_data=None):
     tier = 1
     tactical_score = 0
 
-    # 1. Captures — SEE (Static Exchange Evaluation), with MVV-LVA fallback.
-    #    SEE estimates net material gain after the full exchange sequence:
-    #      see_score = victim_value - max(0, attacker_value - victim_value)
-    #    For multi-captures (rare on 5×5), values are summed per target square.
-    #    Winning captures (SEE > 0) are tried before equal/losing ones, but all
-    #    captures stay in tier 6 — above any quiet move.
+    # 1. Captures — MVV-LVA, preserving multiple-capture value where applicable.
     if caps:
         capture_score = 0
         for cap_pos in caps:
@@ -1041,10 +1086,7 @@ def _score_move(piece, move, board, depth, check_data=None):
                 if victim:
                     victim_val = PIECE_VALUES.get(_piece_name(victim), 0)
                     attacker_val = PIECE_VALUES.get(_piece_name(piece), 0)
-                    # Simple 1-ply SEE: assume opponent recaptures with cheapest
-                    # available attacker ≈ our piece value if we hang it there.
-                    see_score = victim_val - max(0, attacker_val - victim_val)
-                    capture_score += 10000 + see_score
+                    capture_score += 10000 + victim_val - (attacker_val >> 3)
             except Exception:
                 capture_score += 5000
         tier, tactical_score = 6, capture_score
@@ -1133,9 +1175,9 @@ def _age_history(decay=0.78, floor=12, max_entries=5000):
 def _lmr_reduction(depth, move_index, piece, move, is_tactical, in_check, ply):
     """Conservative dynamic LMR; returns 0, 1 or 2 plies.
 
-    The first reduction threshold stays close to v7.2. A second ply is reserved
-    for genuinely late quiet moves at substantial depth. Moves with strong
-    history/killer evidence are protected from reduction.
+    Returns 0, 1, or 2 plies of reduction. A second ply is reserved for
+    genuinely late quiet moves at depth >= 8. Moves with strong history or
+    killer evidence are always protected from reduction.
     """
     if is_tactical or in_check or depth < 3 or ply < 2 or move_index < 3:
         return 0
@@ -1154,7 +1196,7 @@ def _store_tt_entry(board_hash, depth, flag, score, best_move, ply_from_root):
     """Store with depth preference and LRU eviction instead of flushing the TT.
 
     Existing deeper entries are retained. At capacity, only the least-recently
-    used entry is evicted, avoiding the wholesale 90%-full table reset in v7.2.
+    used entry is evicted via LRU eviction (no wholesale table flush).
     """
     global _tt
     previous = _tt.get(board_hash)
@@ -1503,7 +1545,7 @@ def _quiescence(board, alpha, beta, colour, q_depth, ply_from_root=0, check_budg
             raise TimeoutError
         caps = getattr(move, "captures", set())
         if caps:
-            # MVV-LVA score for sorting
+            # Victim-value score for sorting (victim material, attacker cost)
             cap_score = 0
             for cap_pos in caps:
                 try:
@@ -1635,19 +1677,6 @@ def _negamax(board, depth, alpha, beta, colour, ply_from_root):
     if tb_score is not None:
         return tb_score
 
-    # ── Reverse Futility Pruning (static null-move) ───────────────────────
-    # If static eval − RFP margin >= beta at depth >= 2 and we are not in
-    # check, the position is probably already too good for the opponent to
-    # continue — return beta immediately.  No pass-turn or board mutation
-    # required; this is purely a static check.  Only applied outside mate
-    # range and when alpha/beta are not already at the root window limits
-    # (guarded by MATE_THRESHOLD to avoid corrupting forced-mate detection).
-    if (depth >= 2 and abs(beta) < MATE_THRESHOLD and abs(alpha) < MATE_THRESHOLD):
-        _rfp_static = colour * evaluate_for_white(board)
-        _rfp_margin = 90 * depth   # 90 cp/ply: conservative for 5×5 variant
-        if _rfp_static - _rfp_margin >= beta:
-            return beta
-
     # Leaf → quiescence search
     if depth <= 0:
         return _quiescence(board, alpha, beta, colour, 2, ply_from_root)
@@ -1680,6 +1709,20 @@ def _negamax(board, depth, alpha, beta, colour, ply_from_root):
                 _last_tt_cutoffs += 1
                 return tt_val
         tt_best_move = tt_mv     # Always use TT move for ordering
+
+    # ── Reverse Futility Pruning (RFP) ───────────────────────────────────
+    # At depth >= 2, if static eval already exceeds beta by a wide margin,
+    # the opponent's refutation is unlikely. Safe to prune. Guards:
+    #  • NOT near mate scores (could mask forced wins/losses)
+    #  • NOT when in check (static eval unreliable under attack)
+    #  • Conservative 100 cp/ply margin (slightly wider than standard 90)
+    if (depth >= 2
+            and abs(beta) < MATE_THRESHOLD and abs(alpha) < MATE_THRESHOLD
+            and not _is_in_check(board)):
+        _rfp_static = colour * evaluate_for_white(board)
+        _rfp_margin = 100 * depth
+        if _rfp_static - _rfp_margin >= beta:
+            return beta
 
     # ── Move Generation & Ordering ────────────────────────────────────────
     current_player = board.current_player
@@ -2157,9 +2200,9 @@ def _opponent_has_immediate_terminal_win(child_board, our_player_name, deadline)
 
     In Chess Fragments, no legal moves is a loss. The check is now enabled for
     high-material non-king moves as well as low-material and king moves: the
-    v7.6 Strong-tier losses demonstrate that the previous high-material fast
-    path left a real blind spot. Return None when the reserved safety budget is
-    exhausted; never treat an unverified move as proven safe.
+    Enabled for all material levels (high and low): the high-material fast
+    path was removed after it left a real blind spot. Returns None when the
+    safety budget is exhausted; never treat an unverified move as proven safe.
     """
     global _last_stalemate_guard_calls, _last_stalemate_guard_threats
     global _last_stalemate_guard_inconclusive
@@ -2197,9 +2240,9 @@ def _opponent_has_immediate_terminal_win(child_board, our_player_name, deadline)
 def _we_are_immediately_stalemated(child_board, our_player_name, deadline):
     """Check if after OUR move, the opponent can immediately stalemate US.
 
-    v8.0: Prevents the case where we play a move that looks good but allows
-    the opponent to reply with a move that leaves us (our_player_name) with
-    zero legal moves on our next turn — i.e., we get stalemated.
+    Prevents the case where we play a move that looks good but allows the
+    opponent to reply with a move that leaves us with zero legal moves on
+    our next turn (we get stalemated).
 
     Returns True  → opponent CAN stalemate us in one reply (dangerous move)
     Returns False → opponent cannot stalemate us in one reply (safe)
@@ -2475,18 +2518,17 @@ def _entropy_guided_anti_loss(board, player, selected_piece, selected_move,
     recursively guarantee stalemate-free play beyond that horizon. In practice
     it is sufficient because the search already avoids multi-move stalemate
     traps; this guard catches only the one case the search missed when the
-    tablebase was driving root move selection (v7.8 regression, fixed v7.9).
+    tablebase was driving root move selection (a historical regression, now
+    resolved).
     """
     global _last_stalemate_guard_replacements
     selected_piece, selected_move = _material_blunder_guard(
         board, player, selected_piece, selected_move, deadline)
     if selected_piece is None or selected_move is None or time.perf_counter() >= deadline:
         return selected_piece, selected_move
-    # v7.6 skipped high-material non-king moves here. Two fresh Strong-tier
-    # losses ended in Black stalemate with 15 pieces still on the board. The
-    # skip meant those candidate moves never received the one-reply terminal
-    # safety check. v7.7 applies the check to every selected move; alternatives
-    # remain capped in crowded positions to protect the clock.
+    # The stalemate guard is applied to every selected move (not just king or
+    # low-material moves). Alternatives are capped in crowded positions to
+    # protect the time budget.
     try:
         piece_count = len(board.get_pieces())
     except Exception:
@@ -2499,7 +2541,7 @@ def _entropy_guided_anti_loss(board, player, selected_piece, selected_move,
 
     # Check A (existing): does our move give opponent an immediate terminal win?
     unsafe = _opponent_has_immediate_terminal_win(child, player.name, deadline)
-    # Check B (v8.0): does our move let opponent immediately stalemate US?
+    # Check B: does our move let the opponent immediately stalemate US?
     we_get_stalemated = False
     if unsafe is not True and time.perf_counter() < deadline:
         we_get_stalemated = _we_are_immediately_stalemated(child, player.name, deadline)
@@ -2945,7 +2987,7 @@ def _charge_own_clock(started_at):
 
 def agent(board, player, var):
     """
-    AI Agent for the 5×5 Chess Fragments game — Version 7.5 Endgame Depth candidate.
+    AI Agent for the 5×5 Chess Fragments game — Version 8.3 Final Submission.
 
     Called once per turn by the game runner.  Must return a (piece, move)
     pair within the allotted thinking time.
@@ -3180,9 +3222,9 @@ def agent(board, player, var):
             # Proof-based anti-loss pass: ALWAYS run the stalemate guard,
             # even when the tablebase solved the root. The tablebase picks the
             # best WDL move but does NOT verify that the chosen move avoids an
-            # immediate one-reply terminal loss. Game 12 (v7.8) was exactly
-            # this: tablebase-guided Black walked into a stalemate trap because
-            # the guard was skipped when _last_tb_root_solved was True.
+            # immediate one-reply terminal loss. (In a prior version, tablebase-
+            # guided Black walked into a stalemate trap because this guard was
+            # skipped when _last_tb_root_solved was True. Fixed permanently.)
             piece, move_opt = _entropy_guided_anti_loss(
                 board, player, piece, move_opt, legal_moves, deadline)
 
@@ -3266,7 +3308,7 @@ def _log_move_stats(ply, player_name, elapsed):
         partial = (f" partial={_last_aborted_depth}:{_last_aborted_nodes}"
                    if _last_aborted_depth else "")
         print(
-            f"[agent v7.7-final] ply={ply:>3d}  {player_name:>5s}  "
+            f"[agent v8.4-final] ply={ply:>3d}  {player_name:>5s}  "
             f"depth={_last_depth_reached}  nodes={_last_nodes_searched:>7d}  "
             f"ebf={_last_branching_factor:.2f}  nps={nps:>6d}  "
             f"iter={trace}{partial}  "
