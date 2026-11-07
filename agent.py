@@ -43,7 +43,7 @@ import math
 import random
 from collections import OrderedDict
 
-ENGINE_BUILD = "v8.4-tactical-kings"
+ENGINE_BUILD = "v8.8-hmalus"
 from extension.board_utils import list_legal_moves_for
 
 # The retrograde data is a companion module (≈4.7 MB source).  Keep the agent
@@ -281,6 +281,7 @@ _opening_book = {}   # (board_hash, player_name, ply) → (fx, fy, tx, ty)
 
 _killer_moves = {}   # (side, piece_type, ply) → [coordinate move keys]
 _history = {}        # (side, piece_type, from/to) → bounded cutoff score
+_countermove = {}    # opponent_heuristic_key → our best refuting heuristic_key
 
 
 # ─── Global Search State ──────────────────────────────────────────────────────
@@ -1064,13 +1065,16 @@ def _killer_bucket(piece, ply):
     return (piece.player.name, _piece_name(piece), int(ply))
 
 
-def _score_move(piece, move, board, depth, check_data=None):
+def _score_move(piece, move, board, depth, check_data=None, cm_key=None):
     """Return lexicographic move-ordering fields; never prunes or changes legality.
 
     Tiers are separate rather than additive, so a large history score cannot
     accidentally push a quiet move above a capture, promotion or likely check.
     Quiet-check detection is only a geometric prefilter: a false positive merely
     changes order, never legality or the returned score.
+
+    cm_key: if provided, the heuristic key of the opponent's last move; used to
+    identify our countermove for ordering between killers and plain history.
     """
     caps = getattr(move, "captures", set())
     mk = _move_key(piece, move)
@@ -1110,6 +1114,14 @@ def _score_move(piece, move, board, depth, check_data=None):
         tier = 3
         tactical_score = 0
 
+    # 4b. Countermove: our recorded refutation of the opponent's last move.
+    #     Ranked just below killers (tier 2) so it doesn't displace them.
+    if not caps and tier < 3 and cm_key is not None:
+        our_key = _heuristic_move_key(piece, move)
+        if _countermove.get(cm_key) == our_key:
+            tier = 2
+            tactical_score = 0
+
     # History is strictly a within-tier tiebreaker.
     history_score = _history.get(_heuristic_move_key(piece, move), 0)
     cx, cy = move.position.x, move.position.y
@@ -1117,14 +1129,14 @@ def _score_move(piece, move, board, depth, check_data=None):
     return tier, tactical_score, history_score, centre_score
 
 
-def _order_moves(moves, board, depth=0, tt_best_move=None):
+def _order_moves(moves, board, depth=0, tt_best_move=None, cm_key=None):
     """Order PV/TT first, then tactical and side-aware heuristic priorities."""
     check_data = _check_prefilter_data(board) if moves else None
     scored = []
     for i, (piece, move) in enumerate(moves):
         mk = _move_key(piece, move)
         pv_priority = 1 if tt_best_move is not None and mk == tt_best_move else 0
-        score = _score_move(piece, move, board, depth, check_data)
+        score = _score_move(piece, move, board, depth, check_data, cm_key=cm_key)
         scored.append((pv_priority, *score, i, piece, move))
     scored.sort(key=lambda item: (-item[0], -item[1], -item[2], -item[3], -item[4], item[5]))
     return [(piece, move) for (_, _, _, _, _, _, piece, move) in scored]
@@ -1146,6 +1158,33 @@ def _update_history(piece, move, depth):
     key = _heuristic_move_key(piece, move)
     bonus = min(512, max(1, int(depth) * int(depth) * 4))
     _history[key] = min(6000, _history.get(key, 0) + bonus)
+
+
+def _apply_history_malus(piece, move, depth):
+    """Small negative history update for quiet moves that didn't cause a cutoff.
+
+    When a quiet move is searched but fails to beat alpha, it was a wasted
+    effort that should be ordered later in future sibling nodes.  The malus is
+    intentionally smaller than the reward (depth rather than depth²×4) to
+    avoid over-penalising moves that are merely positionally equal rather than
+    actively bad.  History values are allowed to go negative (floor -1000) so
+    that penalised moves sort below un-seen moves (score 0) within their tier.
+    """
+    key = _heuristic_move_key(piece, move)
+    penalty = min(128, max(1, int(depth)))
+    _history[key] = max(-1000, _history.get(key, 0) - penalty)
+
+
+def _store_countermove(opponent_last_key, piece, move):
+    """Record our quiet beta-cutoff move as the countermove for the opponent's last move.
+
+    The countermove table is a 1-entry table (last write wins) mapping the
+    opponent's move key to our best refutation. This is a move-ordering hint
+    only — it never changes search correctness.  Bounded implicitly by the
+    number of distinct opponent moves seen.
+    """
+    if opponent_last_key is not None:
+        _countermove[opponent_last_key] = _heuristic_move_key(piece, move)
 
 
 def _age_history(decay=0.78, floor=12, max_entries=5000):
@@ -1633,7 +1672,7 @@ def _frontier_futility_allowed(depth, in_check, alpha, legal_move_count):
             and abs(alpha) < 90000)
 
 
-def _negamax(board, depth, alpha, beta, colour, ply_from_root):
+def _negamax(board, depth, alpha, beta, colour, ply_from_root, last_move_key=None):
     """
     Negamax alpha-beta with all standard enhancements.
 
@@ -1756,7 +1795,7 @@ def _negamax(board, depth, alpha, beta, colour, ply_from_root):
         depth += 1
         _last_mobility_extensions += 1
 
-    ordered = _order_moves(moves, board, ply_from_root, tt_best_move)
+    ordered = _order_moves(moves, board, ply_from_root, tt_best_move, cm_key=last_move_key)
     # Precompute enemy king and occupancy where checking moves can be protected
     # from LMR/futility pruning. The prefilter is only a tactical ordering hint.
     check_data = (_check_prefilter_data(board)
@@ -1778,6 +1817,7 @@ def _negamax(board, depth, alpha, beta, colour, ply_from_root):
     best_piece_for_killer = None
     best_move_for_killer = None
     moves_searched = 0
+    searched_quiet = []   # (piece, move) quiet moves searched before cutoff
 
     for i, (piece, move) in enumerate(ordered):
         if time.perf_counter() >= _deadline:
@@ -1813,22 +1853,23 @@ def _negamax(board, depth, alpha, beta, colour, ply_from_root):
             _last_lmr_two_ply += 1
 
         # ── PVS (Principal Variation Search) ──────────────────────────
+        this_move_key = _heuristic_move_key(piece, move)
         if moves_searched == 0:
             # First move — full window
             val = -_negamax(child, depth - 1 - reduction, -beta, -alpha,
-                            -colour, ply_from_root + 1)
+                            -colour, ply_from_root + 1, last_move_key=this_move_key)
         else:
             # Zero-window scout search
             val = -_negamax(child, depth - 1 - reduction, -alpha - 1, -alpha,
-                            -colour, ply_from_root + 1)
+                            -colour, ply_from_root + 1, last_move_key=this_move_key)
             # Re-search with full window if scout found a better move
             if alpha < val < beta:
                 val = -_negamax(child, depth - 1, -beta, -alpha,
-                                -colour, ply_from_root + 1)
+                                -colour, ply_from_root + 1, last_move_key=this_move_key)
             elif reduction > 0 and val > alpha:
                 # LMR re-search: reduced search beat α — try at full depth
                 val = -_negamax(child, depth - 1, -beta, -alpha,
-                                -colour, ply_from_root + 1)
+                                -colour, ply_from_root + 1, last_move_key=this_move_key)
 
         moves_searched += 1
 
@@ -1840,11 +1881,19 @@ def _negamax(board, depth, alpha, beta, colour, ply_from_root):
 
         alpha = max(alpha, val)
         if alpha >= beta:
-            # β-cutoff — record killer & history
+            # β-cutoff — record killer, history, and countermove
             if not caps:
                 _store_killer(ply_from_root, piece, move)
+                _store_countermove(last_move_key, piece, move)
             _update_history(piece, move, depth)
+            # Apply history malus to quiet moves searched before this cutoff
+            for mp, mm in searched_quiet:
+                _apply_history_malus(mp, mm, depth)
             break
+        else:
+            # Move was searched and didn't cut — record for potential malus
+            if not is_tactical:
+                searched_quiet.append((piece, move))
 
     # ── TT Store ──────────────────────────────────────────────────────────
     if best_val <= alpha_original:
@@ -1966,7 +2015,7 @@ def _iterative_deepening(board, my_player_name, deadline):
     -------
     (piece, move) — the best move found before the deadline.
     """
-    global _nodes_searched, _tt, _deadline, _killer_moves, _history
+    global _nodes_searched, _tt, _deadline, _killer_moves, _history, _countermove
     global _last_depth_reached, _last_nodes_searched, _last_branching_factor, _last_root_evals
     global _last_iteration_trace, _last_aborted_depth, _last_aborted_nodes
     global _last_check_extensions, _last_mobility_extensions
@@ -1977,6 +2026,7 @@ def _iterative_deepening(board, my_player_name, deadline):
 
     _deadline = deadline
     _killer_moves = {}
+    _countermove = {}
     _last_root_evals = []
     _last_root_exact_evals = []
     _last_tb_root_solved = False
@@ -3081,6 +3131,7 @@ def agent(board, player, var):
             _position_history = {}
             _killer_moves = {}
             _history = {}
+            _countermove = {}
 
         _last_seen_ply = ply
         if not is_new_game:

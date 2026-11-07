@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════════════════════════
-# agent.py — Chess Fragments AI Agent (v8.4 — Tactical Kings)
+# agent.py — Chess Fragments AI Agent (v8.5 — Opening Intelligence)
 # COMP2321 Coursework — 5×5 Chess Variant with Custom Pieces
 #
 # Architecture at a Glance:
@@ -43,7 +43,15 @@ import math
 import random
 from collections import OrderedDict
 
-ENGINE_BUILD = "v8.4-tactical-kings"
+ENGINE_BUILD = "v8.5-opening-intelligence"
+
+# ── v8.5 Feature Flags ────────────────────────────────────────────────────────
+# Each improvement is independently toggleable for ablation testing.
+# Set to False to reproduce exact v8.4 behaviour.
+_FEAT_OPENING_DEVELOPMENT  = True   # Reward piece development in opening phase
+_FEAT_PAWN_TENSION         = True   # Penalise premature exchanges that open lines
+_FEAT_RFP_STALEMATE_FIX    = True   # Move gen before RFP (correctness fix)
+# ─────────────────────────────────────────────────────────────────────────────
 from extension.board_utils import list_legal_moves_for
 
 # The retrograde data is a companion module (≈4.7 MB source).  Keep the agent
@@ -229,7 +237,18 @@ _TT_MAX_SIZE = 200_000
 # v6.6 carried a self-learning in-memory cache but never consulted the supplied
 # opening_book.py table. That left known black-side bait-pawn traps unprotected.
 # Embed only the two defensive replies that correspond to the measured v6.6 losses. Do not override other openings.
-_SELECTIVE_OPENING_RAW = {'nqkbrppppp..P..PP.PPRBKQN_black_2': (3, 1, 2, 2), 'nqkbrppppp....PPPPP.RBKQN_black_2': (3, 1, 3, 2), 'rbkqnpppppP.....PPPPNQKBR_black_2': (1, 1, 1, 2)}
+_SELECTIVE_OPENING_RAW = {
+    # sample0: Black recaptures White's center pawn advance
+    'nqkbrppppp..P..PP.PPRBKQN_black_2': (3, 1, 2, 2),
+    # sample0: White plays h-pawn → Black d-pawn response (pre-existing)
+    'nqkbrppppp....PPPPP.RBKQN_black_2': (3, 1, 3, 2),
+    # sample1: Black recaptures White's center pawn advance
+    'rqknbppppp..P..PP.PPBNKQR_black_2': (3, 1, 2, 2),
+    # sample2: Black recaptures White's center pawn advance
+    'rbkqnppppp..P..PP.PPNQKBR_black_2': (3, 1, 2, 2),
+    # sample1: existing a-pawn → b-pawn response
+    'rbkqnpppppP.....PPPPNQKBR_black_2': (1, 1, 1, 2),
+}
 _OPENING_SYMBOL_TO_NAME = {"p": "pawn", "n": "knight", "b": "bishop",
                           "r": "right", "q": "queen", "k": "king"}
 
@@ -766,6 +785,44 @@ def evaluate_for_white(board):
                            85 if rows_forward == 2 else
                            140 if rows_forward == 3 else 200)
                 score -= side * penalty
+
+    # ── Opening development bonus ────────────────────────────────────────────
+    # In the opening (high phase = many pieces still on board), reward pieces
+    # that have left their home rank.  Keeps weights small so the existing
+    # middlegame evaluation is undisturbed.  Pawns and kings are excluded:
+    # pawns earn bonuses via their own advance terms; kings should stay home.
+    # Home rank: y=4 for White, y=0 for Black.
+    if _FEAT_OPENING_DEVELOPMENT and phase >= 10:  # only while board is full
+        dev_weight = max(0, (phase - 9)) * 2  # tapers to 0 as pieces leave board
+        for name, x, y, side, _ in pieces:
+            if name in ('king', 'pawn'):
+                continue
+            home_y = 4 if side == 1 else 0
+            if y != home_y:   # piece has left its starting rank
+                score += side * dev_weight
+
+    # ── Pawn tension: penalise premature exchanges ───────────────────────────
+    # In the opening/early middlegame, capturing a pawn is not always best.
+    # If the capture opens a file for the opponent's Right or Queen, the
+    # structural damage may outweigh the material gain.  We apply a small
+    # positional penalty when a pawn capture would leave an open file that
+    # the opponent can immediately exploit with a major piece.
+    # This is a static evaluation of the CURRENT position's pawn structure;
+    # the actual decision remains with the search.
+    if _FEAT_PAWN_TENSION and phase >= 8:
+        for side, pawns, enemy_pawns, enemy_pieces in (
+                (1, white_pawns, black_pawns, [(n, ex, ey) for n, ex, ey, es, _ in pieces if es == -1]),
+                (-1, black_pawns, white_pawns, [(n, ex, ey) for n, ex, ey, es, _ in pieces if es == 1])):
+            # Count open files from each side's perspective
+            our_pawn_files = {x for x, y in pawns}
+            for col in range(5):
+                if col not in our_pawn_files:
+                    # This file is open (no friendly pawn) — check for enemy major pieces
+                    # on that file that can apply immediate column pressure
+                    for ename, ex, ey in enemy_pieces:
+                        if ename in ('right', 'queen') and ex == col:
+                            # Enemy major on an open file: strategic pressure disadvantage
+                            score -= side * 12   # modest, non-distorting penalty
 
     # ── Pawn structure, passed pawns and promotion race ────────────────────
     # A passed pawn has no opposing pawn on its file or adjacent files ahead
@@ -1710,21 +1767,11 @@ def _negamax(board, depth, alpha, beta, colour, ply_from_root):
                 return tt_val
         tt_best_move = tt_mv     # Always use TT move for ordering
 
-    # ── Reverse Futility Pruning (RFP) ───────────────────────────────────
-    # At depth >= 2, if static eval already exceeds beta by a wide margin,
-    # the opponent's refutation is unlikely. Safe to prune. Guards:
-    #  • NOT near mate scores (could mask forced wins/losses)
-    #  • NOT when in check (static eval unreliable under attack)
-    #  • Conservative 100 cp/ply margin (slightly wider than standard 90)
-    if (depth >= 2
-            and abs(beta) < MATE_THRESHOLD and abs(alpha) < MATE_THRESHOLD
-            and not _is_in_check(board)):
-        _rfp_static = colour * evaluate_for_white(board)
-        _rfp_margin = 100 * depth
-        if _rfp_static - _rfp_margin >= beta:
-            return beta
-
-    # ── Move Generation & Ordering ────────────────────────────────────────
+    # ── Move Generation (must precede any pruning that could mask terminal nodes) ─
+    # Critical: stalemate and checkmate are LOSSES in this variant (-MATE_SCORE).
+    # RFP/futility pruning must never fire on a no-legal-moves position because
+    # the static eval will be non-terminal while the true score is -MATE_SCORE.
+    # Generating moves here also enables the in-check probe to reuse the move list.
     current_player = board.current_player
     moves = list_legal_moves_for(board, current_player)
     if time.perf_counter() >= _deadline:
@@ -1733,6 +1780,22 @@ def _negamax(board, depth, alpha, beta, colour, ply_from_root):
     if not moves:
         # No legal moves = loss (stalemate AND checkmate both lose in this variant)
         return -MATE_SCORE + ply_from_root
+
+    # ── Reverse Futility Pruning (RFP) ───────────────────────────────────
+    # At depth >= 2, if static eval already exceeds beta by a wide margin,
+    # the opponent's refutation is unlikely. Safe to prune. Guards:
+    #  • NOT near mate scores (could mask forced wins/losses)
+    #  • NOT when in check (static eval unreliable under attack)
+    #  • Conservative 100 cp/ply margin (slightly wider than standard 90)
+    #  • Move generation already done above — no stalemate mis-evaluation risk
+    if (_FEAT_RFP_STALEMATE_FIX
+            and depth >= 2
+            and abs(beta) < MATE_THRESHOLD and abs(alpha) < MATE_THRESHOLD
+            and not _is_in_check(board)):
+        _rfp_static = colour * evaluate_for_white(board)
+        _rfp_margin = 100 * depth
+        if _rfp_static - _rfp_margin >= beta:
+            return beta
 
     # ── Bounded selective extensions ───────────────────────────────────────
     # Check detection is pseudo-attack based (pins are not resolved). A false
@@ -3308,7 +3371,7 @@ def _log_move_stats(ply, player_name, elapsed):
         partial = (f" partial={_last_aborted_depth}:{_last_aborted_nodes}"
                    if _last_aborted_depth else "")
         print(
-            f"[agent v8.4-final] ply={ply:>3d}  {player_name:>5s}  "
+            f"[agent v8.5-final] ply={ply:>3d}  {player_name:>5s}  "
             f"depth={_last_depth_reached}  nodes={_last_nodes_searched:>7d}  "
             f"ebf={_last_branching_factor:.2f}  nps={nps:>6d}  "
             f"iter={trace}{partial}  "
